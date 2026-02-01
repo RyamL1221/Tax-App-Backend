@@ -140,7 +140,7 @@ make view-db-simple
 # View DynamoDB table (full JSON)
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb scan \
-  --table-name UsersTable \
+  --table-name Users \
   --endpoint-url http://localhost:4566 \
   --region us-east-1
 ```
@@ -160,7 +160,7 @@ Create the table:
 ```bash
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb create-table \
-  --table-name UsersTable \
+  --table-name Users \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \

@@ -17,14 +17,14 @@ dynamodb = boto3.resource(
     aws_secret_access_key='test'
 )
 
-table = dynamodb.Table('UsersTable')
+table = dynamodb.Table('Users')
 
 # Scan the table
 response = table.scan()
 items = response['Items']
 
 print(f"\n{'='*80}")
-print(f"LocalStack DynamoDB - UsersTable")
+print(f"LocalStack DynamoDB - Users")
 print(f"{'='*80}")
 print(f"Total Users: {len(items)}\n")
 

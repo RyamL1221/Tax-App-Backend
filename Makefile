@@ -29,8 +29,8 @@ localstack-status: ## Check LocalStack status
 	@curl -s http://localhost:4566/_localstack/health | python3 -m json.tool || echo "LocalStack is not running"
 
 view-db: ## View DynamoDB table contents
-	@echo "Viewing UsersTable contents..."
-	@awslocal dynamodb scan --table-name UsersTable --region us-east-1 | python3 -m json.tool
+	@echo "Viewing Users contents..."
+	@awslocal dynamodb scan --table-name Users --region us-east-1 | python3 -m json.tool
 
 view-db-simple: ## View DynamoDB table contents (simple format)
 	@python3 view-dynamodb.py
@@ -45,7 +45,7 @@ test-local: localstack-start ## Run tests against LocalStack
 	@export AWS_ENDPOINT_URL=http://localhost:4566 && \
 	export AWS_ACCESS_KEY_ID=test && \
 	export AWS_SECRET_ACCESS_KEY=test && \
-	export USER_TABLE_NAME=UsersTable && \
+	export USER_TABLE_NAME=Users && \
 	source venv/bin/activate && pytest user_registration/tests/ -v
 
 deploy-local: localstack-start ## Deploy to LocalStack using SAM

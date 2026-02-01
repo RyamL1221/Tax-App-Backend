@@ -29,7 +29,7 @@ docker-compose up -d
 # 2. Create DynamoDB table (first time only)
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb create-table \
-  --table-name UsersTable \
+  --table-name Users \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
@@ -264,7 +264,7 @@ Once LocalStack is running, you can interact with it using the AWS CLI with the 
 awslocal dynamodb list-tables --region us-east-1
 
 # Scan the users table
-awslocal dynamodb scan --table-name UsersTable --region us-east-1
+awslocal dynamodb scan --table-name Users --region us-east-1
 
 # Test the endpoint (after deploying)
 curl -X POST http://localhost:4566/restapis/*/Prod/register \
@@ -288,7 +288,7 @@ source .env.local
 export AWS_ENDPOINT_URL=http://localhost:4566
 export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
-export USER_TABLE_NAME=UsersTable
+export USER_TABLE_NAME=Users
 ```
 
 ### Build the SAM Application
@@ -415,7 +415,7 @@ Example output:
 ```
 Outputs:
 UserRegistrationApi: https://abc123xyz.execute-api.us-east-1.amazonaws.com/Prod/register/
-UsersTableName: UsersTable
+UsersTableName: Users
 UserRegistrationFunction: arn:aws:lambda:us-east-1:123456789012:function:tax-app-backend-UserRegistrationFunction-ABC123
 ```
 

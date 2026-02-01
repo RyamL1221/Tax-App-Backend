@@ -88,7 +88,7 @@ Conditions:
 # In UserRegistrationFunction:
 Environment:
   Variables:
-    USER_TABLE_NAME: !Ref UsersTable
+    USER_TABLE_NAME: !Ref Users
     AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
 ```
 
@@ -166,7 +166,7 @@ networks:
   "UserRegistrationFunction": {
     "AWS_DEFAULT_REGION": "us-east-1",
     "AWS_ENDPOINT_URL": "http://host.docker.internal:4566",
-    "USER_TABLE_NAME": "UsersTable"
+    "USER_TABLE_NAME": "Users"
   }
 }
 ```
@@ -209,7 +209,7 @@ sleep 15
 # 3. Create DynamoDB table
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb create-table \
-  --table-name UsersTable \
+  --table-name Users \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
@@ -303,7 +303,7 @@ curl -X POST http://localhost:3000/register \
 # View table contents
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb scan \
-  --table-name UsersTable \
+  --table-name Users \
   --endpoint-url http://localhost:4566 \
   --region us-east-1
 ```
@@ -352,7 +352,7 @@ aws dynamodb scan \
 ```bash
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb create-table \
-  --table-name UsersTable \
+  --table-name Users \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
