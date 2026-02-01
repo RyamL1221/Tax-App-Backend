@@ -39,7 +39,7 @@ sam build --parameter-overrides Environment=local
 # Or: make sam-build-local
 
 # Start SAM local
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json
 # Or: make sam-start
 
 # Test endpoint
@@ -140,7 +140,7 @@ make view-db-simple
 # View DynamoDB table (full JSON)
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb scan \
-  --table-name UsersTable \
+  --table-name Users \
   --endpoint-url http://localhost:4566 \
   --region us-east-1
 ```
@@ -160,7 +160,7 @@ Create the table:
 ```bash
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb create-table \
-  --table-name UsersTable \
+  --table-name Users \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
@@ -213,6 +213,46 @@ sam build --parameter-overrides Environment=local
 - `400` - Validation error (invalid email, weak password, etc.)
 - `409` - User already exists
 - `500` - Internal server error
+
+### User Login
+
+**Endpoint:** `POST /login`
+
+**Local:** `http://localhost:3000/login`  
+**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/login`
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Error Responses:**
+- `400` - Validation error (missing fields)
+- `401` - Invalid credentials
+- `500` - Internal server error
+
+### Logout (Client-Side Only)
+
+**Important:** There is **no server-side logout endpoint**. Logout is handled entirely on the client side.
+
+**How to logout:**
+1. Delete the JWT token from your client's storage (localStorage, sessionStorage, memory, etc.)
+2. Redirect the user to the login page or public area
+3. No server request needed
+
+**Why client-side logout?**  
+Since JWTs are stateless tokens, the server doesn't maintain session state. A server-side logout endpoint would add complexity without providing real security benefits. Token expiration provides automatic security by limiting the token's lifetime.
 
 ## File Structure
 

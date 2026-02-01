@@ -14,7 +14,7 @@ export AWS_DEFAULT_REGION=us-east-1
 # Test 1: Create DynamoDB table
 echo -e "\n1. Creating DynamoDB table..."
 awslocal dynamodb create-table \
-    --table-name UsersTable \
+    --table-name Users \
     --attribute-definitions AttributeName=email,AttributeType=S \
     --key-schema AttributeName=email,KeyType=HASH \
     --billing-mode PAY_PER_REQUEST \
@@ -36,7 +36,7 @@ curl -X POST http://localhost:4566/restapis/*/Prod/register \
 
 # Test 4: Check if user was created in DynamoDB
 echo -e "\n4. Checking DynamoDB for created user..."
-awslocal dynamodb scan --table-name UsersTable --region us-east-1
+awslocal dynamodb scan --table-name Users --region us-east-1
 
 echo -e "\n================================================"
 echo "LocalStack testing complete!"

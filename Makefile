@@ -29,8 +29,8 @@ localstack-status: ## Check LocalStack status
 	@curl -s http://localhost:4566/_localstack/health | python3 -m json.tool || echo "LocalStack is not running"
 
 view-db: ## View DynamoDB table contents
-	@echo "Viewing UsersTable contents..."
-	@awslocal dynamodb scan --table-name UsersTable --region us-east-1 | python3 -m json.tool
+	@echo "Viewing Users contents..."
+	@awslocal dynamodb scan --table-name Users --region us-east-1 | python3 -m json.tool
 
 view-db-simple: ## View DynamoDB table contents (simple format)
 	@python3 view-dynamodb.py
@@ -45,7 +45,7 @@ test-local: localstack-start ## Run tests against LocalStack
 	@export AWS_ENDPOINT_URL=http://localhost:4566 && \
 	export AWS_ACCESS_KEY_ID=test && \
 	export AWS_SECRET_ACCESS_KEY=test && \
-	export USER_TABLE_NAME=UsersTable && \
+	export USER_TABLE_NAME=Users && \
 	source venv/bin/activate && pytest user_registration/tests/ -v
 
 deploy-local: localstack-start ## Deploy to LocalStack using SAM
@@ -57,11 +57,11 @@ deploy-local: localstack-start ## Deploy to LocalStack using SAM
 sam-start: ## Start SAM local API Gateway with LocalStack connection
 	@echo "Starting SAM local API Gateway..."
 	@echo "Make sure LocalStack is running first (make localstack-start)"
-	sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+	sam local start-api --docker-network tax-app-network --env-vars env.json
 
 sam-build-local: ## Build SAM for local development
 	@echo "Building SAM for local development..."
-	sam build --parameter-overrides Environment=local
+	sam build
 
 sam-build-prod: ## Build SAM for production deployment
 	@echo "Building SAM for production deployment..."
@@ -75,6 +75,12 @@ invoke-local: ## Invoke Lambda function locally against LocalStack
 		response.json
 	@cat response.json
 	@rm response.json
+
+clean-lambda: ## Stop and remove orphaned Lambda containers from SAM Local
+	@echo "Cleaning up Lambda containers..."
+	@docker stop $$(docker ps -q --filter "ancestor=public.ecr.aws/lambda/python:3.14-rapid-x86_64") 2>/dev/null || true
+	@docker rm $$(docker ps -aq --filter "ancestor=public.ecr.aws/lambda/python:3.14-rapid-x86_64") 2>/dev/null || true
+	@echo "Lambda containers cleaned up"
 
 clean: ## Clean up generated files and stop LocalStack
 	@echo "Cleaning up..."

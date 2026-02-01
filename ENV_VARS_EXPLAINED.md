@@ -17,7 +17,7 @@ This document explains the different environment variable files and their purpos
 Used when you run commands in your terminal:
 ```bash
 source .env.local
-awslocal dynamodb scan --table-name UsersTable
+awslocal dynamodb scan --table-name Users
 pytest user_registration/tests/
 ```
 
@@ -61,7 +61,7 @@ When Lambda runs in a Docker container, it can't use `localhost:4566` because th
 - **Note:** Without this, boto3 tries to connect to real AWS
 
 ### USER_TABLE_NAME
-- **Value:** `UsersTable`
+- **Value:** `Users`
 - **Purpose:** Name of the DynamoDB table
 - **Note:** Must match the table name in `template.yaml`
 

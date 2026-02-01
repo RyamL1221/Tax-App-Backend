@@ -88,7 +88,7 @@ Conditions:
 # In UserRegistrationFunction:
 Environment:
   Variables:
-    USER_TABLE_NAME: !Ref UsersTable
+    USER_TABLE_NAME: !Ref Users
     AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
 ```
 
@@ -100,8 +100,8 @@ Environment:
 **Usage:**
 ```bash
 # Local development
-sam build --parameter-overrides Environment=local
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam build
+sam local start-api --docker-network tax-app-network --env-vars env.json
 
 # Production deployment
 sam build --parameter-overrides Environment=production
@@ -166,7 +166,7 @@ networks:
   "UserRegistrationFunction": {
     "AWS_DEFAULT_REGION": "us-east-1",
     "AWS_ENDPOINT_URL": "http://host.docker.internal:4566",
-    "USER_TABLE_NAME": "UsersTable"
+    "USER_TABLE_NAME": "Users"
   }
 }
 ```
@@ -187,7 +187,7 @@ Added convenience command for starting SAM:
 sam-start: ## Start SAM local API Gateway with LocalStack connection
 	@echo "Starting SAM local API Gateway..."
 	@echo "Make sure LocalStack is running first (make localstack-start)"
-	sam local start-api --docker-network tax-app-network
+	sam local start-api --docker-network tax-app-network --env-vars env.json
 ```
 
 ## Complete Workflow
@@ -209,7 +209,7 @@ sleep 15
 # 3. Create DynamoDB table
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb create-table \
-  --table-name UsersTable \
+  --table-name Users \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
@@ -228,11 +228,11 @@ source venv/bin/activate  # macOS/Linux
 docker-compose up -d
 
 # 2. Build SAM application for local development
-sam build --parameter-overrides Environment=local
+sam build
 # Or use: make sam-build-local
 
 # 3. Start SAM local API Gateway
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json
 # Or use: make sam-start
 
 # 4. Test with Postman at http://localhost:3000/register
@@ -242,10 +242,10 @@ sam local start-api --docker-network tax-app-network --parameter-overrides Envir
 
 ```bash
 # 1. Rebuild for local
-sam build --parameter-overrides Environment=local
+sam build
 
 # 2. Restart SAM (Ctrl+C first, then)
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json
 ```
 
 ### Production Deployment
@@ -303,7 +303,7 @@ curl -X POST http://localhost:3000/register \
 # View table contents
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb scan \
-  --table-name UsersTable \
+  --table-name Users \
   --endpoint-url http://localhost:4566 \
   --region us-east-1
 ```
@@ -352,7 +352,7 @@ aws dynamodb scan \
 ```bash
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb create-table \
-  --table-name UsersTable \
+  --table-name Users \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
@@ -410,8 +410,8 @@ During `sam deploy --guided`, you'll be prompted for:
 
 **Local Development:**
 ```bash
-sam build --parameter-overrides Environment=local
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam build
+sam local start-api --docker-network tax-app-network --env-vars env.json
 ```
 
 **Production Deployment:**

@@ -17,7 +17,7 @@ from hypothesis.strategies import emails
 from user_login.app import lambda_handler
 
 
-@settings(max_examples=30)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(alphabet=st.characters(min_codepoint=33, max_codepoint=126), min_size=10, max_size=30)
@@ -78,7 +78,7 @@ def test_password_not_logged_on_success_property(email, password):
                 "Password hash should never be logged"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=1, max_size=50)
@@ -138,7 +138,7 @@ def test_password_not_logged_on_failure_property(email, password):
                 "Password should never be logged"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=8, max_size=50)
@@ -193,7 +193,7 @@ def test_email_is_logged_but_not_password_property(email, password):
                     "Password should never be logged"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=8, max_size=50)

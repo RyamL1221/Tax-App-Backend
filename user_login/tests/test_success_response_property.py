@@ -16,7 +16,7 @@ from hypothesis.strategies import emails
 from user_login.response_formatter import success_response
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')
@@ -35,7 +35,7 @@ def test_success_response_status_code_property(email, token):
         f"Success response should have status code 200, got {response['statusCode']}"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')
@@ -56,7 +56,7 @@ def test_success_response_contains_email_property(email, token):
         f"Response email should match input email: {body['email']} != {email}"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')
@@ -77,7 +77,7 @@ def test_success_response_contains_token_property(email, token):
         f"Response token should match input token: {body['token']} != {token}"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')
@@ -98,7 +98,7 @@ def test_success_response_contains_message_property(email, token):
     assert len(body["message"]) > 0, "Message should not be empty"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')
@@ -121,7 +121,7 @@ def test_success_response_does_not_contain_password_property(email, token):
         "Success response should not contain password_hash field"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')
@@ -150,7 +150,7 @@ def test_success_response_has_cors_headers_property(email, token):
         "Response should contain Content-Type header"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')

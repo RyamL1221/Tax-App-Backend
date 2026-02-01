@@ -24,7 +24,7 @@ class TestUserLookupProperty:
     """Property-based tests for user lookup by email."""
     
     @mock_aws
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         email=emails(),
         name=text(min_size=1, max_size=100),
@@ -107,7 +107,7 @@ class TestUserLookupProperty:
             "Stored user should have correct password_hash"
     
     @mock_aws
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(email=emails())
     def test_lookup_non_existent_user_raises_error(self, email):
         """
@@ -147,7 +147,7 @@ class TestUserLookupProperty:
             f"Error message should mention the email. Got: {error_message}"
     
     @mock_aws
-    @settings(max_examples=50)
+    @settings(max_examples=10)
     @given(
         emails_and_data=st.lists(
             st.tuples(

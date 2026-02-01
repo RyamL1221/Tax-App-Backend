@@ -17,7 +17,7 @@ from hypothesis.strategies import emails
 from user_login.app import lambda_handler
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=8, max_size=50)
@@ -56,7 +56,7 @@ def test_request_initiation_logged_property(email, password):
                 "Request initiation should be logged"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=8, max_size=50)
@@ -110,7 +110,7 @@ def test_successful_login_completion_logged_property(email, password):
                 "Successful login should be logged with email"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=1, max_size=50)

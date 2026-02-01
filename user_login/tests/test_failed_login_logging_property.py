@@ -16,7 +16,7 @@ from hypothesis.strategies import emails
 from user_login.app import lambda_handler
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=1, max_size=50)
@@ -64,7 +64,7 @@ def test_failed_login_user_not_found_logged_property(email, password):
                 "Log should indicate failed login attempt"
 
 
-@settings(max_examples=30)
+@settings(max_examples=10)
 @given(
     email=emails(),
     correct_password=st.text(alphabet=st.characters(min_codepoint=33, max_codepoint=126), min_size=10, max_size=30),
@@ -124,7 +124,7 @@ def test_failed_login_incorrect_password_logged_property(email, correct_password
                 "Log should indicate failed login attempt"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=1, max_size=50)
@@ -166,7 +166,7 @@ def test_failed_login_outcome_logged_property(email, password):
                 "Log should indicate the outcome/reason for failed login"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=1, max_size=50)

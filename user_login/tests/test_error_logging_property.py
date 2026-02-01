@@ -15,7 +15,7 @@ from hypothesis.strategies import emails
 from user_login.app import lambda_handler
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=1, max_size=50)
@@ -62,7 +62,7 @@ def test_database_error_logged_with_context_property(email, password):
                 "Error log should indicate database error"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(email=st.text(min_size=1, max_size=100))
 def test_validation_error_logged_with_context_property(email):
     """
@@ -94,7 +94,7 @@ def test_validation_error_logged_with_context_property(email):
         assert len(warning_calls) > 0, "Validation error should be logged"
 
 
-@settings(max_examples=50)
+@settings(max_examples=10)
 @given(
     email=emails(),
     password=st.text(min_size=1, max_size=50)

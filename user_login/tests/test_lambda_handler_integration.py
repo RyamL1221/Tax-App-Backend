@@ -7,10 +7,11 @@ DynamoDB and all components integrated.
 
 import json
 import bcrypt
+import jwt
 import pytest
 from unittest.mock import patch, MagicMock
 from user_login.app import lambda_handler
-from user_registration.user_repository import UserNotFoundError, DatabaseError
+from user_login.app import UserNotFoundError, DatabaseError
 
 
 class TestLambdaHandlerIntegration:
@@ -24,6 +25,7 @@ class TestLambdaHandlerIntegration:
         """
         email = "user@example.com"
         password = "SecurePass123!"
+        jwt_secret = "test-secret-key-at-least-32-characters-long"
         password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=4)).decode('utf-8')
         
         event = {
@@ -34,14 +36,17 @@ class TestLambdaHandlerIntegration:
         }
         context = {}
         
-        # Mock database to return user
-        with patch('user_login.app.get_user_by_email') as mock_get_user:
+        # Mock database and environment to return user and JWT secret
+        with patch('user_login.app.get_user_by_email') as mock_get_user, \
+             patch('user_login.app.os.environ.get') as mock_env:
+            
             mock_get_user.return_value = {
                 'email': email,
                 'name': 'Test User',
                 'password_hash': password_hash,
                 'created_at': '2024-01-01T00:00:00Z'
             }
+            mock_env.return_value = jwt_secret
             
             # Call lambda handler
             response = lambda_handler(event, context)
@@ -55,7 +60,22 @@ class TestLambdaHandlerIntegration:
             assert body['message'] == 'Login successful'
             assert body['email'] == email
             assert 'token' in body
-            assert len(body['token']) == 64  # 32 bytes in hex
+            
+            # Verify token is a JWT (three segments separated by periods)
+            token = body['token']
+            token_parts = token.split('.')
+            assert len(token_parts) == 3, "Token must be a valid JWT with three segments"
+            
+            # Verify JWT can be decoded with the secret
+            try:
+                payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+                assert payload['email'] == email, "JWT payload must contain correct email"
+                assert 'iat' in payload, "JWT payload must contain issued at timestamp"
+                assert 'exp' in payload, "JWT payload must contain expiration timestamp"
+            except jwt.InvalidTokenError as e:
+                pytest.fail(f"Token must be a valid JWT that can be decoded: {e}")
+            
+            # Verify no sensitive data in response
             assert 'password' not in body
             assert 'password_hash' not in body
     
@@ -67,6 +87,7 @@ class TestLambdaHandlerIntegration:
         """
         email = "nonexistent@example.com"
         password = "SomePassword123!"
+        jwt_secret = "test-secret-key-at-least-32-characters-long"
         
         event = {
             'body': json.dumps({
@@ -76,8 +97,14 @@ class TestLambdaHandlerIntegration:
         }
         context = {}
         
-        # Mock database to raise UserNotFoundError
-        with patch('user_login.app.get_user_by_email') as mock_get_user:
+        # Mock database to raise UserNotFoundError and environment
+        with patch('user_login.app.get_user_by_email') as mock_get_user, \
+             patch.dict('os.environ', {
+                 'JWT_SECRET_KEY': jwt_secret,
+                 'USER_TABLE_NAME': 'test-table',
+                 'AWS_DEFAULT_REGION': 'us-east-1'
+             }):
+            
             mock_get_user.side_effect = UserNotFoundError("User not found")
             
             # Call lambda handler
@@ -100,6 +127,7 @@ class TestLambdaHandlerIntegration:
         email = "user@example.com"
         correct_password = "CorrectPass123!"
         wrong_password = "WrongPass456!"
+        jwt_secret = "test-secret-key-at-least-32-characters-long"
         password_hash = bcrypt.hashpw(correct_password.encode('utf-8'), bcrypt.gensalt(rounds=4)).decode('utf-8')
         
         event = {
@@ -110,14 +138,17 @@ class TestLambdaHandlerIntegration:
         }
         context = {}
         
-        # Mock database to return user
-        with patch('user_login.app.get_user_by_email') as mock_get_user:
+        # Mock database to return user and environment
+        with patch('user_login.app.get_user_by_email') as mock_get_user, \
+             patch('user_login.app.os.environ.get') as mock_env:
+            
             mock_get_user.return_value = {
                 'email': email,
                 'name': 'Test User',
                 'password_hash': password_hash,
                 'created_at': '2024-01-01T00:00:00Z'
             }
+            mock_env.return_value = jwt_secret
             
             # Call lambda handler
             response = lambda_handler(event, context)
@@ -286,6 +317,7 @@ class TestLambdaHandlerIntegration:
         """
         email = "user@example.com"
         password = "SomePassword123!"
+        jwt_secret = "test-secret-key-at-least-32-characters-long"
         
         # Test 1: Non-existent user
         event1 = {
@@ -295,8 +327,11 @@ class TestLambdaHandlerIntegration:
             })
         }
         
-        with patch('user_login.app.get_user_by_email') as mock_get_user:
+        with patch('user_login.app.get_user_by_email') as mock_get_user, \
+             patch('user_login.app.os.environ.get') as mock_env:
+            
             mock_get_user.side_effect = UserNotFoundError("User not found")
+            mock_env.return_value = jwt_secret
             response1 = lambda_handler(event1, {})
         
         # Test 2: Incorrect password
@@ -310,13 +345,16 @@ class TestLambdaHandlerIntegration:
             })
         }
         
-        with patch('user_login.app.get_user_by_email') as mock_get_user:
+        with patch('user_login.app.get_user_by_email') as mock_get_user, \
+             patch('user_login.app.os.environ.get') as mock_env:
+            
             mock_get_user.return_value = {
                 'email': email,
                 'name': 'Test User',
                 'password_hash': password_hash,
                 'created_at': '2024-01-01T00:00:00Z'
             }
+            mock_env.return_value = jwt_secret
             response2 = lambda_handler(event2, {})
         
         # Both should return 401 with identical error message
@@ -336,6 +374,7 @@ class TestLambdaHandlerIntegration:
         """
         email = "user@example.com"
         password = "SecurePass123!"
+        jwt_secret = "test-secret-key-at-least-32-characters-long"
         
         # Test success response
         password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=4)).decode('utf-8')
@@ -346,13 +385,16 @@ class TestLambdaHandlerIntegration:
             })
         }
         
-        with patch('user_login.app.get_user_by_email') as mock_get_user:
+        with patch('user_login.app.get_user_by_email') as mock_get_user, \
+             patch('user_login.app.os.environ.get') as mock_env:
+            
             mock_get_user.return_value = {
                 'email': email,
                 'name': 'Test User',
                 'password_hash': password_hash,
                 'created_at': '2024-01-01T00:00:00Z'
             }
+            mock_env.return_value = jwt_secret
             success_response = lambda_handler(event, {})
         
         # Test error response
@@ -392,3 +434,92 @@ class TestLambdaHandlerIntegration:
         body = json.loads(response['body'])
         assert 'error' in body
         assert 'JSON' in body['error'] or 'json' in body['error']
+    
+    def test_missing_jwt_secret_key_configuration(self):
+        """
+        Test that missing JWT_SECRET_KEY environment variable returns 500.
+        
+        Validates: Requirements 2.1, 2.3
+        """
+        email = "user@example.com"
+        password = "SecurePass123!"
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=4)).decode('utf-8')
+        
+        event = {
+            'body': json.dumps({
+                'email': email,
+                'password': password
+            })
+        }
+        context = {}
+        
+        # Mock database to return user, but environment to return None for JWT_SECRET_KEY
+        with patch('user_login.app.get_user_by_email') as mock_get_user, \
+             patch('user_login.app.os.environ.get') as mock_env:
+            
+            mock_get_user.return_value = {
+                'email': email,
+                'name': 'Test User',
+                'password_hash': password_hash,
+                'created_at': '2024-01-01T00:00:00Z'
+            }
+            mock_env.return_value = None  # JWT_SECRET_KEY not set
+            
+            # Call lambda handler
+            response = lambda_handler(event, context)
+            
+            # Verify response
+            assert response['statusCode'] == 500
+            body = json.loads(response['body'])
+            assert body['error'] == 'Internal server error'
+    
+    def test_jwt_token_verification_with_correct_secret(self):
+        """
+        Test that JWT tokens can be verified with the correct secret.
+        
+        Validates: Requirements 1.5, 2.1
+        """
+        email = "user@example.com"
+        password = "SecurePass123!"
+        jwt_secret = "test-secret-key-at-least-32-characters-long"
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=4)).decode('utf-8')
+        
+        event = {
+            'body': json.dumps({
+                'email': email,
+                'password': password
+            })
+        }
+        context = {}
+        
+        # Mock database and environment
+        with patch('user_login.app.get_user_by_email') as mock_get_user, \
+             patch('user_login.app.os.environ.get') as mock_env:
+            
+            mock_get_user.return_value = {
+                'email': email,
+                'name': 'Test User',
+                'password_hash': password_hash,
+                'created_at': '2024-01-01T00:00:00Z'
+            }
+            mock_env.return_value = jwt_secret
+            
+            # Call lambda handler
+            response = lambda_handler(event, context)
+            
+            # Verify response
+            assert response['statusCode'] == 200
+            body = json.loads(response['body'])
+            token = body['token']
+            
+            # Verify token can be decoded with the correct secret
+            try:
+                payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+                assert payload['email'] == email
+            except jwt.InvalidTokenError as e:
+                pytest.fail(f"Token should be verifiable with correct secret: {e}")
+            
+            # Verify token cannot be decoded with wrong secret
+            wrong_secret = "wrong-secret-key-at-least-32-characters-long"
+            with pytest.raises(jwt.InvalidSignatureError):
+                jwt.decode(token, wrong_secret, algorithms=["HS256"])

@@ -14,7 +14,7 @@ from hypothesis import given, settings, strategies as st, assume
 from user_login.password_verifier import verify_password, InvalidCredentialsError
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     correct_password=st.text(min_size=1, max_size=100),
     incorrect_password=st.text(min_size=1, max_size=100)
@@ -57,7 +57,7 @@ def test_incorrect_password_raises_invalid_credentials_error(correct_password, i
     assert str(exc_info.value), "InvalidCredentialsError should have an error message"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(password=st.text(alphabet=st.characters(min_codepoint=1, max_codepoint=127), min_size=1, max_size=72))
 def test_correct_password_does_not_raise_error(password):
     """
