@@ -39,7 +39,7 @@ sam build --parameter-overrides Environment=local
 # Or: make sam-build-local
 
 # Start SAM local
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json
 # Or: make sam-start
 
 # Test endpoint

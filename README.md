@@ -37,8 +37,8 @@ aws dynamodb create-table \
   --region us-east-1
 
 # 3. Build and start SAM
-sam build --parameter-overrides Environment=local
-sam local start-api --docker-network tax-app-network --env-vars env.json --parameter-overrides Environment=local
+sam build
+sam local start-api --docker-network tax-app-network --env-vars env.json
 
 # 4. Test at http://localhost:3000/register
 ```
@@ -323,7 +323,7 @@ make localstack-start
 sam build --parameter-overrides Environment=local
 
 # 3. Start SAM with LocalStack connection
-sam local start-api --docker-network tax-app-network --env-vars env.json --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json
 
 # Or use the Makefile shortcut (does steps 2-3):
 make sam-start

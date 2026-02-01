@@ -100,8 +100,8 @@ Environment:
 **Usage:**
 ```bash
 # Local development
-sam build --parameter-overrides Environment=local
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam build
+sam local start-api --docker-network tax-app-network --env-vars env.json
 
 # Production deployment
 sam build --parameter-overrides Environment=production
@@ -187,7 +187,7 @@ Added convenience command for starting SAM:
 sam-start: ## Start SAM local API Gateway with LocalStack connection
 	@echo "Starting SAM local API Gateway..."
 	@echo "Make sure LocalStack is running first (make localstack-start)"
-	sam local start-api --docker-network tax-app-network
+	sam local start-api --docker-network tax-app-network --env-vars env.json
 ```
 
 ## Complete Workflow
@@ -228,11 +228,11 @@ source venv/bin/activate  # macOS/Linux
 docker-compose up -d
 
 # 2. Build SAM application for local development
-sam build --parameter-overrides Environment=local
+sam build
 # Or use: make sam-build-local
 
 # 3. Start SAM local API Gateway
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json
 # Or use: make sam-start
 
 # 4. Test with Postman at http://localhost:3000/register
@@ -242,10 +242,10 @@ sam local start-api --docker-network tax-app-network --parameter-overrides Envir
 
 ```bash
 # 1. Rebuild for local
-sam build --parameter-overrides Environment=local
+sam build
 
 # 2. Restart SAM (Ctrl+C first, then)
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json
 ```
 
 ### Production Deployment
@@ -410,8 +410,8 @@ During `sam deploy --guided`, you'll be prompted for:
 
 **Local Development:**
 ```bash
-sam build --parameter-overrides Environment=local
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam build
+sam local start-api --docker-network tax-app-network --env-vars env.json
 ```
 
 **Production Deployment:**
