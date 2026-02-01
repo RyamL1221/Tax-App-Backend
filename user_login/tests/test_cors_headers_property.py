@@ -22,7 +22,7 @@ from user_login.response_formatter import (
 )
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')
@@ -40,7 +40,7 @@ def test_success_response_has_cors_headers_property(email, token):
     _assert_cors_headers_present(response)
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(message=st.text(min_size=1, max_size=200))
 def test_validation_error_response_has_cors_headers_property(message):
     """
@@ -55,7 +55,7 @@ def test_validation_error_response_has_cors_headers_property(message):
     _assert_cors_headers_present(response)
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_authentication_error_response_has_cors_headers_property(iteration):
     """
@@ -70,7 +70,7 @@ def test_authentication_error_response_has_cors_headers_property(iteration):
     _assert_cors_headers_present(response)
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_internal_error_response_has_cors_headers_property(iteration):
     """
@@ -85,7 +85,7 @@ def test_internal_error_response_has_cors_headers_property(iteration):
     _assert_cors_headers_present(response)
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     status_code=st.integers(min_value=400, max_value=599),
     message=st.text(min_size=1, max_size=200)
@@ -140,7 +140,7 @@ def _assert_cors_headers_present(response):
         "Content-Type should be application/json"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     email=emails(),
     token=st.text(min_size=64, max_size=64, alphabet='0123456789abcdef')

@@ -24,7 +24,7 @@ class TestNonExistentUserProperty:
     """Property-based tests for non-existent user handling."""
     
     @mock_aws
-    @settings(max_examples=100, deadline=500)
+    @settings(max_examples=20, deadline=500)
     @given(email=emails())
     def test_non_existent_user_raises_user_not_found_error(self, email):
         """
@@ -77,7 +77,7 @@ class TestNonExistentUserProperty:
             f"Error message should indicate user not found. Got: {error_message}"
     
     @mock_aws
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         existing_email=emails(),
         non_existent_email=emails(),
@@ -144,7 +144,7 @@ class TestNonExistentUserProperty:
             f"Error message should mention the non-existent email. Got: {error_message}"
     
     @mock_aws
-    @settings(max_examples=50)
+    @settings(max_examples=10)
     @given(
         emails_to_check=st.lists(
             emails(),

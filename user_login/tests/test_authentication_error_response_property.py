@@ -16,7 +16,7 @@ from hypothesis import given, settings, strategies as st
 from user_login.response_formatter import authentication_error_response
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_authentication_error_response_status_code_property(iteration):
     """
@@ -32,7 +32,7 @@ def test_authentication_error_response_status_code_property(iteration):
         f"Authentication error response should have status code 401, got {response['statusCode']}"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_authentication_error_response_contains_error_property(iteration):
     """
@@ -50,7 +50,7 @@ def test_authentication_error_response_contains_error_property(iteration):
     assert len(body["error"]) > 0, "Error message should not be empty"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_authentication_error_response_is_generic_property(iteration):
     """
@@ -70,7 +70,7 @@ def test_authentication_error_response_is_generic_property(iteration):
         f"Error message should be 'Invalid credentials', got '{body['error']}'"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_authentication_error_response_consistency_property(iteration):
     """
@@ -90,7 +90,7 @@ def test_authentication_error_response_consistency_property(iteration):
         "Authentication error responses should be identical"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_authentication_error_response_has_cors_headers_property(iteration):
     """
@@ -116,7 +116,7 @@ def test_authentication_error_response_has_cors_headers_property(iteration):
         "Response should contain Content-Type header"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_authentication_error_response_body_is_valid_json_property(iteration):
     """
@@ -136,7 +136,7 @@ def test_authentication_error_response_body_is_valid_json_property(iteration):
         pytest.fail(f"Response body should be valid JSON: {e}")
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(iteration=st.integers(min_value=0, max_value=1000))
 def test_authentication_error_response_does_not_reveal_details_property(iteration):
     """

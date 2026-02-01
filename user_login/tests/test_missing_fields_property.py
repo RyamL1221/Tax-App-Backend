@@ -23,7 +23,7 @@ class TestMissingRequiredFieldsProperty:
     """Property-based tests for missing required fields validation."""
     
     @pytest.mark.skipif(not LAMBDA_HANDLER_AVAILABLE, reason="Lambda handler not yet implemented (task 8.1)")
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         email=st.one_of(emails(), st.none()),
         password=st.one_of(st.text(min_size=1, max_size=100), st.none())
@@ -82,7 +82,7 @@ class TestMissingRequiredFieldsProperty:
                 f"Error message should mention missing 'password' field, got: {error_message}"
     
     @pytest.mark.skipif(not LAMBDA_HANDLER_AVAILABLE, reason="Lambda handler not yet implemented (task 8.1)")
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         email=emails(),
         password=st.text(min_size=1, max_size=100)

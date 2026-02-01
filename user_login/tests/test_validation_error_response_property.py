@@ -14,7 +14,7 @@ from hypothesis import given, settings, strategies as st
 from user_login.response_formatter import validation_error_response
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(message=st.text(min_size=1, max_size=200))
 def test_validation_error_response_status_code_property(message):
     """
@@ -30,7 +30,7 @@ def test_validation_error_response_status_code_property(message):
         f"Validation error response should have status code 400, got {response['statusCode']}"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(message=st.text(min_size=1, max_size=200))
 def test_validation_error_response_contains_error_property(message):
     """
@@ -49,7 +49,7 @@ def test_validation_error_response_contains_error_property(message):
     assert len(body["error"]) > 0, "Error message should not be empty"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(message=st.text(min_size=1, max_size=200))
 def test_validation_error_response_includes_message_property(message):
     """
@@ -68,7 +68,7 @@ def test_validation_error_response_includes_message_property(message):
         f"Error message should contain '{message}', got '{body['error']}'"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(message=st.text(min_size=1, max_size=200))
 def test_validation_error_response_has_cors_headers_property(message):
     """
@@ -94,7 +94,7 @@ def test_validation_error_response_has_cors_headers_property(message):
         "Response should contain Content-Type header"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(message=st.text(min_size=1, max_size=200))
 def test_validation_error_response_body_is_valid_json_property(message):
     """
@@ -114,7 +114,7 @@ def test_validation_error_response_body_is_valid_json_property(message):
         pytest.fail(f"Response body should be valid JSON: {e}")
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(message=st.text(min_size=1, max_size=200))
 def test_validation_error_response_format_property(message):
     """

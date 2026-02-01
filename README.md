@@ -62,9 +62,46 @@ The Tax-App-Backend is a serverless application built with AWS SAM (Serverless A
 ### Features
 
 - **User Registration**: Secure user registration with email validation, password strength requirements, and bcrypt password hashing
+- **User Authentication**: JWT-based stateless authentication for secure API access
+- **Client-Side Logout**: Simple logout by discarding JWT tokens on the client side
 - **DynamoDB Storage**: Persistent user data storage with duplicate email detection
 - **CORS Support**: Cross-origin resource sharing enabled for web applications
 - **Comprehensive Logging**: Request tracking and error logging for monitoring and debugging
+
+### Authentication and Logout
+
+This application uses **JWT (JSON Web Token) based authentication** for a stateless, scalable authentication system.
+
+#### How Authentication Works
+
+1. **Registration**: Users register via the `/register` endpoint with email, name, and password
+2. **Login**: Users authenticate via the `/login` endpoint and receive a JWT token
+3. **Protected Requests**: Include the JWT token in the `Authorization` header for protected endpoints
+4. **Logout**: Handled entirely on the client side (see below)
+
+#### Client-Side Logout
+
+**Important:** This system does **not** have a server-side logout endpoint. Logout is handled entirely on the client side.
+
+**How to implement logout in your client application:**
+
+1. **Delete the JWT token** from your client's storage (localStorage, sessionStorage, memory, etc.)
+2. **Redirect the user** to the login page or public area of your application
+3. **No server request needed** - simply discard the token
+
+**Why client-side logout?**
+
+Since JWTs are stateless tokens, the server doesn't maintain session state. Once a JWT is issued, it remains valid until it expires. A server-side logout endpoint would add complexity without providing real security benefits, as:
+- The server cannot "revoke" a JWT that's already been issued (without adding a token blacklist, which defeats the purpose of stateless authentication)
+- Clients can simply stop sending the token to achieve the same effect as logout
+- Token expiration provides automatic security by limiting the token's lifetime
+
+**Security considerations:**
+
+- Set appropriate token expiration times (e.g., 1 hour, 24 hours) based on your security requirements
+- Use HTTPS to prevent token interception
+- Store tokens securely on the client (avoid localStorage for sensitive applications; prefer httpOnly cookies or memory storage)
+- Clear tokens immediately when the user logs out
 
 ## Prerequisites
 
@@ -383,6 +420,15 @@ UserRegistrationFunction: arn:aws:lambda:us-east-1:123456789012:function:tax-app
 ```
 
 ## API Documentation
+
+### Available Endpoints
+
+This API provides the following endpoints:
+
+- **POST /register** - Register a new user account
+- **POST /login** - Authenticate and receive a JWT token
+
+**Note:** There is no `/logout` endpoint. Logout is handled on the client side by discarding the JWT token. See the [Authentication and Logout](#authentication-and-logout) section for details.
 
 ### User Registration Endpoint
 

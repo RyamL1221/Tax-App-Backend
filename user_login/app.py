@@ -8,12 +8,13 @@ formatting.
 
 import json
 import logging
+import os
 from typing import Any, Dict
 
 from validator import validate_login_data, ValidationError
 from user_repository import get_user_by_email, UserNotFoundError, DatabaseError
 from password_verifier import verify_password, InvalidCredentialsError
-from token_generator import generate_auth_token
+from token_generator import generate_jwt_token
 from response_formatter import (
     success_response,
     validation_error_response,
@@ -107,8 +108,18 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             # Return generic error to prevent revealing password was wrong
             return authentication_error_response()
         
-        # Generate authentication token
-        token = generate_auth_token()
+        # Get JWT secret key from environment
+        jwt_secret_key = os.environ.get('JWT_SECRET_KEY')
+        if not jwt_secret_key:
+            logger.error("JWT_SECRET_KEY environment variable not set")
+            return internal_error_response()
+        
+        # Generate JWT authentication token
+        try:
+            token = generate_jwt_token(email, jwt_secret_key)
+        except ValueError as e:
+            logger.error(f"JWT token generation failed: {str(e)}")
+            return internal_error_response()
         
         # Log successful login (without sensitive data)
         logger.info(f"Login successful for email: {email}")

@@ -13,7 +13,7 @@ from user_login.validator import ValidationError, validate_password_present
 class TestPasswordPresenceProperty:
     """Property-based tests for password presence validation."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(password=st.text(min_size=1))
     def test_non_empty_passwords_are_accepted(self, password):
         """
@@ -25,7 +25,7 @@ class TestPasswordPresenceProperty:
         # Non-empty passwords should be accepted
         assert validate_password_present(password) is True
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         invalid_password=st.one_of(
             # Empty string

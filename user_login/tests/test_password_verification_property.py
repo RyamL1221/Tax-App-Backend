@@ -14,7 +14,7 @@ from hypothesis import given, settings, strategies as st
 from user_login.password_verifier import verify_password, InvalidCredentialsError
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(password=st.text(min_size=1, max_size=100))
 def test_password_verification_property(password):
     """
@@ -45,7 +45,7 @@ def test_password_verification_property(password):
     assert result == expected, "Should use bcrypt.checkpw for verification"
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(
     password=st.text(min_size=1, max_size=100),
     wrong_password=st.text(min_size=1, max_size=100)

@@ -36,7 +36,7 @@ Resources:
   UsersTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: UsersTable
+      TableName: Users
       AttributeDefinitions:
         - AttributeName: email
           AttributeType: S
@@ -85,6 +85,7 @@ Resources:
       Environment:
         Variables:
           USER_TABLE_NAME: !Ref UsersTable
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
       Policies:
         - DynamoDBReadPolicy:
