@@ -248,5 +248,8 @@ $RECYCLE.BIN/
 # AWS SAM build artifacts
 .aws-sam/
 
+# LocalStack runtime data
+localstack-data/
+
 # Kiro
 .kiro/
