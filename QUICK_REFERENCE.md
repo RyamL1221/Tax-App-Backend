@@ -17,6 +17,17 @@ Parameters:
 
 ## Daily Commands
 
+### Virtual Environment
+
+```bash
+# Activate virtual environment (do this first every day)
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate   # Windows
+
+# Deactivate when done
+deactivate
+```
+
 ### Local Development
 
 ```bash
@@ -50,6 +61,19 @@ sam deploy --guided --parameter-overrides Environment=production
 
 ## First-Time Setup
 
+### 0. Create and Activate Virtual Environment
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate   # Windows
+
+# Your prompt should show (venv) prefix
+```
+
 ### 1. Install Dependencies
 
 ```bash
@@ -69,7 +93,7 @@ sleep 15  # Wait for LocalStack to be ready
 ```bash
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
 aws dynamodb create-table \
-  --table-name UsersTable \
+  --table-name Users \
   --attribute-definitions AttributeName=email,AttributeType=S \
   --key-schema AttributeName=email,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \

@@ -16,6 +16,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./localstack-data:/var/lib/localstack"
     networks:
       - tax-app-network
 

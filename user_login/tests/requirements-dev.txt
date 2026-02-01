@@ -1,0 +1,7 @@
+pytest
+hypothesis
+moto
+pytest-mock
+boto3
+bcrypt
+email-validator

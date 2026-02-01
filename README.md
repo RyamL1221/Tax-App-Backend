@@ -19,6 +19,10 @@ This will serve as the backend for the tax app.
 ### Local Development with LocalStack
 
 ```bash
+# 0. Activate virtual environment (if not already activated)
+source venv/bin/activate  # macOS/Linux
+# venv\Scripts\activate   # Windows
+
 # 1. Start LocalStack
 docker-compose up -d
 
@@ -34,7 +38,7 @@ aws dynamodb create-table \
 
 # 3. Build and start SAM
 sam build --parameter-overrides Environment=local
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json --parameter-overrides Environment=local
 
 # 4. Test at http://localhost:3000/register
 ```
@@ -81,9 +85,29 @@ git clone <repository-url>
 cd tax-app-backend
 ```
 
-### 2. Install Dependencies
+### 2. Set Up Python Virtual Environment (Recommended)
 
-Install the dependencies for the user registration function:
+Using a virtual environment isolates project dependencies from your system Python:
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+
+# On Windows:
+# venv\Scripts\activate
+
+# Your prompt should now show (venv) prefix
+```
+
+**Note:** You'll need to activate the virtual environment every time you start a new terminal session.
+
+### 3. Install Dependencies
+
+With the virtual environment activated, install the dependencies:
 
 ```bash
 pip install -r user_registration/requirements.txt
@@ -262,7 +286,7 @@ make localstack-start
 sam build --parameter-overrides Environment=local
 
 # 3. Start SAM with LocalStack connection
-sam local start-api --docker-network tax-app-network --parameter-overrides Environment=local
+sam local start-api --docker-network tax-app-network --env-vars env.json --parameter-overrides Environment=local
 
 # Or use the Makefile shortcut (does steps 2-3):
 make sam-start
@@ -272,8 +296,9 @@ The API will be available at `http://localhost:3000`
 
 **What's happening:**
 - `--parameter-overrides Environment=local` tells SAM to use LocalStack endpoint
+- `--env-vars env.json` loads environment variables into Lambda containers
 - `--docker-network tax-app-network` connects SAM to LocalStack's Docker network
-- Lambda automatically connects to LocalStack's DynamoDB at `http://172.18.0.1:4566`
+- Lambda automatically connects to LocalStack's DynamoDB at `http://host.docker.internal:4566`
 - No manual configuration changes needed!
 
 #### Option 2: Without LocalStack (Quick Testing)

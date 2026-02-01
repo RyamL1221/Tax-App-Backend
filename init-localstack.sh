@@ -1,23 +1,26 @@
 #!/bin/bash
 
-echo "Initializing LocalStack resources..."
+# Set dummy AWS credentials for LocalStack (it doesn't validate them)
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+export AWS_DEFAULT_REGION=us-east-1
 
-# Wait for LocalStack to be ready
-sleep 5
+# Print statement
+echo "Attempting to create DynamoDB Table"
 
 # Create DynamoDB table
-awslocal dynamodb create-table \
-    --table-name UsersTable \
+aws dynamodb create-table \
+    --table-name Users \
     --attribute-definitions \
         AttributeName=email,AttributeType=S \
     --key-schema \
         AttributeName=email,KeyType=HASH \
     --billing-mode PAY_PER_REQUEST \
-    --region us-east-1
+    --region us-east-1 \
+    --endpoint-url http://localhost:4566
 
-echo "DynamoDB table 'UsersTable' created successfully"
+# Print statement
+echo "Listing tables to verify creation"
 
 # List tables to verify
-awslocal dynamodb list-tables --region us-east-1
-
-echo "LocalStack initialization complete!"
+aws dynamodb list-tables --region us-east-1 --endpoint-url http://localhost:4566
