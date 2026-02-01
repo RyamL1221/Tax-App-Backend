@@ -195,6 +195,11 @@ sam-start: ## Start SAM local API Gateway with LocalStack connection
 ### Initial Setup (One Time)
 
 ```bash
+# 0. Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+# venv\Scripts\activate   # Windows
+
 # 1. Start LocalStack
 docker-compose up -d
 
@@ -215,6 +220,10 @@ aws dynamodb create-table \
 ### Daily Development Workflow
 
 ```bash
+# 0. Activate virtual environment (do this first every day)
+source venv/bin/activate  # macOS/Linux
+# venv\Scripts\activate   # Windows
+
 # 1. Start LocalStack (if not running)
 docker-compose up -d
 

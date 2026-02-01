@@ -74,6 +74,35 @@ Resources:
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
+  UserLoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: user_login/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          USER_TABLE_NAME: !Ref UsersTable
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        LoginUser:
+          Type: Api
+          Properties:
+            Path: /login
+            Method: post
+            RestApiId: !Ref ServerlessRestApi
+        LoginUserOptions:
+          Type: Api
+          Properties:
+            Path: /login
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -121,6 +150,15 @@ Outputs:
   UserRegistrationFunctionIamRole:
     Description: Implicit IAM Role created for User Registration function
     Value: !GetAtt UserRegistrationFunctionRole.Arn
+  UserLoginApi:
+    Description: API Gateway endpoint URL for Prod stage for User Login function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/login/"
+  UserLoginFunction:
+    Description: User Login Lambda Function ARN
+    Value: !GetAtt UserLoginFunction.Arn
+  UserLoginFunctionIamRole:
+    Description: Implicit IAM Role created for User Login function
+    Value: !GetAtt UserLoginFunctionRole.Arn
   HelloWorldApi:
     Description: API Gateway endpoint URL for Prod stage for Hello World 
       function

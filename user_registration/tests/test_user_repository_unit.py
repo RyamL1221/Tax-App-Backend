@@ -352,3 +352,258 @@ class TestUserRepositoryUnit:
                 f"Stored user {i+1} should have correct name"
             assert stored_user['password_hash'] == password_hash, \
                 f"Stored user {i+1} should have correct password hash"
+
+
+class TestGetUserByEmail:
+    """Unit tests for get_user_by_email function."""
+    
+    @mock_aws
+    def test_successful_user_retrieval(self):
+        """
+        Test successful user retrieval by email.
+        
+        Verifies that get_user_by_email successfully retrieves a user from
+        DynamoDB and returns complete user data including password_hash.
+        
+        Requirements: 3.1, 3.4
+        """
+        # Import here to avoid circular import issues
+        from user_registration.user_repository import get_user_by_email
+        
+        # Setup: Create a mock DynamoDB table
+        table_name = f'test-users-table-{uuid.uuid4().hex[:8]}'
+        os.environ['USER_TABLE_NAME'] = table_name
+        
+        dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=[
+                {'AttributeName': 'email', 'KeyType': 'HASH'}
+            ],
+            AttributeDefinitions=[
+                {'AttributeName': 'email', 'AttributeType': 'S'}
+            ],
+            BillingMode='PAY_PER_REQUEST'
+        )
+        
+        # Test data
+        email = 'retrieve@example.com'
+        name = 'Retrieve Test'
+        password_hash = '$2b$12$retrievehashretrievehashretrievehashretrievehash'
+        
+        # Setup: Create a user first
+        result = create_user(email, name, password_hash)
+        assert result is not None, "User creation should succeed"
+        
+        # Action: Retrieve user by email
+        retrieved_user = get_user_by_email(email)
+        
+        # Verification: Check returned data
+        assert retrieved_user is not None, "get_user_by_email should return user data"
+        assert retrieved_user['email'] == email, "Retrieved email should match"
+        assert retrieved_user['name'] == name, "Retrieved name should match"
+        assert retrieved_user['password_hash'] == password_hash, \
+            "Retrieved password_hash should match"
+        assert 'created_at' in retrieved_user, \
+            "Retrieved user should contain created_at timestamp"
+    
+    @mock_aws
+    def test_non_existent_user_raises_error(self):
+        """
+        Test that non-existent user raises UserNotFoundError.
+        
+        Verifies that attempting to retrieve a user with an email that doesn't
+        exist in the database raises a UserNotFoundError.
+        
+        Requirements: 3.2
+        """
+        # Import here to avoid circular import issues
+        from user_registration.user_repository import (
+            get_user_by_email,
+            UserNotFoundError
+        )
+        
+        # Setup: Create a mock DynamoDB table
+        table_name = f'test-users-table-{uuid.uuid4().hex[:8]}'
+        os.environ['USER_TABLE_NAME'] = table_name
+        
+        dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=[
+                {'AttributeName': 'email', 'KeyType': 'HASH'}
+            ],
+            AttributeDefinitions=[
+                {'AttributeName': 'email', 'AttributeType': 'S'}
+            ],
+            BillingMode='PAY_PER_REQUEST'
+        )
+        
+        # Test data
+        non_existent_email = 'nonexistent@example.com'
+        
+        # Action & Verification: Should raise UserNotFoundError
+        with pytest.raises(UserNotFoundError) as exc_info:
+            get_user_by_email(non_existent_email)
+        
+        error_message = str(exc_info.value)
+        assert non_existent_email in error_message, \
+            f"Error message should mention the email. Got: {error_message}"
+    
+    @mock_aws
+    def test_password_hash_included_in_response(self):
+        """
+        Test that password_hash is included in the response.
+        
+        Verifies that get_user_by_email returns the password_hash field,
+        which is needed for password verification during login.
+        
+        Requirements: 3.4
+        """
+        # Import here to avoid circular import issues
+        from user_registration.user_repository import get_user_by_email
+        
+        # Setup: Create a mock DynamoDB table
+        table_name = f'test-users-table-{uuid.uuid4().hex[:8]}'
+        os.environ['USER_TABLE_NAME'] = table_name
+        
+        dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=[
+                {'AttributeName': 'email', 'KeyType': 'HASH'}
+            ],
+            AttributeDefinitions=[
+                {'AttributeName': 'email', 'AttributeType': 'S'}
+            ],
+            BillingMode='PAY_PER_REQUEST'
+        )
+        
+        # Test data
+        email = 'passwordhash@example.com'
+        name = 'Password Hash Test'
+        password_hash = '$2b$12$passwordhashpasswordhashpasswordhashpasswordhash'
+        
+        # Setup: Create a user first
+        result = create_user(email, name, password_hash)
+        assert result is not None, "User creation should succeed"
+        
+        # Action: Retrieve user by email
+        retrieved_user = get_user_by_email(email)
+        
+        # Verification: Check password_hash is present
+        assert 'password_hash' in retrieved_user, \
+            "Retrieved user should contain password_hash"
+        assert retrieved_user['password_hash'] == password_hash, \
+            "Retrieved password_hash should match the original"
+        assert isinstance(retrieved_user['password_hash'], str), \
+            "password_hash should be a string"
+    
+    @mock_aws
+    def test_missing_table_name_raises_database_error(self):
+        """
+        Test that missing USER_TABLE_NAME environment variable raises DatabaseError.
+        
+        Verifies that get_user_by_email properly handles the case where the
+        USER_TABLE_NAME environment variable is not set.
+        
+        Requirements: 3.3
+        """
+        # Import here to avoid circular import issues
+        from user_registration.user_repository import get_user_by_email
+        
+        # Setup: Remove USER_TABLE_NAME environment variable
+        if 'USER_TABLE_NAME' in os.environ:
+            del os.environ['USER_TABLE_NAME']
+        
+        # Test data
+        email = 'test@example.com'
+        
+        # Action & Verification: Should raise DatabaseError
+        with pytest.raises(DatabaseError) as exc_info:
+            get_user_by_email(email)
+        
+        error_message = str(exc_info.value)
+        assert 'USER_TABLE_NAME' in error_message, \
+            f"Error message should mention USER_TABLE_NAME. Got: {error_message}"
+    
+    @mock_aws
+    def test_retrieve_multiple_different_users(self):
+        """
+        Test that multiple different users can be retrieved.
+        
+        Verifies that get_user_by_email can retrieve different users
+        by their email addresses.
+        """
+        # Import here to avoid circular import issues
+        from user_registration.user_repository import get_user_by_email
+        
+        # Setup: Create a mock DynamoDB table
+        table_name = f'test-users-table-{uuid.uuid4().hex[:8]}'
+        os.environ['USER_TABLE_NAME'] = table_name
+        
+        dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+        table = dynamodb.create_table(
+            TableName=table_name,
+            KeySchema=[
+                {'AttributeName': 'email', 'KeyType': 'HASH'}
+            ],
+            AttributeDefinitions=[
+                {'AttributeName': 'email', 'AttributeType': 'S'}
+            ],
+            BillingMode='PAY_PER_REQUEST'
+        )
+        
+        # Test data: Multiple users
+        users = [
+            ('user1@example.com', 'User One', '$2b$12$hash1'),
+            ('user2@example.com', 'User Two', '$2b$12$hash2'),
+            ('user3@example.com', 'User Three', '$2b$12$hash3'),
+        ]
+        
+        # Setup: Create multiple users
+        for email, name, password_hash in users:
+            result = create_user(email, name, password_hash)
+            assert result is not None, f"User {email} creation should succeed"
+        
+        # Action & Verification: Retrieve each user and verify data
+        for email, name, password_hash in users:
+            retrieved_user = get_user_by_email(email)
+            
+            assert retrieved_user is not None, \
+                f"User {email} should be retrievable"
+            assert retrieved_user['email'] == email, \
+                f"Retrieved email should match for {email}"
+            assert retrieved_user['name'] == name, \
+                f"Retrieved name should match for {email}"
+            assert retrieved_user['password_hash'] == password_hash, \
+                f"Retrieved password_hash should match for {email}"
+    
+    @mock_aws
+    def test_database_error_on_invalid_table(self):
+        """
+        Test that database error is raised when table doesn't exist.
+        
+        Verifies that get_user_by_email raises DatabaseError when attempting
+        to query a non-existent DynamoDB table.
+        
+        Requirements: 3.3
+        """
+        # Import here to avoid circular import issues
+        from user_registration.user_repository import get_user_by_email
+        
+        # Setup: Set table name to a non-existent table
+        table_name = f'non-existent-table-{uuid.uuid4().hex[:8]}'
+        os.environ['USER_TABLE_NAME'] = table_name
+        
+        # Test data
+        email = 'test@example.com'
+        
+        # Action & Verification: Should raise DatabaseError
+        with pytest.raises(DatabaseError) as exc_info:
+            get_user_by_email(email)
+        
+        error_message = str(exc_info.value)
+        # The error message should indicate a database operation failure
+        assert 'Failed to retrieve user' in error_message or 'Unexpected error' in error_message, \
+            f"Error message should indicate database failure. Got: {error_message}"

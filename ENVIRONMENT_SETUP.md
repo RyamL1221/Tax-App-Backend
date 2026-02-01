@@ -27,18 +27,28 @@ This project uses multiple environment files for different purposes:
 
 ### For New Developers
 
-1. **Copy the example file:**
+1. **Create and activate virtual environment:**
+   ```bash
+   # Create virtual environment
+   python3 -m venv venv
+   
+   # Activate it
+   source venv/bin/activate  # macOS/Linux
+   # venv\Scripts\activate   # Windows
+   ```
+
+2. **Copy the example file:**
    ```bash
    cp .env.example .env
    ```
 
-2. **Fill in your real AWS credentials in `.env`:**
+3. **Fill in your real AWS credentials in `.env`:**
    ```bash
    AWS_ACCESS_KEY_ID=your-real-access-key
    AWS_SECRET_ACCESS_KEY=your-real-secret-key
    ```
 
-3. **For local development, use `.env.local`:**
+4. **For local development, use `.env.local`:**
    ```bash
    source .env.local
    make localstack-start
