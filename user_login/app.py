@@ -114,9 +114,10 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             logger.error("JWT_SECRET_KEY environment variable not set")
             return internal_error_response()
         
-        # Generate JWT authentication token
+        # Generate JWT authentication token with session version
         try:
-            token = generate_jwt_token(email, jwt_secret_key)
+            session_version = user.get('session_version', 0)
+            token = generate_jwt_token(email, jwt_secret_key, session_version)
         except ValueError as e:
             logger.error(f"JWT token generation failed: {str(e)}")
             return internal_error_response()

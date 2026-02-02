@@ -9,17 +9,18 @@ import jwt
 import time
 
 
-def generate_jwt_token(email: str, secret_key: str) -> str:
+def generate_jwt_token(email: str, secret_key: str, session_version: int = 0) -> str:
     """
     Generates a JWT authentication token.
     
-    Creates a cryptographically signed JWT token containing the user's email
-    and expiration information. The token is self-contained and stateless,
-    eliminating the need for database storage.
+    Creates a cryptographically signed JWT token containing the user's email,
+    session version, and expiration information. The token is self-contained
+    and stateless, with session version enabling server-side invalidation.
     
     Args:
         email: User's email address to include in token payload
         secret_key: Secret key for signing the JWT (must be at least 32 characters)
+        session_version: Current session version for the user (default: 0)
         
     Returns:
         JWT token string in format: header.payload.signature
@@ -28,18 +29,21 @@ def generate_jwt_token(email: str, secret_key: str) -> str:
         ValueError: If email is empty or secret_key is less than 32 characters
         
     Example:
-        >>> token = generate_jwt_token("user@example.com", "a" * 32)
+        >>> token = generate_jwt_token("user@example.com", "a" * 32, 1)
         >>> len(token.split('.'))
         3
         >>> import jwt
         >>> payload = jwt.decode(token, "a" * 32, algorithms=["HS256"])
         >>> payload['email']
         'user@example.com'
+        >>> payload['session_version']
+        1
         
     Note:
         - Token expires 24 hours after issuance
         - Uses HS256 (HMAC with SHA-256) algorithm
-        - Payload includes: email, iat (issued at), exp (expiration)
+        - Payload includes: email, session_version, iat (issued at), exp (expiration)
+        - Session version enables invalidation of all tokens issued before password reset
     """
     # Validate inputs
     if not email or not isinstance(email, str):
@@ -58,6 +62,7 @@ def generate_jwt_token(email: str, secret_key: str) -> str:
     # Create payload with required claims
     payload = {
         "email": email,
+        "session_version": session_version,
         "iat": issued_at,
         "exp": expiration
     }

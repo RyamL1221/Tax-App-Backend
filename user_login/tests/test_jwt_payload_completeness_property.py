@@ -101,11 +101,11 @@ class TestJWTPayloadCompletenessProperty:
         **Validates: Requirements 1.2, 1.3, 1.4, 11.1, 11.2, 11.3**
         Feature: jwt-authentication-migration, Property 2: JWT Payload Completeness
         
-        For any generated JWT token, the payload should contain exactly the three
-        required claims (email, iat, exp) and no additional claims.
+        For any generated JWT token, the payload should contain exactly the four
+        required claims (email, session_version, iat, exp) and no additional claims.
         
         This test verifies that:
-        1. The payload has exactly 3 claims
+        1. The payload has exactly 4 claims
         2. No extra claims are added
         3. The payload structure is minimal and predictable
         """
@@ -115,12 +115,12 @@ class TestJWTPayloadCompletenessProperty:
         # Decode the JWT token to inspect payload
         payload = jwt.decode(token, secret_key, algorithms=["HS256"])
         
-        # Verification 1: Payload should have exactly 3 claims
-        assert len(payload) == 3, \
-            f"JWT payload should contain exactly 3 claims (email, iat, exp), got {len(payload)} claims: {list(payload.keys())}"
+        # Verification 1: Payload should have exactly 4 claims
+        assert len(payload) == 4, \
+            f"JWT payload should contain exactly 4 claims (email, session_version, iat, exp), got {len(payload)} claims: {list(payload.keys())}"
         
         # Verification 2: Payload should contain only the expected claims
-        expected_claims = {"email", "iat", "exp"}
+        expected_claims = {"email", "session_version", "iat", "exp"}
         actual_claims = set(payload.keys())
         assert actual_claims == expected_claims, \
             f"JWT payload should contain only {expected_claims}, got {actual_claims}"

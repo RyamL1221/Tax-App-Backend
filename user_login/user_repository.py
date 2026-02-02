@@ -39,6 +39,7 @@ def get_user_by_email(email: str) -> Dict[str, str]:
             "email": "user@example.com",
             "name": "John Doe",
             "password_hash": "$2b$12...",
+            "session_version": 0,
             "created_at": "2024-01-15T10:30:00Z"
         }
         
@@ -90,11 +91,12 @@ def get_user_by_email(email: str) -> Dict[str, str]:
         # Extract item data
         item = response['Item']
         
-        # Return complete user data including password_hash
+        # Return complete user data including password_hash and session_version
         return {
             'email': item['email']['S'],
             'name': item['name']['S'],
             'password_hash': item['password_hash']['S'],
+            'session_version': int(item.get('session_version', {}).get('N', '0')),
             'created_at': item['created_at']['S']
         }
         

@@ -500,3 +500,134 @@ class TestJWTVerifier:
         assert decoded_payload["iat"] == issued_at
         assert decoded_payload["exp"] == expiration
         assert len(decoded_payload) == 3  # Only these 3 claims
+
+    def test_verify_token_with_session_version_validation_succeeds(self):
+        """
+        Test that token verification succeeds when session versions match.
+        
+        Validates: Requirements 4.2, 4.3
+        """
+        email = "user@example.com"
+        secret_key = "my-secret-key-with-at-least-32-characters"
+        session_version = 5
+        
+        # Create token with session version
+        issued_at = int(time.time())
+        expiration = issued_at + 3600
+        
+        payload = {
+            "email": email,
+            "session_version": session_version,
+            "iat": issued_at,
+            "exp": expiration
+        }
+        
+        token = jwt.encode(payload, secret_key, algorithm="HS256")
+        
+        # Mock get_session_version function that returns matching version
+        def get_session_version(user_email: str) -> int:
+            assert user_email == email
+            return session_version
+        
+        # Verification should succeed
+        decoded_payload = verify_jwt_token(token, secret_key, get_session_version)
+        
+        assert decoded_payload["email"] == email
+        assert decoded_payload["session_version"] == session_version
+    
+    def test_verify_token_with_outdated_session_version_fails(self):
+        """
+        Test that token verification fails when token session version is outdated.
+        
+        Validates: Requirements 4.2, 4.3
+        """
+        from jwt_verifier import SessionVersionMismatchError
+        
+        email = "user@example.com"
+        secret_key = "my-secret-key-with-at-least-32-characters"
+        token_session_version = 3
+        current_session_version = 5
+        
+        # Create token with old session version
+        issued_at = int(time.time())
+        expiration = issued_at + 3600
+        
+        payload = {
+            "email": email,
+            "session_version": token_session_version,
+            "iat": issued_at,
+            "exp": expiration
+        }
+        
+        token = jwt.encode(payload, secret_key, algorithm="HS256")
+        
+        # Mock get_session_version function that returns newer version
+        def get_session_version(user_email: str) -> int:
+            assert user_email == email
+            return current_session_version
+        
+        # Verification should fail with SessionVersionMismatchError
+        with pytest.raises(SessionVersionMismatchError) as exc_info:
+            verify_jwt_token(token, secret_key, get_session_version)
+        
+        assert "session version" in str(exc_info.value).lower()
+    
+    def test_verify_token_without_session_version_validation(self):
+        """
+        Test that token verification works without session version validation.
+        
+        Validates backward compatibility.
+        """
+        email = "user@example.com"
+        secret_key = "my-secret-key-with-at-least-32-characters"
+        
+        # Create token with session version
+        issued_at = int(time.time())
+        expiration = issued_at + 3600
+        
+        payload = {
+            "email": email,
+            "session_version": 5,
+            "iat": issued_at,
+            "exp": expiration
+        }
+        
+        token = jwt.encode(payload, secret_key, algorithm="HS256")
+        
+        # Verification should succeed without session version check
+        decoded_payload = verify_jwt_token(token, secret_key)
+        
+        assert decoded_payload["email"] == email
+        assert decoded_payload["session_version"] == 5
+    
+    def test_verify_token_with_zero_session_version(self):
+        """
+        Test that token with session version 0 works correctly.
+        
+        Validates: Requirements 4.1
+        """
+        email = "user@example.com"
+        secret_key = "my-secret-key-with-at-least-32-characters"
+        
+        # Create token with session version 0 (default for new users)
+        issued_at = int(time.time())
+        expiration = issued_at + 3600
+        
+        payload = {
+            "email": email,
+            "session_version": 0,
+            "iat": issued_at,
+            "exp": expiration
+        }
+        
+        token = jwt.encode(payload, secret_key, algorithm="HS256")
+        
+        # Mock get_session_version function that returns 0
+        def get_session_version(user_email: str) -> int:
+            return 0
+        
+        # Verification should succeed
+        decoded_payload = verify_jwt_token(token, secret_key, get_session_version)
+        
+        assert decoded_payload["email"] == email
+        assert decoded_payload["session_version"] == 0
