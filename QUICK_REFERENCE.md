@@ -170,10 +170,20 @@ aws dynamodb create-table \
 
 ### Code Changes Not Reflected
 
-Rebuild SAM:
+SAM Local caches Lambda containers. After code changes:
+
 ```bash
-sam build --parameter-overrides Environment=local
-# Then restart SAM (Ctrl+C and run sam local start-api again)
+# Option 1: Use the restart script (recommended)
+./restart-sam.sh
+
+# Option 2: Manual cleanup
+# 1. Stop SAM local (Ctrl+C)
+# 2. Remove Lambda containers:
+docker ps -a | grep -E 'lambci|public.ecr.aws/lambda|rapid' | awk '{print $1}' | xargs docker rm -f
+# 3. Rebuild:
+sam build
+# 4. Restart SAM:
+sam local start-api --env-vars env.json --docker-network tax-app-network
 ```
 
 ## API Endpoints
@@ -253,6 +263,64 @@ sam build --parameter-overrides Environment=local
 
 **Why client-side logout?**  
 Since JWTs are stateless tokens, the server doesn't maintain session state. A server-side logout endpoint would add complexity without providing real security benefits. Token expiration provides automatic security by limiting the token's lifetime.
+
+### Password Recovery
+
+**Forgot Password Endpoint:** `POST /forgot-password`
+
+**Local:** `http://localhost:3000/forgot-password`  
+**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/forgot-password`
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "If an account exists with this email, a password reset link has been sent."
+}
+```
+
+**Reset Password Endpoint:** `POST /reset-password`
+
+**Local:** `http://localhost:3000/reset-password`  
+**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/reset-password`
+
+**Request Body:**
+```json
+{
+  "token": "base64-encoded-token",
+  "new_password": "NewSecurePass123!"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Password has been reset successfully"
+}
+```
+
+**Local Testing:**
+
+Since LocalStack doesn't send real emails, use these helper scripts:
+
+```bash
+# Test forgot-password and extract token
+./test-forgot-password.sh
+
+# Or manually extract token from logs
+./get-reset-token.sh
+
+# View recent logs
+./view-recent-logs.sh
+```
+
+See [PASSWORD_RECOVERY_TESTING.md](./PASSWORD_RECOVERY_TESTING.md) for detailed testing guide.
 
 ## File Structure
 

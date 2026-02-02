@@ -317,13 +317,13 @@ class TestTokenGenerator:
         # Decode token to verify payload
         payload = jwt.decode(token, secret_key, algorithms=["HS256"])
         
-        # Should have exactly 3 claims
-        assert len(payload) == 3, \
-            f"Token payload should have exactly 3 claims, got {len(payload)}"
+        # Should have exactly 4 claims (email, session_version, iat, exp)
+        assert len(payload) == 4, \
+            f"Token payload should have exactly 4 claims, got {len(payload)}"
         
         # Should have specific claims
-        assert set(payload.keys()) == {"email", "iat", "exp"}, \
-            f"Token payload should have email, iat, exp claims, got {set(payload.keys())}"
+        assert set(payload.keys()) == {"email", "session_version", "iat", "exp"}, \
+            f"Token payload should have email, session_version, iat, exp claims, got {set(payload.keys())}"
     
     def test_token_does_not_contain_password_field(self):
         """
