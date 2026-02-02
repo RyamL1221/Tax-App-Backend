@@ -99,3 +99,28 @@ install: ## Install dependencies
 
 setup: install localstack-start localstack-init ## Complete setup (install + start LocalStack)
 	@echo "Setup complete! LocalStack is running at http://localhost:4566"
+
+test-tax-docs: ## Run tax document generation tests
+	@echo "Running tax document generation tests..."
+	source venv/bin/activate && pytest tax_document_generation/tests/ -v
+
+test-tax-docs-property: ## Run tax document generation property tests
+	@echo "Running tax document generation property tests..."
+	source venv/bin/activate && pytest tax_document_generation/tests/ -v -k "property"
+
+test-tax-docs-integration: ## Run tax document generation integration tests (requires LocalStack)
+	@echo "Running tax document generation integration tests..."
+	@export AWS_ENDPOINT_URL=http://localhost:4566 && \
+	export AWS_ACCESS_KEY_ID=test && \
+	export AWS_SECRET_ACCESS_KEY=test && \
+	source venv/bin/activate && pytest tax_document_generation/tests/test_lambda_handler_integration.py -v
+
+test-tax-docs-endpoint: ## Test tax document generation endpoint with curl
+	@echo "Testing tax document generation endpoint..."
+	@bash test-tax-document-generation.sh
+
+deploy-tax-docs: ## Deploy tax document generation function to LocalStack
+	@echo "Deploying tax document generation function..."
+	samlocal build
+	samlocal deploy --no-confirm-changeset
+

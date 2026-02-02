@@ -1,9 +1,16 @@
 {
   "info": {
-    "name": "Tax App - Authentication API",
-    "description": "API endpoints for user authentication and password recovery",
+    "name": "Tax App API",
+    "description": "API endpoints for user authentication, password recovery, and tax document generation",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
   "item": [
     {
       "name": "User Registration",
@@ -390,6 +397,22 @@
       "item": [
         {
           "name": "Successful Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save JWT token to collection variable",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+                  "    console.log(\"JWT token saved:\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -408,7 +431,8 @@
               "host": ["localhost"],
               "port": "3000",
               "path": ["login"]
-            }
+            },
+            "description": "Login and automatically save JWT token to collection variable"
           },
           "response": []
         },
@@ -634,6 +658,240 @@
               "path": ["reset-password"]
             },
             "description": "Attempt to reuse a token that was already used. Should fail."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tax Document Generation",
+      "item": [
+        {
+          "name": "Generate 1099-DIV - Complete Form",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "description": "JWT token from login (automatically set)"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Vanguard Investments\",\n    \"payerStreetAddress\": \"100 Vanguard Blvd\",\n    \"payerCity\": \"Malvern\",\n    \"payerState\": \"PA\",\n    \"payerCountry\": \"USA\",\n    \"payerZip\": \"19355\",\n    \"payerPhone\": \"800-662-7447\",\n    \"payerTIN\": \"23-1945930\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"John Doe\",\n    \"recipientStreetAddress\": \"456 Main St, Apt 2B\",\n    \"recipientCity\": \"Boston\",\n    \"recipientState\": \"MA\",\n    \"recipientCountry\": \"USA\",\n    \"recipientZip\": \"02101\",\n    \"accountNumber\": \"12345678\",\n    \"calendarYear\": \"2025\",\n    \"totalOrdinaryDividends\": 5000.00,\n    \"qualifiedDividends\": 3000.00,\n    \"totalCapitalGainDistributions\": 1500.00,\n    \"federalIncomeTaxWithheld\": 500.00,\n    \"section199ADividends\": 2000.00\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/Prod/generate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["Prod", "generate"]
+            },
+            "description": "Generate a complete Form 1099-DIV with payer, recipient, and dividend information. Requires JWT token from login."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate 1099-DIV - Minimal Required Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Fidelity Investments\",\n    \"payerTIN\": \"04-3232190\",\n    \"recipientTIN\": \"987-65-4321\",\n    \"recipientName\": \"Jane Smith\",\n    \"totalOrdinaryDividends\": 1250.50\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/Prod/generate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["Prod", "generate"]
+            },
+            "description": "Generate Form 1099-DIV with only required fields (minimal data)"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate 1099-DIV - With Foreign Tax",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"International Fund LLC\",\n    \"payerTIN\": \"98-7654321\",\n    \"recipientTIN\": \"555-66-7777\",\n    \"recipientName\": \"Alice Johnson\",\n    \"totalOrdinaryDividends\": 8000.00,\n    \"qualifiedDividends\": 6000.00,\n    \"foreignTaxPaid\": 800.00,\n    \"foreignCountry\": \"Canada\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/Prod/generate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["Prod", "generate"]
+            },
+            "description": "Generate Form 1099-DIV with foreign tax paid"
+          },
+          "response": []
+        },
+        {
+          "name": "Missing Required Field (payerName)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerTIN\": \"12-3456789\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"Test User\",\n    \"totalOrdinaryDividends\": 1000\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/Prod/generate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["Prod", "generate"]
+            },
+            "description": "Should return 400 - Missing required field: payerName"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid TIN Format",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Test Company\",\n    \"payerTIN\": \"123456789\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"Test User\",\n    \"totalOrdinaryDividends\": 1000\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/Prod/generate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["Prod", "generate"]
+            },
+            "description": "Should return 400 - TIN must be in format XX-XXXXXXX"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid JWT Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid-token-here"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Test Company\",\n    \"payerTIN\": \"12-3456789\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"Test User\",\n    \"totalOrdinaryDividends\": 1000\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/Prod/generate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["Prod", "generate"]
+            },
+            "description": "Should return 401 - Invalid JWT token"
+          },
+          "response": []
+        },
+        {
+          "name": "Missing Authorization Header",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Test Company\",\n    \"payerTIN\": \"12-3456789\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"Test User\",\n    \"totalOrdinaryDividends\": 1000\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/Prod/generate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["Prod", "generate"]
+            },
+            "description": "Should return 401 - Missing Authorization header"
+          },
+          "response": []
+        },
+        {
+          "name": "Template Not Found",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"1040\",\n  \"formData\": {\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"ssn\": \"123-45-6789\",\n    \"filingStatus\": \"single\",\n    \"income\": 50000\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/Prod/generate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["Prod", "generate"]
+            },
+            "description": "Should return 404 - Template not found (1040.pdf doesn't exist in S3)"
           },
           "response": []
         }

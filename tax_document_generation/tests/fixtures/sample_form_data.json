@@ -1,0 +1,29 @@
+{
+  "valid_1040": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "ssn": "123-45-6789",
+    "filingStatus": "single",
+    "income": 75000
+  },
+  "valid_1040_married": {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "ssn": "987-65-4321",
+    "filingStatus": "married_filing_jointly",
+    "income": 100000
+  },
+  "invalid_missing_ssn": {
+    "firstName": "Bob",
+    "lastName": "Johnson",
+    "filingStatus": "single",
+    "income": 50000
+  },
+  "invalid_bad_ssn_format": {
+    "firstName": "Alice",
+    "lastName": "Williams",
+    "ssn": "12345678",
+    "filingStatus": "single",
+    "income": 60000
+  }
+}

@@ -67,8 +67,54 @@ aws dynamodb update-time-to-live \
 
 echo "TTL enabled on RateLimits table"
 
+# Create DynamoDB TaxDocumentJobs table
+aws dynamodb create-table \
+    --table-name TaxDocumentJobs \
+    --attribute-definitions \
+        AttributeName=jobId,AttributeType=S \
+        AttributeName=userId,AttributeType=S \
+    --key-schema \
+        AttributeName=jobId,KeyType=HASH \
+    --global-secondary-indexes \
+        "[{\"IndexName\":\"UserIdIndex\",\"KeySchema\":[{\"AttributeName\":\"userId\",\"KeyType\":\"HASH\"}],\"Projection\":{\"ProjectionType\":\"ALL\"}}]" \
+    --billing-mode PAY_PER_REQUEST \
+    --region us-east-1 \
+    --endpoint-url http://localhost:4566
+
+echo "TaxDocumentJobs table created"
+
+# Create S3 bucket for tax documents
+echo "Creating S3 bucket for tax documents"
+
+aws s3 mb s3://tax-app-documents \
+    --region us-east-1 \
+    --endpoint-url http://localhost:4566
+
+echo "S3 bucket tax-app-documents created"
+
+# Create folder structure in S3 bucket
+aws s3api put-object \
+    --bucket tax-app-documents \
+    --key templates/irs/ \
+    --region us-east-1 \
+    --endpoint-url http://localhost:4566
+
+echo "Created templates/irs/ folder in S3 bucket"
+
+aws s3api put-object \
+    --bucket tax-app-documents \
+    --key outputs/ \
+    --region us-east-1 \
+    --endpoint-url http://localhost:4566
+
+echo "Created outputs/ folder in S3 bucket"
+
 # Print statement
 echo "Listing tables to verify creation"
 
 # List tables to verify
 aws dynamodb list-tables --region us-east-1 --endpoint-url http://localhost:4566
+
+# List S3 buckets to verify
+echo "Listing S3 buckets to verify creation"
+aws s3 ls --endpoint-url http://localhost:4566
