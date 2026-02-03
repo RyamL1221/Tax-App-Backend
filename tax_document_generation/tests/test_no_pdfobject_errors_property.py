@@ -16,9 +16,9 @@ import os
 from io import BytesIO
 
 try:
-    from pypdf import PdfReader
+    import fitz  # PyMuPDF
 except ImportError:
-    from PyPDF2 import PdfReader
+    pytest.skip("PyMuPDF not installed", allow_module_level=True)
 
 from tax_document_generation.document_generator import generate_document
 from tax_document_generation.exceptions import GenerationError

@@ -13,11 +13,26 @@ Property 12: Completion status is logged
 
 import pytest
 import logging
+import os
 from hypothesis import given, settings, strategies as st, HealthCheck
 from unittest.mock import Mock, patch
 from io import BytesIO
 from tax_document_generation.document_generator import generate_document
 from tax_document_generation.field_mappings.div_1099 import SUPPORTED_FIELDS
+
+
+def get_1099_div_template():
+    """Load the actual 1099-DIV template from the project root."""
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    tax_doc_dir = os.path.dirname(test_dir)
+    project_root = os.path.dirname(tax_doc_dir)
+    template_path = os.path.join(project_root, "1099-DIV.pdf")
+    
+    if not os.path.exists(template_path):
+        pytest.skip(f"1099-DIV template not found at {template_path}")
+    
+    with open(template_path, "rb") as f:
+        return f.read()
 
 
 # Strategy for generating valid API field names
@@ -86,52 +101,36 @@ class TestCompletionStatusLoggingProperty:
         3. Log is at INFO level
         4. Message is clear and positive
         """
-        # Create a mock PDF template
-        mock_template = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\n%%EOF"
+        # Get the real template
+        template = get_1099_div_template()
         
         # Clear any previous log records
         caplog.clear()
         
-        # Mock the PDF library components
-        with patch('tax_document_generation.document_generator.PdfReader') as mock_reader_class, \
-             patch('tax_document_generation.document_generator.PdfWriter') as mock_writer_class:
-            
-            # Setup mock reader
-            mock_reader = Mock()
-            mock_reader.pages = [Mock()]
-            mock_reader.get_fields.return_value = {}
-            mock_reader_class.return_value = mock_reader
-            
-            # Setup mock writer
-            mock_writer = Mock()
-            mock_output = BytesIO(b"%PDF-1.4\ngenerated content\n%%EOF")
-            mock_writer.write = lambda stream: stream.write(mock_output.getvalue())
-            mock_writer_class.return_value = mock_writer
-            
-            # Generate the document with logging enabled
-            with caplog.at_level(logging.INFO):
-                try:
-                    result = generate_document(mock_template, form_data, "1099-DIV")
-                except Exception as e:
-                    pass
-            
-            # Find completion status logs
-            info_logs = [record for record in caplog.records if record.levelname == "INFO"]
-            
-            completion_logs = [
-                record for record in info_logs
-                if ("completed" in record.message.lower() or "complete" in record.message.lower()) and
-                   ("all" in record.message.lower() or "successfully" in record.message.lower())
-            ]
-            
-            assert len(completion_logs) > 0, \
-                "Should have an INFO log about successful completion when all fields are mapped"
-            
-            # Verify the log indicates success
-            log_message = completion_logs[0].message.lower()
-            
-            assert "all" in log_message or "successfully" in log_message, \
-                f"Completion log should indicate success: {completion_logs[0].message}"
+        # Generate the document with logging enabled
+        with caplog.at_level(logging.INFO):
+            try:
+                result = generate_document(template, form_data, "1099-DIV")
+            except Exception as e:
+                pass
+        
+        # Find completion status logs
+        info_logs = [record for record in caplog.records if record.levelname == "INFO"]
+        
+        completion_logs = [
+            record for record in info_logs
+            if ("completed" in record.message.lower() or "complete" in record.message.lower()) and
+               ("all" in record.message.lower() or "successfully" in record.message.lower())
+        ]
+        
+        assert len(completion_logs) > 0, \
+            "Should have an INFO log about successful completion when all fields are mapped"
+        
+        # Verify the log indicates success
+        log_message = completion_logs[0].message.lower()
+        
+        assert "all" in log_message or "successfully" in log_message, \
+            f"Completion log should indicate success: {completion_logs[0].message}"
     
     @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
@@ -150,56 +149,40 @@ class TestCompletionStatusLoggingProperty:
         3. Log is at INFO level
         4. Message is clear about the issue
         """
-        # Create a mock PDF template
-        mock_template = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\n%%EOF"
+        # Get the real template
+        template = get_1099_div_template()
         
         # Clear any previous log records
         caplog.clear()
         
-        # Mock the PDF library components
-        with patch('tax_document_generation.document_generator.PdfReader') as mock_reader_class, \
-             patch('tax_document_generation.document_generator.PdfWriter') as mock_writer_class:
+        # Generate the document with logging enabled
+        with caplog.at_level(logging.INFO):
+            try:
+                result = generate_document(template, form_data, "1099-DIV")
+            except Exception as e:
+                pass
+        
+        # Count unmapped fields
+        unmapped_fields = [k for k in form_data.keys() if k not in SUPPORTED_FIELDS]
+        
+        if unmapped_fields:
+            # Find completion status logs
+            info_logs = [record for record in caplog.records if record.levelname == "INFO"]
             
-            # Setup mock reader
-            mock_reader = Mock()
-            mock_reader.pages = [Mock()]
-            mock_reader.get_fields.return_value = {}
-            mock_reader_class.return_value = mock_reader
+            completion_logs = [
+                record for record in info_logs
+                if ("completed" in record.message.lower() or "complete" in record.message.lower()) and
+                   ("unmapped" in record.message.lower())
+            ]
             
-            # Setup mock writer
-            mock_writer = Mock()
-            mock_output = BytesIO(b"%PDF-1.4\ngenerated content\n%%EOF")
-            mock_writer.write = lambda stream: stream.write(mock_output.getvalue())
-            mock_writer_class.return_value = mock_writer
+            assert len(completion_logs) > 0, \
+                "Should have an INFO log about completion with unmapped fields"
             
-            # Generate the document with logging enabled
-            with caplog.at_level(logging.INFO):
-                try:
-                    result = generate_document(mock_template, form_data, "1099-DIV")
-                except Exception as e:
-                    pass
+            # Verify the log mentions unmapped fields
+            log_message = completion_logs[0].message.lower()
             
-            # Count unmapped fields
-            unmapped_fields = [k for k in form_data.keys() if k not in SUPPORTED_FIELDS]
-            
-            if unmapped_fields:
-                # Find completion status logs
-                info_logs = [record for record in caplog.records if record.levelname == "INFO"]
-                
-                completion_logs = [
-                    record for record in info_logs
-                    if ("completed" in record.message.lower() or "complete" in record.message.lower()) and
-                       ("unmapped" in record.message.lower())
-                ]
-                
-                assert len(completion_logs) > 0, \
-                    "Should have an INFO log about completion with unmapped fields"
-                
-                # Verify the log mentions unmapped fields
-                log_message = completion_logs[0].message.lower()
-                
-                assert "unmapped" in log_message, \
-                    f"Completion log should mention unmapped fields: {completion_logs[0].message}"
+            assert "unmapped" in log_message, \
+                f"Completion log should mention unmapped fields: {completion_logs[0].message}"
     
     @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
@@ -218,57 +201,41 @@ class TestCompletionStatusLoggingProperty:
         3. Not too late (after all operations)
         4. Provides timely feedback
         """
-        # Create a mock PDF template
-        mock_template = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\n%%EOF"
+        # Get the real template
+        template = get_1099_div_template()
         
         # Clear any previous log records
         caplog.clear()
         
-        # Mock the PDF library components
-        with patch('tax_document_generation.document_generator.PdfReader') as mock_reader_class, \
-             patch('tax_document_generation.document_generator.PdfWriter') as mock_writer_class:
+        # Generate the document with logging enabled
+        with caplog.at_level(logging.INFO):
+            try:
+                result = generate_document(template, form_data, "1099-DIV")
+            except Exception as e:
+                pass
+        
+        # Find completion status log
+        info_logs = [record for record in caplog.records if record.levelname == "INFO"]
+        
+        completion_logs = [
+            record for record in info_logs
+            if "completed" in record.message.lower() or "complete" in record.message.lower()
+        ]
+        
+        # Find mapping statistics log
+        mapping_logs = [
+            record for record in info_logs
+            if "Mapped" in record.message and "field" in record.message.lower()
+        ]
+        
+        if completion_logs and mapping_logs:
+            # Get indices in the log list
+            completion_index = caplog.records.index(completion_logs[0])
+            mapping_index = caplog.records.index(mapping_logs[0])
             
-            # Setup mock reader
-            mock_reader = Mock()
-            mock_reader.pages = [Mock()]
-            mock_reader.get_fields.return_value = {}
-            mock_reader_class.return_value = mock_reader
-            
-            # Setup mock writer
-            mock_writer = Mock()
-            mock_output = BytesIO(b"%PDF-1.4\ngenerated content\n%%EOF")
-            mock_writer.write = lambda stream: stream.write(mock_output.getvalue())
-            mock_writer_class.return_value = mock_writer
-            
-            # Generate the document with logging enabled
-            with caplog.at_level(logging.INFO):
-                try:
-                    result = generate_document(mock_template, form_data, "1099-DIV")
-                except Exception as e:
-                    pass
-            
-            # Find completion status log
-            info_logs = [record for record in caplog.records if record.levelname == "INFO"]
-            
-            completion_logs = [
-                record for record in info_logs
-                if "completed" in record.message.lower() or "complete" in record.message.lower()
-            ]
-            
-            # Find mapping statistics log
-            mapping_logs = [
-                record for record in info_logs
-                if "Mapped" in record.message and "field" in record.message.lower()
-            ]
-            
-            if completion_logs and mapping_logs:
-                # Get indices in the log list
-                completion_index = caplog.records.index(completion_logs[0])
-                mapping_index = caplog.records.index(mapping_logs[0])
-                
-                # Completion should be after mapping
-                assert completion_index > mapping_index, \
-                    "Completion status should be logged after mapping statistics"
+            # Completion should be after mapping
+            assert completion_index > mapping_index, \
+                "Completion status should be logged after mapping statistics"
     
     @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
@@ -285,57 +252,41 @@ class TestCompletionStatusLoggingProperty:
         2. Operators can see the extent of the issue
         3. Quantitative information is provided
         """
-        # Create a mock PDF template
-        mock_template = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\n%%EOF"
+        # Get the real template
+        template = get_1099_div_template()
         
         # Clear any previous log records
         caplog.clear()
         
-        # Mock the PDF library components
-        with patch('tax_document_generation.document_generator.PdfReader') as mock_reader_class, \
-             patch('tax_document_generation.document_generator.PdfWriter') as mock_writer_class:
+        # Generate the document with logging enabled
+        with caplog.at_level(logging.INFO):
+            try:
+                result = generate_document(template, form_data, "1099-DIV")
+            except Exception as e:
+                pass
+        
+        # Count unmapped fields
+        unmapped_fields = [k for k in form_data.keys() if k not in SUPPORTED_FIELDS]
+        
+        if unmapped_fields:
+            # Find completion status logs
+            info_logs = [record for record in caplog.records if record.levelname == "INFO"]
             
-            # Setup mock reader
-            mock_reader = Mock()
-            mock_reader.pages = [Mock()]
-            mock_reader.get_fields.return_value = {}
-            mock_reader_class.return_value = mock_reader
+            completion_logs = [
+                record for record in info_logs
+                if ("completed" in record.message.lower() or "complete" in record.message.lower()) and
+                   "unmapped" in record.message.lower()
+            ]
             
-            # Setup mock writer
-            mock_writer = Mock()
-            mock_output = BytesIO(b"%PDF-1.4\ngenerated content\n%%EOF")
-            mock_writer.write = lambda stream: stream.write(mock_output.getvalue())
-            mock_writer_class.return_value = mock_writer
-            
-            # Generate the document with logging enabled
-            with caplog.at_level(logging.INFO):
-                try:
-                    result = generate_document(mock_template, form_data, "1099-DIV")
-                except Exception as e:
-                    pass
-            
-            # Count unmapped fields
-            unmapped_fields = [k for k in form_data.keys() if k not in SUPPORTED_FIELDS]
-            
-            if unmapped_fields:
-                # Find completion status logs
-                info_logs = [record for record in caplog.records if record.levelname == "INFO"]
+            if completion_logs:
+                log_message = completion_logs[0].message
                 
-                completion_logs = [
-                    record for record in info_logs
-                    if ("completed" in record.message.lower() or "complete" in record.message.lower()) and
-                       "unmapped" in record.message.lower()
-                ]
+                # Verify the log contains a number (the unmapped count)
+                import re
+                numbers = re.findall(r'\d+', log_message)
                 
-                if completion_logs:
-                    log_message = completion_logs[0].message
-                    
-                    # Verify the log contains a number (the unmapped count)
-                    import re
-                    numbers = re.findall(r'\d+', log_message)
-                    
-                    assert len(numbers) > 0, \
-                        f"Completion log should include unmapped count: {log_message}"
+                assert len(numbers) > 0, \
+                    f"Completion log should include unmapped count: {log_message}"
     
     @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
@@ -352,49 +303,33 @@ class TestCompletionStatusLoggingProperty:
         2. Visible in production logs
         3. Appropriate severity level
         """
-        # Create a mock PDF template
-        mock_template = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\n%%EOF"
+        # Get the real template
+        template = get_1099_div_template()
         
         # Clear any previous log records
         caplog.clear()
         
-        # Mock the PDF library components
-        with patch('tax_document_generation.document_generator.PdfReader') as mock_reader_class, \
-             patch('tax_document_generation.document_generator.PdfWriter') as mock_writer_class:
-            
-            # Setup mock reader
-            mock_reader = Mock()
-            mock_reader.pages = [Mock()]
-            mock_reader.get_fields.return_value = {}
-            mock_reader_class.return_value = mock_reader
-            
-            # Setup mock writer
-            mock_writer = Mock()
-            mock_output = BytesIO(b"%PDF-1.4\ngenerated content\n%%EOF")
-            mock_writer.write = lambda stream: stream.write(mock_output.getvalue())
-            mock_writer_class.return_value = mock_writer
-            
-            # Generate the document with logging enabled
-            with caplog.at_level(logging.INFO):
-                try:
-                    result = generate_document(mock_template, form_data, "1099-DIV")
-                except Exception as e:
-                    pass
-            
-            # Find completion status logs
-            info_logs = [record for record in caplog.records if record.levelname == "INFO"]
-            
-            completion_logs = [
-                record for record in info_logs
-                if "completed" in record.message.lower() or "complete" in record.message.lower()
-            ]
-            
-            assert len(completion_logs) > 0, \
-                "Completion status should be logged at INFO level"
-            
-            # Verify it's INFO level
-            assert completion_logs[0].levelname == "INFO", \
-                f"Completion status should use INFO level, got {completion_logs[0].levelname}"
+        # Generate the document with logging enabled
+        with caplog.at_level(logging.INFO):
+            try:
+                result = generate_document(template, form_data, "1099-DIV")
+            except Exception as e:
+                pass
+        
+        # Find completion status logs
+        info_logs = [record for record in caplog.records if record.levelname == "INFO"]
+        
+        completion_logs = [
+            record for record in info_logs
+            if "completed" in record.message.lower() or "complete" in record.message.lower()
+        ]
+        
+        assert len(completion_logs) > 0, \
+            "Completion status should be logged at INFO level"
+        
+        # Verify it's INFO level
+        assert completion_logs[0].levelname == "INFO", \
+            f"Completion status should use INFO level, got {completion_logs[0].levelname}"
     
     @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
@@ -412,42 +347,26 @@ class TestCompletionStatusLoggingProperty:
         2. Easy to search for in logs
         3. Consistent messaging
         """
-        # Create a mock PDF template
-        mock_template = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\n%%EOF"
+        # Get the real template
+        template = get_1099_div_template()
         
         # Clear any previous log records
         caplog.clear()
         
-        # Mock the PDF library components
-        with patch('tax_document_generation.document_generator.PdfReader') as mock_reader_class, \
-             patch('tax_document_generation.document_generator.PdfWriter') as mock_writer_class:
-            
-            # Setup mock reader
-            mock_reader = Mock()
-            mock_reader.pages = [Mock()]
-            mock_reader.get_fields.return_value = {}
-            mock_reader_class.return_value = mock_reader
-            
-            # Setup mock writer
-            mock_writer = Mock()
-            mock_output = BytesIO(b"%PDF-1.4\ngenerated content\n%%EOF")
-            mock_writer.write = lambda stream: stream.write(mock_output.getvalue())
-            mock_writer_class.return_value = mock_writer
-            
-            # Generate the document with logging enabled
-            with caplog.at_level(logging.INFO):
-                try:
-                    result = generate_document(mock_template, form_data, "1099-DIV")
-                except Exception as e:
-                    pass
-            
-            # Find logs with completion keywords
-            info_logs = [record for record in caplog.records if record.levelname == "INFO"]
-            
-            completion_logs = [
-                record for record in info_logs
-                if "completed" in record.message.lower() or "complete" in record.message.lower()
-            ]
-            
-            assert len(completion_logs) > 0, \
-                "Should have a log with 'completed' or 'complete' keyword"
+        # Generate the document with logging enabled
+        with caplog.at_level(logging.INFO):
+            try:
+                result = generate_document(template, form_data, "1099-DIV")
+            except Exception as e:
+                pass
+        
+        # Find logs with completion keywords
+        info_logs = [record for record in caplog.records if record.levelname == "INFO"]
+        
+        completion_logs = [
+            record for record in info_logs
+            if "completed" in record.message.lower() or "complete" in record.message.lower()
+        ]
+        
+        assert len(completion_logs) > 0, \
+            "Should have a log with 'completed' or 'complete' keyword"

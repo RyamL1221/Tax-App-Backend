@@ -1,13 +1,13 @@
 """
 Property Test: Error Wrapping
 
-Feature: fix-pdf-form-field-error
-Property 3: Error Wrapping
+Feature: pymupdf-migration
+Property 7: Error Wrapping
 
 Tests that all non-GenerationError exceptions during document generation are caught
-and wrapped in GenerationError with descriptive context.
+and wrapped in GenerationError with descriptive context including document_type.
 
-**Validates: Requirements 5.4**
+**Validates: Requirements 3.2, 5.1, 5.4, 5.5**
 """
 
 import pytest
@@ -16,9 +16,9 @@ import os
 from io import BytesIO
 
 try:
-    from pypdf import PdfReader
+    import fitz  # PyMuPDF
 except ImportError:
-    from PyPDF2 import PdfReader
+    pytest.skip("PyMuPDF not installed", allow_module_level=True)
 
 from tax_document_generation.document_generator import generate_document
 from tax_document_generation.exceptions import GenerationError
@@ -139,12 +139,13 @@ def invalid_form_data(draw):
 def test_error_wrapping_corrupted_template(template_bytes):
     """
     Property: For any corrupted template bytes, document generation should raise
-    GenerationError (not the underlying exception) with descriptive context.
+    GenerationError (not the underlying PyMuPDF exception) with descriptive context
+    including document_type.
     
-    This test verifies that low-level PDF library errors are properly wrapped
+    This test verifies that low-level PyMuPDF errors are properly wrapped
     in GenerationError with helpful error messages.
     
-    **Validates: Requirements 5.4**
+    **Validates: Requirements 3.2, 5.1, 5.4, 5.5**
     """
     # Use simple valid form data
     form_data = {
@@ -155,10 +156,12 @@ def test_error_wrapping_corrupted_template(template_bytes):
         "totalOrdinaryDividends": 1000.00,
     }
     
+    document_type = "1099-DIV"
+    
     # Attempt to generate document with corrupted template
-    # This should raise GenerationError, not the underlying exception
+    # This should raise GenerationError, not the underlying PyMuPDF exception
     with pytest.raises(GenerationError) as exc_info:
-        generate_document(template_bytes, form_data, "1099-DIV")
+        generate_document(template_bytes, form_data, document_type)
     
     # Verify the error message contains descriptive context
     error_message = str(exc_info.value)
@@ -174,18 +177,19 @@ def test_error_wrapping_invalid_data_types(form_data):
     Property: For any form data with invalid data types, IF an error occurs during
     document generation, it should be wrapped in GenerationError with descriptive context.
     
-    Note: pypdf is quite forgiving and handles many data types gracefully. This test
+    Note: PyMuPDF is quite forgiving and handles many data types gracefully. This test
     verifies that IF an error occurs, it is properly wrapped.
     
-    **Validates: Requirements 5.4**
+    **Validates: Requirements 3.2, 5.1, 5.4, 5.5**
     """
     # Use valid template
     template = get_1099_div_template()
+    document_type = "1099-DIV"
     
     # Attempt to generate document with potentially invalid form data
     try:
-        result = generate_document(template, form_data, "1099-DIV")
-        # If it succeeds, that's fine - pypdf handled it gracefully
+        result = generate_document(template, form_data, document_type)
+        # If it succeeds, that's fine - PyMuPDF handled it gracefully
         assert isinstance(result, bytes)
         assert len(result) > 0
     except GenerationError as e:
@@ -302,10 +306,10 @@ def test_error_wrapping_none_form_data():
     """
     Unit test: Verify behavior when form_data contains None values.
     
-    pypdf handles None values gracefully by converting them to empty strings.
+    PyMuPDF handles None values gracefully by converting them to empty strings.
     This test verifies that the generation succeeds without errors.
     
-    **Validates: Requirements 5.4** (no error to wrap in this case)
+    **Validates: Requirements 3.2, 5.1, 5.4, 5.5** (no error to wrap in this case)
     """
     template = get_1099_div_template()
     
@@ -317,7 +321,7 @@ def test_error_wrapping_none_form_data():
         "totalOrdinaryDividends": None,
     }
     
-    # pypdf handles None gracefully - should succeed
+    # PyMuPDF handles None gracefully - should succeed
     result = generate_document(template, form_data, "1099-DIV")
     assert isinstance(result, bytes)
     assert len(result) > 0
@@ -327,10 +331,10 @@ def test_error_wrapping_list_values():
     """
     Unit test: Verify behavior when form_data contains list values.
     
-    pypdf handles list values gracefully by converting them to strings.
+    PyMuPDF handles list values gracefully by converting them to strings.
     This test verifies that the generation succeeds without errors.
     
-    **Validates: Requirements 5.4** (no error to wrap in this case)
+    **Validates: Requirements 3.2, 5.1, 5.4, 5.5** (no error to wrap in this case)
     """
     template = get_1099_div_template()
     
@@ -342,7 +346,7 @@ def test_error_wrapping_list_values():
         "totalOrdinaryDividends": 1000.00,
     }
     
-    # pypdf handles lists gracefully - should succeed
+    # PyMuPDF handles lists gracefully - should succeed
     result = generate_document(template, form_data, "1099-DIV")
     assert isinstance(result, bytes)
     assert len(result) > 0
@@ -352,10 +356,10 @@ def test_error_wrapping_dict_values():
     """
     Unit test: Verify behavior when form_data contains dict values.
     
-    pypdf handles dict values gracefully by converting them to strings.
+    PyMuPDF handles dict values gracefully by converting them to strings.
     This test verifies that the generation succeeds without errors.
     
-    **Validates: Requirements 5.4** (no error to wrap in this case)
+    **Validates: Requirements 3.2, 5.1, 5.4, 5.5** (no error to wrap in this case)
     """
     template = get_1099_div_template()
     
@@ -367,7 +371,7 @@ def test_error_wrapping_dict_values():
         "totalOrdinaryDividends": 1000.00,
     }
     
-    # pypdf handles dicts gracefully - should succeed
+    # PyMuPDF handles dicts gracefully - should succeed
     result = generate_document(template, form_data, "1099-DIV")
     assert isinstance(result, bytes)
     assert len(result) > 0

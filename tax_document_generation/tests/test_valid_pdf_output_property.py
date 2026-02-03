@@ -1,13 +1,13 @@
 """
 Property Test: Valid PDF Output
 
-Feature: fix-pdf-form-field-error
-Property 4: Valid PDF Output
+Feature: pymupdf-migration
+Property 10: Valid PDF Output
 
-Tests that document generation produces valid PDF output that can be read
-and has non-zero size for any valid form data.
+Tests that for any successful document generation, the output is valid PDF bytes
+(verifiable by opening with PyMuPDF without errors).
 
-**Validates: Requirements 6.3, 6.4**
+**Validates: Requirements 3.5**
 """
 
 import pytest
@@ -16,9 +16,9 @@ import os
 from io import BytesIO
 
 try:
-    from pypdf import PdfReader
+    import fitz  # PyMuPDF
 except ImportError:
-    from PyPDF2 import PdfReader
+    pytest.skip("PyMuPDF not installed", allow_module_level=True)
 
 from tax_document_generation.document_generator import generate_document
 
@@ -83,16 +83,17 @@ def valid_form_data(draw):
     return form_data
 
 
-@settings(max_examples=20, deadline=None)
+@settings(max_examples=100, deadline=None)
 @given(form_data=valid_form_data())
 def test_valid_pdf_output(form_data):
     """
     Property: For any valid form data, document generation should produce
-    valid PDF output that can be read by PdfReader and has non-zero size.
+    valid PDF output that can be opened with PyMuPDF without errors.
     
     This test verifies that the generated output is always a valid, readable PDF.
     
-    **Validates: Requirements 6.3, 6.4**
+    **Validates: Requirements 3.5**
+    Feature: pymupdf-migration, Property 10: Valid PDF Output
     """
     # Load the actual 1099-DIV template
     template = get_1099_div_template()
@@ -103,13 +104,14 @@ def test_valid_pdf_output(form_data):
     # Verify the result is bytes
     assert isinstance(result, bytes), "Result should be bytes"
     
-    # Verify non-zero size (Requirement 6.4)
+    # Verify non-zero size
     assert len(result) > 0, "Result should have non-zero size"
     
-    # Verify we can read the generated PDF (Requirement 6.3)
+    # Verify we can open the generated PDF with PyMuPDF (Requirement 3.5)
     try:
-        reader = PdfReader(BytesIO(result))
-        assert len(reader.pages) > 0, "Generated PDF should have at least one page"
+        doc = fitz.open(stream=result, filetype="pdf")
+        assert len(doc) > 0, "Generated PDF should have at least one page"
+        doc.close()
     except Exception as e:
         pytest.fail(f"Generated PDF is not valid: {e}")
 
@@ -132,9 +134,10 @@ def test_valid_pdf_output_minimal():
     assert isinstance(result, bytes)
     assert len(result) > 0
     
-    # Verify we can read the PDF
-    reader = PdfReader(BytesIO(result))
-    assert len(reader.pages) > 0
+    # Verify we can open the PDF with PyMuPDF
+    doc = fitz.open(stream=result, filetype="pdf")
+    assert len(doc) > 0
+    doc.close()
 
 
 def test_valid_pdf_output_empty():
@@ -154,9 +157,10 @@ def test_valid_pdf_output_empty():
     assert isinstance(result, bytes)
     assert len(result) > 0
     
-    # Verify we can read the PDF
-    reader = PdfReader(BytesIO(result))
-    assert len(reader.pages) > 0
+    # Verify we can open the PDF with PyMuPDF
+    doc = fitz.open(stream=result, filetype="pdf")
+    assert len(doc) > 0
+    doc.close()
 
 
 def test_valid_pdf_output_comprehensive():
@@ -197,6 +201,7 @@ def test_valid_pdf_output_comprehensive():
     assert isinstance(result, bytes)
     assert len(result) > 0
     
-    # Verify we can read the PDF
-    reader = PdfReader(BytesIO(result))
-    assert len(reader.pages) > 0
+    # Verify we can open the PDF with PyMuPDF
+    doc = fitz.open(stream=result, filetype="pdf")
+    assert len(doc) > 0
+    doc.close()

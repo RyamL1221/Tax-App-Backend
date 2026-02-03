@@ -17,11 +17,9 @@ from hypothesis import given, settings, strategies as st, assume
 from tax_document_generation.field_mappings.div_1099 import FIELD_MAPPING, SUPPORTED_FIELDS
 
 try:
-    from pypdf import PdfReader
-    USING_PYPDF = True
+    import fitz  # PyMuPDF
 except ImportError:
-    from PyPDF2 import PdfReader
-    USING_PYPDF = False
+    pytest.skip("PyMuPDF not installed", allow_module_level=True)
 
 
 # Strategy for generating API field names
@@ -49,10 +47,17 @@ def load_pdf_template():
         if os.path.exists(path):
             try:
                 with open(path, 'rb') as f:
-                    reader = PdfReader(f)
-                    fields = reader.get_fields()
-                    if fields:
-                        return set(fields.keys())
+                    doc = fitz.open(stream=f.read(), filetype="pdf")
+                    field_names = set()
+                    for page_num in range(len(doc)):
+                        page = doc[page_num]
+                        widgets = list(page.widgets())
+                        for widget in widgets:
+                            if widget.field_name:
+                                field_names.add(widget.field_name)
+                    doc.close()
+                    if field_names:
+                        return field_names
             except Exception:
                 continue
     

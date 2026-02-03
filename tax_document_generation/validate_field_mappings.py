@@ -20,11 +20,12 @@ import os
 from pathlib import Path
 
 try:
-    from pypdf import PdfReader
-    USING_PYPDF = True
-except ImportError:
-    from PyPDF2 import PdfReader
-    USING_PYPDF = False
+    import fitz  # PyMuPDF
+except ImportError as e:
+    raise ImportError(
+        "PyMuPDF is required for PDF validation. "
+        "Install with: pip install PyMuPDF>=1.23.0"
+    ) from e
 
 # Add parent directory to path to import field mappings
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -32,15 +33,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from tax_document_generation.field_mappings.div_1099 import FIELD_MAPPING
 
 
-def load_pdf_template(template_path: str) -> PdfReader:
+def load_pdf_template(template_path: str) -> fitz.Document:
     """
-    Load the PDF template and return a PdfReader object.
+    Load the PDF template and return a PyMuPDF Document object.
     
     Args:
         template_path: Path to the PDF template file
         
     Returns:
-        PdfReader object
+        fitz.Document object
         
     Raises:
         FileNotFoundError: If template file doesn't exist
@@ -48,28 +49,32 @@ def load_pdf_template(template_path: str) -> PdfReader:
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Template file not found: {template_path}")
     
-    with open(template_path, 'rb') as f:
-        reader = PdfReader(f)
-    
-    return reader
+    doc = fitz.open(template_path)
+    return doc
 
 
-def extract_pdf_field_names(reader: PdfReader) -> set:
+def extract_pdf_field_names(doc: fitz.Document) -> set:
     """
     Extract all field names from the PDF template.
     
     Args:
-        reader: PdfReader object
+        doc: PyMuPDF Document object
         
     Returns:
         Set of PDF field names
     """
-    fields = reader.get_fields()
+    field_names = set()
     
-    if not fields:
-        return set()
+    for page_num in range(len(doc)):
+        page = doc[page_num]
+        widgets = page.widgets()
+        
+        if widgets:
+            for widget in widgets:
+                if widget.field_name:
+                    field_names.add(widget.field_name)
     
-    return set(fields.keys())
+    return field_names
 
 
 def validate_mappings(mapping: dict, pdf_fields: set) -> tuple:
@@ -197,15 +202,18 @@ def main():
         sys.exit(1)
     
     print(f"Using template: {os.path.abspath(template_path)}")
-    print(f"Using PDF library: {'pypdf' if USING_PYPDF else 'PyPDF2'}")
+    print(f"Using PDF library: PyMuPDF (fitz)")
     print()
     
     try:
         # Load the PDF template
-        reader = load_pdf_template(template_path)
+        doc = load_pdf_template(template_path)
         
         # Extract PDF field names
-        pdf_fields = extract_pdf_field_names(reader)
+        pdf_fields = extract_pdf_field_names(doc)
+        
+        # Close the document
+        doc.close()
         
         if not pdf_fields:
             print("WARNING: No form fields found in PDF template")

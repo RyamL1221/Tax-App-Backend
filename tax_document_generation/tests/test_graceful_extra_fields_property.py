@@ -16,9 +16,9 @@ import os
 from io import BytesIO
 
 try:
-    from pypdf import PdfReader
+    import fitz  # PyMuPDF
 except ImportError:
-    from PyPDF2 import PdfReader
+    pytest.skip("PyMuPDF not installed", allow_module_level=True)
 
 from tax_document_generation.document_generator import generate_document
 from tax_document_generation.exceptions import GenerationError
@@ -120,9 +120,10 @@ def test_graceful_handling_of_extra_fields(form_data):
     assert isinstance(result, bytes), "Result should be bytes"
     assert len(result) > 0, "Result should not be empty"
     
-    # Verify we can read the generated PDF (validates it's a valid PDF)
-    reader = PdfReader(BytesIO(result))
-    assert len(reader.pages) > 0, "Generated PDF should have at least one page"
+    # Verify we can open the generated PDF with PyMuPDF (validates it's a valid PDF)
+    doc = fitz.open(stream=result, filetype="pdf")
+    assert len(doc) > 0, "Generated PDF should have at least one page"
+    doc.close()
 
 
 def test_graceful_extra_fields_minimal():
@@ -157,9 +158,10 @@ def test_graceful_extra_fields_minimal():
     assert isinstance(result, bytes)
     assert len(result) > 0
     
-    # Verify we can read the PDF
-    reader = PdfReader(BytesIO(result))
-    assert len(reader.pages) > 0
+    # Verify we can open the PDF with PyMuPDF
+    doc = fitz.open(stream=result, filetype="pdf")
+    assert len(doc) > 0
+    doc.close()
 
 
 def test_graceful_extra_fields_only():
@@ -187,9 +189,10 @@ def test_graceful_extra_fields_only():
     assert isinstance(result, bytes)
     assert len(result) > 0
     
-    # Verify we can read the PDF
-    reader = PdfReader(BytesIO(result))
-    assert len(reader.pages) > 0
+    # Verify we can open the PDF with PyMuPDF
+    doc = fitz.open(stream=result, filetype="pdf")
+    assert len(doc) > 0
+    doc.close()
 
 
 def test_graceful_extra_fields_mixed():
@@ -230,6 +233,7 @@ def test_graceful_extra_fields_mixed():
     assert isinstance(result, bytes)
     assert len(result) > 0
     
-    # Verify we can read the PDF
-    reader = PdfReader(BytesIO(result))
-    assert len(reader.pages) > 0
+    # Verify we can open the PDF with PyMuPDF
+    doc = fitz.open(stream=result, filetype="pdf")
+    assert len(doc) > 0
+    doc.close()

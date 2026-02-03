@@ -232,16 +232,53 @@ All 20 properties from the design document have been implemented and tested:
 
 ### Known Limitations
 
-1. **PDF Generation** - Currently uses PyPDF2 for basic PDF manipulation. For production, consider:
-   - Using actual IRS PDF forms with fillable fields
-   - Implementing more sophisticated PDF generation
-   - Adding PDF validation
+1. **PDF Generation** - Uses PyMuPDF (fitz) for PDF form field population:
+   - Supports fillable PDF forms with form fields
+   - Generates appearance streams for visible form data
+   - Maintains field editability (forms are not flattened)
+   - Requires PyMuPDF>=1.23.0 (may need Lambda layer for native dependencies)
 
 2. **Template Management** - Templates must be manually uploaded to S3
 
 3. **Document Types** - Currently supports 1040, 1099, W2. Additional forms require:
    - Adding field definitions to input_validator.py
    - Uploading corresponding templates to S3
+
+## PyMuPDF Migration
+
+The document generation system has been migrated from a multi-library fallback approach (pypdf/PyPDF2) to PyMuPDF-only implementation:
+
+### Key Changes
+
+- **Single PDF Library**: Uses PyMuPDF (fitz) exclusively for all PDF operations
+- **Form Data Visibility**: Implements proper widget update sequence to ensure form data is visible when PDFs are opened
+- **Appearance Streams**: Calls `widget.update()` after setting field values to generate appearance streams
+- **Hidden Flag Clearing**: Explicitly clears the hidden flag on form fields
+- **NeedAppearances Flag**: Sets the PDF catalog's NeedAppearances flag for maximum compatibility
+
+### Widget Update Sequence
+
+For each form field, the following sequence is executed:
+```python
+widget.field_value = str(value)
+widget.update()  # Generate appearance stream
+widget.field_flags = widget.field_flags & ~(1 << 1)  # Clear hidden flag
+widget.update()  # Apply flag changes
+```
+
+### Lambda Deployment Considerations
+
+PyMuPDF has native dependencies that may require a Lambda layer:
+- PyMuPDF uses native C libraries (MuPDF)
+- Consider using a pre-built Lambda layer or building one with the required dependencies
+- Alternative: Use a container image deployment with PyMuPDF pre-installed
+
+### Migration Benefits
+
+- **Simplified Codebase**: Removed fallback logic and conditional library selection
+- **Better Form Support**: PyMuPDF has superior form field handling compared to pypdf/PyPDF2
+- **Visible Form Data**: Proper appearance stream generation ensures data is visible in all PDF viewers
+- **Maintained Compatibility**: 100% backward compatible - no changes to calling code required
 
 ## Conclusion
 
