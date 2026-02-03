@@ -22,7 +22,7 @@ localstack-logs: ## View LocalStack logs
 
 localstack-init: ## Initialize LocalStack resources (run after localstack-start)
 	@echo "Initializing LocalStack resources..."
-	@bash init-localstack.sh
+	@bash scripts/init-localstack.sh
 
 localstack-status: ## Check LocalStack status
 	@echo "Checking LocalStack status..."
@@ -33,7 +33,7 @@ view-db: ## View DynamoDB table contents
 	@awslocal dynamodb scan --table-name Users --region us-east-1 | python3 -m json.tool
 
 view-db-simple: ## View DynamoDB table contents (simple format)
-	@python3 view-dynamodb.py
+	@python3 scripts/utils/view-dynamodb.py
 
 test: ## Run all tests
 	@echo "Running tests..."
@@ -117,7 +117,7 @@ test-tax-docs-integration: ## Run tax document generation integration tests (req
 
 test-tax-docs-endpoint: ## Test tax document generation endpoint with curl
 	@echo "Testing tax document generation endpoint..."
-	@bash test-tax-document-generation.sh
+	@bash scripts/test-tax-document-generation.sh
 
 deploy-tax-docs: ## Deploy tax document generation function to LocalStack
 	@echo "Deploying tax document generation function..."
