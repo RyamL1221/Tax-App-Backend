@@ -75,6 +75,44 @@ class FieldMapper:
         # This should never be reached due to validation in __init__
         raise ValueError(f"Unsupported document type: {document_type}")
     
+    def _generate_copy_variants(self, pdf_field_name: str) -> List[str]:
+        """
+        Generate field name variants for all form copies.
+        
+        Takes a Copy1 PDF field name and generates corresponding field names
+        for Copy2 and CopyB by replacing the copy prefix while preserving
+        all other path components.
+        
+        Args:
+            pdf_field_name: The Copy1 PDF field name
+            
+        Returns:
+            List of field names for Copy1, Copy2, and CopyB. If the field name
+            doesn't contain "Copy1[0]", returns a list with only the original
+            field name.
+            
+        Requirements: 1.1, 1.2, 1.4, 2.1, 2.2, 2.3, 2.4
+        """
+        # Check if the field name contains the Copy1 pattern
+        if "Copy1[0]" not in pdf_field_name:
+            logger.warning(
+                f"Field name '{pdf_field_name}' does not contain 'Copy1[0]' pattern. "
+                f"Returning original field name only."
+            )
+            return [pdf_field_name]
+        
+        # Generate variants by replacing Copy1[0] with Copy2[0] and CopyB[0]
+        copy1_name = pdf_field_name
+        copy2_name = pdf_field_name.replace("Copy1[0]", "Copy2[0]")
+        copyb_name = pdf_field_name.replace("Copy1[0]", "CopyB[0]")
+        
+        logger.debug(
+            f"Generated copy variants for field: "
+            f"Copy1='{copy1_name}', Copy2='{copy2_name}', CopyB='{copyb_name}'"
+        )
+        
+        return [copy1_name, copy2_name, copyb_name]
+    
     def map_field(self, api_field_name: str) -> Optional[str]:
         """
         Map an API field name to its PDF field name.
@@ -104,30 +142,43 @@ class FieldMapper:
     
     def map_all_fields(self, form_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Map all fields in a form data dictionary.
+        Map all fields in a form data dictionary to multiple copies.
+        
+        For each API field, generates mappings for Copy1, Copy2, and CopyB.
+        All three copies receive the same value from the form data.
         
         Args:
             form_data: Dictionary with API field names as keys
             
         Returns:
-            Dictionary with PDF field names as keys, unmapped fields excluded
+            Dictionary with PDF field names as keys (includes all copies),
+            unmapped fields excluded
             
-        Requirements: 1.2, 3.1, 4.3
+        Requirements: 1.1, 1.2, 1.3, 3.1, 4.3, 5.1
         """
         if not form_data:
             logger.info("No form data provided, returning empty dictionary")
             return {}
         
         mapped_data = {}
+        total_copies_generated = 0
         
         for api_field_name, value in form_data.items():
             pdf_field_name = self.map_field(api_field_name)
             
             if pdf_field_name is not None:
-                mapped_data[pdf_field_name] = value
+                # Generate field name variants for all copies
+                copy_variants = self._generate_copy_variants(pdf_field_name)
+                
+                # Map each copy variant to the same value
+                for variant in copy_variants:
+                    mapped_data[variant] = value
+                
+                total_copies_generated += len(copy_variants)
         
-        logger.debug(
-            f"Mapped {len(mapped_data)} out of {len(form_data)} fields "
+        logger.info(
+            f"Mapped {len(form_data)} API fields to {len(mapped_data)} PDF fields "
+            f"({total_copies_generated} total copies generated) "
             f"for document type '{self.document_type}'"
         )
         

@@ -132,9 +132,26 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
         populated_count = 0
         failed_fields = []
         
+        # Track statistics per copy for multi-copy operations
+        copy_stats = {
+            'Copy1': {'success': 0, 'failed': []},
+            'Copy2': {'success': 0, 'failed': []},
+            'CopyB': {'success': 0, 'failed': []}
+        }
+        
         for field_data in fields_to_flatten:
             try:
                 page = doc[field_data['page_num']]
+                field_name = field_data['field_name']
+                
+                # Determine which copy this field belongs to
+                copy_id = None
+                if 'Copy1[0]' in field_name:
+                    copy_id = 'Copy1'
+                elif 'Copy2[0]' in field_name:
+                    copy_id = 'Copy2'
+                elif 'CopyB[0]' in field_name:
+                    copy_id = 'CopyB'
                 
                 # Insert text as static content
                 # Use "helv" (Helvetica) - a PDF base-14 font that's always available
@@ -150,14 +167,37 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                 
                 if rc >= 0:  # Success
                     populated_count += 1
-                    logger.debug(f"Flattened field '{field_data['field_name']}' with value '{field_data['value']}'")
+                    if copy_id:
+                        copy_stats[copy_id]['success'] += 1
+                        logger.debug(f"Successfully populated {copy_id} field '{field_name}' with value '{field_data['value']}'")
+                    else:
+                        logger.debug(f"Flattened field '{field_name}' with value '{field_data['value']}'")
                 else:
-                    logger.warning(f"Failed to insert text for field '{field_data['field_name']}' (rc={rc})")
-                    failed_fields.append(field_data['field_name'])
+                    if copy_id:
+                        copy_stats[copy_id]['failed'].append(field_name)
+                        logger.warning(f"Failed to populate {copy_id} field '{field_name}' (rc={rc})")
+                    else:
+                        logger.warning(f"Failed to insert text for field '{field_name}' (rc={rc})")
+                    failed_fields.append(field_name)
                     
             except Exception as e:
-                logger.warning(f"Failed to flatten field '{field_data['field_name']}': {str(e)}")
-                failed_fields.append(field_data['field_name'])
+                field_name = field_data['field_name']
+                
+                # Determine which copy this field belongs to
+                copy_id = None
+                if 'Copy1[0]' in field_name:
+                    copy_id = 'Copy1'
+                elif 'Copy2[0]' in field_name:
+                    copy_id = 'Copy2'
+                elif 'CopyB[0]' in field_name:
+                    copy_id = 'CopyB'
+                
+                if copy_id:
+                    copy_stats[copy_id]['failed'].append(field_name)
+                    logger.warning(f"Failed to populate {copy_id} field '{field_name}': {str(e)}")
+                else:
+                    logger.warning(f"Failed to flatten field '{field_name}': {str(e)}")
+                failed_fields.append(field_name)
         
         # Step 3: Remove form field widgets (convert to static content)
         logger.info("Removing form field widgets (converting to static content)...")
@@ -179,6 +219,22 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
         logger.info(f"Successfully flattened {populated_count} fields")
         if failed_fields:
             logger.warning(f"Failed to flatten {len(failed_fields)} field(s): {failed_fields}")
+        
+        # Log summary statistics per copy for multi-copy operations
+        has_multi_copy = any(copy_stats[copy]['success'] > 0 or copy_stats[copy]['failed'] 
+                            for copy in copy_stats)
+        if has_multi_copy:
+            logger.info("Multi-copy field population summary:")
+            for copy_id in ['Copy1', 'Copy2', 'CopyB']:
+                success_count = copy_stats[copy_id]['success']
+                failed_count = len(copy_stats[copy_id]['failed'])
+                total = success_count + failed_count
+                
+                if total > 0:
+                    logger.info(f"  {copy_id}: {success_count}/{total} fields populated successfully")
+                    if failed_count > 0:
+                        logger.warning(f"  {copy_id}: {failed_count} field(s) failed: {copy_stats[copy_id]['failed']}")
+
         
         # Save to bytes
         output_bytes = doc.tobytes()

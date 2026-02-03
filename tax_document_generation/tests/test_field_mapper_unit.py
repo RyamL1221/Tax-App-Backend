@@ -205,6 +205,7 @@ class TestFieldMapperUnit:
         1. Only valid fields are in the result
         2. Invalid fields are filtered out
         3. Result contains only mapped fields
+        4. Multi-copy mappings are generated (3 copies per field)
         """
         # Initialize the field mapper
         mapper = FieldMapper("1099-DIV")
@@ -219,14 +220,23 @@ class TestFieldMapperUnit:
         # Map the fields
         result = mapper.map_all_fields(form_data)
         
-        # Verify only valid fields are in the result
-        assert len(result) == 2, \
-            "Result should contain only the 2 valid fields"
+        # Verify only valid fields are in the result (2 API fields × 3 copies = 6 PDF fields)
+        assert len(result) == 6, \
+            "Result should contain 6 PDF fields (2 API fields × 3 copies each)"
         
         # Verify the invalid field is not in the result
         for key in result.keys():
             assert key != "invalidField", \
                 "Invalid field should not be in the result"
+        
+        # Verify all three copies are present for each valid field
+        payer_name_copies = [k for k in result.keys() if "f2_2[0]" in k]
+        assert len(payer_name_copies) == 3, \
+            "Should have 3 copies of payerName field"
+        
+        dividends_copies = [k for k in result.keys() if "f2_9[0]" in k]
+        assert len(dividends_copies) == 3, \
+            "Should have 3 copies of totalOrdinaryDividends field"
     
     def test_get_unmapped_fields_returns_correct_list(self):
         """
