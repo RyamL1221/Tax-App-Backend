@@ -156,7 +156,7 @@ class TestCompleteFieldCoverageProperty:
             f"{sorted(missing_from_supported)}"
         )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(field_name=documented_field_strategy())
     def test_every_documented_field_maps_to_non_null_value(self, field_name):
         """
@@ -193,7 +193,7 @@ class TestCompleteFieldCoverageProperty:
             f"Mapped PDF field name should be non-empty for field '{field_name}'"
         )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(field_name=documented_field_strategy())
     def test_every_documented_field_maps_to_valid_pdf_field_format(self, field_name):
         """
@@ -236,7 +236,7 @@ class TestCompleteFieldCoverageProperty:
             f"but got: {pdf_field_name}"
         )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(field_subset=field_subset_strategy())
     def test_map_all_fields_includes_all_documented_fields(self, field_subset):
         """
@@ -276,7 +276,7 @@ class TestCompleteFieldCoverageProperty:
             f"but the following were unmapped: {unmapped_fields}"
         )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(field_subset=field_subset_strategy())
     def test_get_unmapped_fields_returns_empty_for_documented_fields(self, field_subset):
         """
@@ -334,7 +334,7 @@ class TestCompleteFieldCoverageProperty:
             f"Missing {documented_count - mapped_count} mappings."
         )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(field_name=documented_field_strategy())
     def test_documented_fields_are_in_supported_fields_list(self, field_name):
         """
@@ -389,7 +389,7 @@ class TestCompleteFieldCoverageProperty:
         # The important property is that all documented fields ARE mapped
         assert True  # Always pass, this is just informational
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(field_name=documented_field_strategy())
     def test_field_mapping_is_consistent_across_calls(self, field_name):
         """

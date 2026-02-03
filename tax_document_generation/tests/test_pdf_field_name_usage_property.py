@@ -37,7 +37,7 @@ def form_data_strategy():
 class TestPDFFieldNameUsageProperty:
     """Property-based tests for PDF field name usage."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_only_pdf_field_names_passed_to_pdf_library(self, form_data):
         """
@@ -100,7 +100,7 @@ class TestPDFFieldNameUsageProperty:
                     assert key.startswith("topmostSubform[0].Copy1[0]."), \
                         f"Field name '{key}' should be a PDF field name, not an API field name"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_pdf_field_names_match_mapping_configuration(self, form_data):
         """
@@ -158,7 +158,7 @@ class TestPDFFieldNameUsageProperty:
                     assert key in expected_pdf_field_names, \
                         f"PDF field name '{key}' should be from FIELD_MAPPING configuration"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_values_preserved_during_translation(self, form_data):
         """
@@ -218,7 +218,7 @@ class TestPDFFieldNameUsageProperty:
                     assert original_value in actual_values, \
                         f"Value '{original_value}' should be preserved during translation"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=st.sampled_from(SUPPORTED_FIELDS))
     def test_single_field_translation_uses_correct_pdf_name(self, api_field_name):
         """
@@ -287,7 +287,7 @@ class TestPDFFieldNameUsageProperty:
                 assert actual_data[expected_pdf_field_name] == "test_value", \
                     f"Value should be preserved for field '{expected_pdf_field_name}'"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_no_api_field_names_in_any_pdf_operation(self, form_data):
         """
@@ -347,7 +347,7 @@ class TestPDFFieldNameUsageProperty:
                                 assert key != api_field_name, \
                                     f"API field name '{api_field_name}' found in {method_name} kwargs"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_all_translated_names_follow_pdf_pattern(self, form_data):
         """

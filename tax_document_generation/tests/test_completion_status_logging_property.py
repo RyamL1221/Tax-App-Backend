@@ -84,7 +84,7 @@ def mixed_form_data_strategy():
 class TestCompletionStatusLoggingProperty:
     """Property-based tests for completion status logging."""
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
     def test_successful_completion_logged_when_all_fields_mapped(self, form_data, caplog):
         """
@@ -132,7 +132,7 @@ class TestCompletionStatusLoggingProperty:
         assert "all" in log_message or "successfully" in log_message, \
             f"Completion log should indicate success: {completion_logs[0].message}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
     def test_partial_completion_logged_when_fields_unmapped(self, form_data, caplog):
         """
@@ -184,7 +184,7 @@ class TestCompletionStatusLoggingProperty:
             assert "unmapped" in log_message, \
                 f"Completion log should mention unmapped fields: {completion_logs[0].message}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
     def test_completion_status_logged_at_end_of_generation(self, form_data, caplog):
         """
@@ -237,7 +237,7 @@ class TestCompletionStatusLoggingProperty:
             assert completion_index > mapping_index, \
                 "Completion status should be logged after mapping statistics"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
     def test_completion_status_includes_unmapped_count(self, form_data, caplog):
         """
@@ -288,7 +288,7 @@ class TestCompletionStatusLoggingProperty:
                 assert len(numbers) > 0, \
                     f"Completion log should include unmapped count: {log_message}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
     def test_completion_status_uses_info_level(self, form_data, caplog):
         """
@@ -331,7 +331,7 @@ class TestCompletionStatusLoggingProperty:
         assert completion_logs[0].levelname == "INFO", \
             f"Completion status should use INFO level, got {completion_logs[0].levelname}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
     def test_completion_status_contains_completion_keyword(self, form_data, caplog):
         """

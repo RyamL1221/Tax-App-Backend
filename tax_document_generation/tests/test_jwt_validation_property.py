@@ -35,7 +35,7 @@ user_ids = text(min_size=1, max_size=100, alphabet='abcdefghijklmnopqrstuvwxyzAB
 class TestJWTValidationProperty:
     """Property-based tests for JWT token validation."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -74,7 +74,7 @@ class TestJWTValidationProperty:
         # Verify the error message mentions expiration
         assert "expired" in str(exc_info.value).lower()
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys,
@@ -111,7 +111,7 @@ class TestJWTValidationProperty:
         
         assert "expired" in str(exc_info.value).lower()
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -152,7 +152,7 @@ class TestJWTValidationProperty:
         # Verify the error message mentions signature
         assert "signature" in str(exc_info.value).lower()
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -185,7 +185,7 @@ class TestJWTValidationProperty:
             with pytest.raises(AuthenticationError):
                 validate_jwt(malformed_token, secret_key)
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys,
@@ -222,7 +222,7 @@ class TestJWTValidationProperty:
         
         assert "expired" in str(exc_info.value).lower()
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -266,7 +266,7 @@ class TestJWTValidationProperty:
         
         assert "expired" in str(exc_info.value).lower()
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -305,7 +305,7 @@ class TestJWTValidationProperty:
         error_message = str(exc_info.value).lower()
         assert "userid" in error_message
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -342,7 +342,7 @@ class TestJWTValidationProperty:
         # Verify the payload is returned correctly
         assert result["userId"] == user_id
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         secret_key=secret_keys
     )

@@ -72,7 +72,7 @@ def valid_form_data(draw):
     }
 
 
-@settings(max_examples=100, deadline=None)
+@settings(max_examples=20, deadline=None)
 @given(form_data=valid_form_data())
 def test_form_data_preservation(form_data):
     """

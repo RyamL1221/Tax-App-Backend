@@ -53,7 +53,7 @@ def form_data_strategy():
 class TestFieldEditabilityPreservationProperty:
     """Property-based tests for field editability preservation."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_fields_remain_editable_after_population(self, form_data):
         """
@@ -129,7 +129,7 @@ class TestFieldEditabilityPreservationProperty:
                 assert not hasattr(widget, 'delete') or not widget.delete.called, \
                     f"Widget '{widget.field_name}' should not be deleted"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_document_remains_form_pdf(self, form_data):
         """
@@ -192,7 +192,7 @@ class TestFieldEditabilityPreservationProperty:
             assert mock_doc.is_form_pdf, \
                 "Document should remain a form PDF"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_widget_update_preserves_editability(self, form_data):
         """

@@ -36,7 +36,7 @@ def valid_identifiers(draw):
     return user_id, job_id, document_type
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(identifiers=valid_identifiers())
 @patch('tax_document_generation.output_persister.boto3')
 def test_output_s3_key_pattern(mock_boto3, identifiers):

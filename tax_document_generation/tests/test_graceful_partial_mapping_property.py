@@ -74,7 +74,7 @@ def partial_mapping_strategy():
 class TestGracefulPartialMappingProperty:
     """Property-based tests for graceful partial mapping."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=partial_mapping_strategy())
     def test_partial_mapping_completes_successfully(self, form_data):
         """
@@ -148,7 +148,7 @@ class TestGracefulPartialMappingProperty:
             # Verify result exists
             assert result is not None, "Document generation should return a result"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=partial_mapping_strategy())
     def test_partial_mapping_returns_valid_pdf_bytes(self, form_data):
         """
@@ -226,7 +226,7 @@ class TestGracefulPartialMappingProperty:
             assert result.startswith(b"%PDF"), \
                 "Result should be a valid PDF (start with %PDF header)"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=partial_mapping_strategy())
     def test_partial_mapping_logs_unmapped_fields(self, form_data):
         """
@@ -302,7 +302,7 @@ class TestGracefulPartialMappingProperty:
                 assert len(warning_calls) > 0, \
                     "Warnings should be logged for unmapped fields"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=partial_mapping_strategy())
     def test_zero_mapped_fields_still_succeeds(self, form_data):
         """

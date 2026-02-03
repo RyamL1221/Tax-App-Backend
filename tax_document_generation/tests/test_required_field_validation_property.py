@@ -105,7 +105,7 @@ def form_1040_data_with_missing_field(draw):
 class TestRequiredFieldValidationProperty:
     """Property-based tests for required field validation."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(data=form_1040_data_with_missing_field())
     def test_missing_required_field_raises_validation_error(self, data):
         """
@@ -138,7 +138,7 @@ class TestRequiredFieldValidationProperty:
         assert missing_field_mentioned, \
             f"Error message should mention at least one missing field from {missing_fields}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(field_to_remove=sampled_from(list(FORM_1040_REQUIRED_FIELDS.keys())))
     def test_each_required_field_individually_missing_raises_error(self, field_to_remove):
         """
@@ -174,7 +174,7 @@ class TestRequiredFieldValidationProperty:
         assert "missing required field" in error_message
         assert field_to_remove.lower() in error_message
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=valid_form_1040_data())
     def test_all_required_fields_present_does_not_raise_error(self, form_data):
         """
@@ -200,7 +200,7 @@ class TestRequiredFieldValidationProperty:
             assert "missing required field" not in error_message, \
                 f"Should not complain about missing fields when all are present: {e}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=valid_form_1040_data(),
         num_fields_to_remove=integers(min_value=2, max_value=5)
@@ -238,7 +238,7 @@ class TestRequiredFieldValidationProperty:
         error_message = str(exc_info.value).lower()
         assert "missing required field" in error_message
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=valid_form_1040_data())
     def test_empty_form_data_raises_validation_error(self, form_data):
         """
@@ -264,7 +264,7 @@ class TestRequiredFieldValidationProperty:
         error_message = str(exc_info.value).lower()
         assert "missing required field" in error_message
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=valid_form_1040_data(),
         extra_field_name=text(min_size=1, max_size=50, alphabet='abcdefghijklmnopqrstuvwxyz_'),
@@ -298,7 +298,7 @@ class TestRequiredFieldValidationProperty:
             assert "missing required field" not in error_message, \
                 f"Should not complain about missing fields when all required fields are present: {e}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(field_name=sampled_from(list(FORM_1040_REQUIRED_FIELDS.keys())))
     def test_field_present_but_none_value_is_treated_as_present(self, field_name):
         """

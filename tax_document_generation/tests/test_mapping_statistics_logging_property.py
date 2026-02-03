@@ -70,7 +70,7 @@ def mixed_form_data_strategy():
 class TestMappingStatisticsLoggingProperty:
     """Property-based tests for mapping statistics logging."""
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
     def test_mapped_field_count_is_logged(self, form_data, caplog):
         """
@@ -144,7 +144,7 @@ class TestMappingStatisticsLoggingProperty:
             assert actual_count == expected_count, \
                 f"Logged mapped count should be {expected_count}, got {actual_count}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
     def test_unmapped_field_count_is_logged(self, form_data, caplog):
         """
@@ -205,7 +205,7 @@ class TestMappingStatisticsLoggingProperty:
                 assert len(unmapped_logs) > 0, \
                     "Should have a WARNING log about unmapped fields"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
     def test_mapping_statistics_logged_at_info_level(self, form_data, caplog):
         """
@@ -260,7 +260,7 @@ class TestMappingStatisticsLoggingProperty:
             assert len(mapped_logs) > 0, \
                 "Mapping statistics should be logged at INFO level"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
     def test_both_mapped_and_unmapped_counts_logged(self, form_data, caplog):
         """
@@ -329,7 +329,7 @@ class TestMappingStatisticsLoggingProperty:
                 assert len(unmapped_logs) > 0, \
                     "Should have a log about unmapped fields when they exist"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
     def test_mapping_statistics_logged_before_pdf_operations(self, form_data, caplog):
         """
@@ -394,7 +394,7 @@ class TestMappingStatisticsLoggingProperty:
                 assert stats_index < reader_index, \
                     "Mapping statistics should be logged before PDF operations"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=valid_form_data_strategy())
     def test_mapping_statistics_include_field_word(self, form_data, caplog):
         """

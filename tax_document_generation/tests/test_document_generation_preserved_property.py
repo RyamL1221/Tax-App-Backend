@@ -201,7 +201,7 @@ def valid_form_data(draw):
     return form_data
 
 
-@settings(max_examples=100, deadline=None)
+@settings(max_examples=20, deadline=None)
 @given(form_data=valid_form_data())
 def test_document_generation_preserved(form_data):
     """

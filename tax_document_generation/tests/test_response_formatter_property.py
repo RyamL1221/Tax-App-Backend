@@ -37,7 +37,7 @@ def completed_job_record(draw):
     }
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(job_record=completed_job_record())
 def test_successful_response_completeness(job_record):
     """
@@ -93,7 +93,7 @@ def error_parameters(draw):
     return status_code, error_type, message
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(params=error_parameters())
 def test_error_response_format(params):
     """

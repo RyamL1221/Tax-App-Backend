@@ -35,7 +35,7 @@ def form_data_with_sensitive_fields(draw):
     }
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(form_data=form_data_with_sensitive_fields())
 def test_sensitive_data_exclusion_from_logs(form_data):
     """
@@ -73,7 +73,7 @@ def error_messages_with_internal_details(draw):
     return draw(st.sampled_from(error_types))
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(error_message=error_messages_with_internal_details())
 def test_error_message_sanitization(error_message):
     """

@@ -24,6 +24,177 @@ from field_mapper import FieldMapper
 logger = logging.getLogger(__name__)
 
 
+# Field-specific rendering configuration
+# Different columns in the PDF have different size constraints
+FIELD_RENDERING_CONFIG = {
+    'LeftCol': {
+        'default_font_size': 9.0,
+        'min_font_size': 7.0,
+        'max_font_size': 10.0,
+    },
+    'RghtCol': {
+        'default_font_size': 7.0,  # Smaller for tight boxes
+        'min_font_size': 6.0,
+        'max_font_size': 8.0,
+    },
+    'CopyHeader': {
+        'default_font_size': 10.0,
+        'min_font_size': 8.0,
+        'max_font_size': 12.0,
+    }
+}
+
+
+def calculate_font_size(
+    text: str,
+    field_width: float,
+    field_height: float,
+    max_font_size: float = 10.0,
+    min_font_size: float = 6.0
+) -> float:
+    """
+    Calculate optimal font size for text to fit in field.
+    
+    This function estimates the appropriate font size based on:
+    - Text length (number of characters)
+    - Available field width and height
+    - Configured min/max font size bounds
+    
+    The algorithm uses a simple character width estimation:
+    - Average character width ≈ 0.6 × font_size (for Helvetica)
+    - Text width ≈ char_count × 0.6 × font_size
+    
+    Args:
+        text: Text content to render
+        field_width: Available width in points
+        field_height: Available height in points
+        max_font_size: Maximum allowed font size (default: 10.0)
+        min_font_size: Minimum allowed font size (default: 6.0)
+        
+    Returns:
+        Font size in points that allows text to fit within bounds
+        
+    Requirements: 1.1, 2.1, 3.1
+    """
+    if not text:
+        return max_font_size
+    
+    # Start with the maximum font size
+    font_size = max_font_size
+    
+    # Constraint 1: Font size must fit within field height
+    # Use 80% of field height to allow for padding and descenders
+    height_based_size = field_height * 0.8
+    font_size = min(font_size, height_based_size)
+    
+    # Constraint 2: Text width must fit within field width
+    # Average character width for Helvetica ≈ 0.6 × font_size
+    char_count = len(text)
+    if char_count > 0:
+        # Calculate maximum font size that allows text to fit
+        # text_width = char_count × 0.6 × font_size
+        # Solve for font_size: font_size = text_width / (char_count × 0.6)
+        width_based_size = field_width / (char_count * 0.6)
+        font_size = min(font_size, width_based_size)
+    
+    # Ensure font size is within configured bounds
+    font_size = max(min_font_size, min(font_size, max_font_size))
+    
+    return font_size
+
+
+def insert_text_with_fallback(
+    page: fitz.Page,
+    rect: fitz.Rect,
+    text: str,
+    field_name: str,
+    default_font_size: float = 10.0,
+    min_font_size: float = 6.0,
+    text_color: tuple = (0, 0, 0)
+) -> bool:
+    """
+    Insert text into PDF field with adaptive sizing and fallback.
+    
+    This function attempts to insert text into a PDF field with retry logic:
+    1. Attempts insertion with the calculated/default font size
+    2. If insertion fails (rc < 0), reduces font size by 1pt and retries
+    3. Repeats up to 3 times before giving up
+    4. Logs success/failure with details
+    
+    Args:
+        page: PyMuPDF page object
+        rect: Field rectangle (position and dimensions)
+        text: Text to insert
+        field_name: Field name for logging purposes
+        default_font_size: Starting font size (default: 10.0)
+        min_font_size: Minimum allowed font size (default: 6.0)
+        text_color: RGB color tuple (default: black)
+        
+    Returns:
+        True if text was successfully inserted, False otherwise
+        
+    Requirements: 1.2, 2.2, 3.2
+    """
+    max_attempts = 3
+    current_font_size = default_font_size
+    
+    for attempt in range(1, max_attempts + 1):
+        # Ensure font size doesn't go below minimum
+        if current_font_size < min_font_size:
+            logger.warning(
+                f"Text too large for field '{field_name}' even at minimum font size {min_font_size}pt. "
+                f"Text length: {len(text)}, Field dimensions: {rect.width:.1f}x{rect.height:.1f}. "
+                f"Consider truncating text or increasing field size."
+            )
+            return False
+        
+        # Attempt to insert text
+        rc = page.insert_textbox(
+            rect,
+            text,
+            fontsize=current_font_size,
+            fontname="helv",  # Use built-in Helvetica font
+            color=text_color,
+            align=fitz.TEXT_ALIGN_LEFT
+        )
+        
+        # Check if insertion was successful
+        if rc >= 0:
+            # Log success with complete details
+            if attempt > 1:
+                logger.info(
+                    f"Successfully rendered field '{field_name}' with reduced font size {current_font_size:.1f}pt "
+                    f"(default was {default_font_size:.1f}pt) after {attempt} attempt(s). "
+                    f"Text length: {len(text)}, Field dimensions: {rect.width:.1f}x{rect.height:.1f}"
+                )
+            else:
+                logger.info(
+                    f"Successfully rendered field '{field_name}' with font size {current_font_size:.1f}pt. "
+                    f"Text length: {len(text)}, Field dimensions: {rect.width:.1f}x{rect.height:.1f}"
+                )
+            return True
+        
+        # Insertion failed - log and prepare for retry
+        logger.debug(
+            f"Attempt {attempt}/{max_attempts}: Text doesn't fit in field '{field_name}' "
+            f"at font size {current_font_size:.1f}pt (rc={rc}). "
+            f"Field dimensions: {rect.width:.1f}x{rect.height:.1f}, Text length: {len(text)}"
+        )
+        
+        # Reduce font size for next attempt
+        current_font_size -= 1.0
+    
+    # All attempts failed
+    logger.error(
+        f"Failed to render field '{field_name}' after {max_attempts} attempts. "
+        f"Field name: '{field_name}', Text length: {len(text)}, "
+        f"Field dimensions: {rect.width:.1f}x{rect.height:.1f}, "
+        f"Final font size attempted: {current_font_size + 1.0:.1f}pt, "
+        f"Minimum font size: {min_font_size:.1f}pt"
+    )
+    return False
+
+
 def generate_document(template: bytes, form_data: Dict, document_type: str) -> bytes:
     """
     Generates a completed tax document by populating a template with form data.
@@ -143,6 +314,8 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
             try:
                 page = doc[field_data['page_num']]
                 field_name = field_data['field_name']
+                rect = field_data['rect']
+                value = field_data['value']
                 
                 # Determine which copy this field belongs to
                 copy_id = None
@@ -153,31 +326,51 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                 elif 'CopyB[0]' in field_name:
                     copy_id = 'CopyB'
                 
-                # Insert text as static content
-                # Use "helv" (Helvetica) - a PDF base-14 font that's always available
-                # This avoids "need font file or buffer" errors
-                rc = page.insert_textbox(
-                    field_data['rect'],
-                    field_data['value'],
-                    fontsize=field_data['font_size'],
-                    fontname="helv",
-                    color=field_data['text_color'],
-                    align=fitz.TEXT_ALIGN_LEFT
+                # Determine field column from field name to get appropriate rendering config
+                column_type = 'LeftCol'  # Default
+                if 'LeftCol' in field_name:
+                    column_type = 'LeftCol'
+                elif 'RghtCol' in field_name:
+                    column_type = 'RghtCol'
+                elif 'CopyHeader' in field_name:
+                    column_type = 'CopyHeader'
+                
+                # Look up rendering config for this column
+                config = FIELD_RENDERING_CONFIG.get(column_type, FIELD_RENDERING_CONFIG['LeftCol'])
+                
+                # Calculate adaptive font size based on field dimensions and text content
+                calculated_font_size = calculate_font_size(
+                    text=value,
+                    field_width=rect.width,
+                    field_height=rect.height,
+                    max_font_size=config['max_font_size'],
+                    min_font_size=config['min_font_size']
                 )
                 
-                if rc >= 0:  # Success
+                # Use insert_text_with_fallback for better error handling and retry logic
+                success = insert_text_with_fallback(
+                    page=page,
+                    rect=rect,
+                    text=value,
+                    field_name=field_name,
+                    default_font_size=calculated_font_size,
+                    min_font_size=config['min_font_size'],
+                    text_color=field_data['text_color']
+                )
+                
+                if success:
                     populated_count += 1
                     if copy_id:
                         copy_stats[copy_id]['success'] += 1
-                        logger.debug(f"Successfully populated {copy_id} field '{field_name}' with value '{field_data['value']}'")
+                        logger.debug(f"Successfully populated {copy_id} field '{field_name}' with value '{value}'")
                     else:
-                        logger.debug(f"Flattened field '{field_name}' with value '{field_data['value']}'")
+                        logger.debug(f"Flattened field '{field_name}' with value '{value}'")
                 else:
                     if copy_id:
                         copy_stats[copy_id]['failed'].append(field_name)
-                        logger.warning(f"Failed to populate {copy_id} field '{field_name}' (rc={rc})")
+                        logger.warning(f"Failed to populate {copy_id} field '{field_name}'")
                     else:
-                        logger.warning(f"Failed to insert text for field '{field_name}' (rc={rc})")
+                        logger.warning(f"Failed to insert text for field '{field_name}'")
                     failed_fields.append(field_name)
                     
             except Exception as e:

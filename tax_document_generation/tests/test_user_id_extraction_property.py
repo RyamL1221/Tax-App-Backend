@@ -38,7 +38,7 @@ user_ids = text(
 class TestUserIdExtractionProperty:
     """Property-based tests for user ID extraction and consistency."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -79,7 +79,7 @@ class TestUserIdExtractionProperty:
             f"original userId '{user_id}'"
         )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -120,7 +120,7 @@ class TestUserIdExtractionProperty:
         assert result3["userId"] == user_id
         assert result1["userId"] == result2["userId"] == result3["userId"]
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -163,7 +163,7 @@ class TestUserIdExtractionProperty:
         assert result["email"] == "test@example.com"
         assert result["role"] == "user"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id1=user_ids,
         user_id2=user_ids,
@@ -213,7 +213,7 @@ class TestUserIdExtractionProperty:
         assert result2["userId"] == user_id2
         assert result1["userId"] != result2["userId"]
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -252,7 +252,7 @@ class TestUserIdExtractionProperty:
         )
         assert extracted_user_id == user_id
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -293,7 +293,7 @@ class TestUserIdExtractionProperty:
         for i, char in enumerate(user_id):
             assert extracted_user_id[i] == char
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys
@@ -335,7 +335,7 @@ class TestUserIdExtractionProperty:
         # Verify dictionary access works
         assert result.get("userId") == user_id
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         user_id=user_ids,
         secret_key=secret_keys

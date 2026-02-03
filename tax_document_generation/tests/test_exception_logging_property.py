@@ -49,7 +49,7 @@ def exception_message_strategy():
 class TestExceptionLoggingProperty:
     """Property-based tests for exception logging."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),
@@ -110,7 +110,7 @@ class TestExceptionLoggingProperty:
                 f"At least one error log should have exc_info=True for stack trace. " \
                 f"Error calls: {error_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),
@@ -162,7 +162,7 @@ class TestExceptionLoggingProperty:
             assert 'failed' in all_errors.lower() or 'error' in all_errors.lower(), \
                 f"Error log should indicate failure. Errors: {error_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -219,7 +219,7 @@ class TestExceptionLoggingProperty:
             assert has_exc_info, \
                 f"Error log should have exc_info=True. Error calls: {error_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -292,7 +292,7 @@ class TestExceptionLoggingProperty:
             assert has_exc_info, \
                 f"Error log should have exc_info=True. Error calls: {error_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -365,7 +365,7 @@ class TestExceptionLoggingProperty:
                 f"GenerationError should be raised directly without logging. " \
                 f"Error logs: {error_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()

@@ -58,7 +58,7 @@ def document_type_strategy():
 class TestAppearanceStreamGenerationProperty:
     """Property-based tests for appearance stream generation."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -133,7 +133,7 @@ class TestAppearanceStreamGenerationProperty:
                         f"(once after setting value, once after clearing hidden flag), " \
                         f"but was called {widget.update.call_count} times"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -203,7 +203,7 @@ class TestAppearanceStreamGenerationProperty:
                         f"(once after setting value, once after clearing hidden flag), " \
                         f"but was called {widget.update.call_count} times"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()

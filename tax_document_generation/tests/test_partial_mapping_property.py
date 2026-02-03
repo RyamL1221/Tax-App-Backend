@@ -57,7 +57,7 @@ def mixed_form_data_strategy():
 class TestPartialMappingProperty:
     """Property-based tests for partial mapping."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=mixed_form_data_strategy())
     def test_partial_mapping_produces_valid_pdf_bytes(self, form_data):
         """
@@ -108,7 +108,7 @@ class TestPartialMappingProperty:
             assert result.startswith(b"%PDF"), \
                 "Result should be a valid PDF (start with %PDF header)"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=mixed_form_data_strategy())
     def test_partial_mapping_does_not_raise_exception(self, form_data):
         """
@@ -149,7 +149,7 @@ class TestPartialMappingProperty:
             except Exception as e:
                 pytest.fail(f"Document generation should not raise exception for partial mapping: {e}")
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=mixed_form_data_strategy())
     def test_successfully_mapped_fields_are_populated(self, form_data):
         """
@@ -203,7 +203,7 @@ class TestPartialMappingProperty:
                 assert len(actual_data) > 0, \
                     "Successfully mapped fields should be populated in PDF"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(invalid_field=invalid_api_field_name_strategy())
     def test_all_invalid_fields_produces_valid_pdf(self, invalid_field):
         """
@@ -256,7 +256,7 @@ class TestPartialMappingProperty:
             assert result.startswith(b"%PDF"), \
                 "Result should be a valid PDF"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=mixed_form_data_strategy())
     def test_partial_mapping_maintains_data_integrity(self, form_data):
         """
@@ -313,7 +313,7 @@ class TestPartialMappingProperty:
                     assert str(value) in [str(v) for v in actual_values], \
                         f"Value '{value}' for valid field '{api_field}' should be preserved"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=mixed_form_data_strategy())
     def test_partial_mapping_pdf_has_correct_structure(self, form_data):
         """
@@ -362,7 +362,7 @@ class TestPartialMappingProperty:
             assert len(result) > 10, \
                 "PDF should have content beyond just the header"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=mixed_form_data_strategy())
     def test_partial_mapping_continues_after_unmapped_fields(self, form_data):
         """

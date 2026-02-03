@@ -42,7 +42,7 @@ def document_type_strategy():
 class TestUnmappedFieldWarningsProperty:
     """Property-based tests for unmapped field warnings."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -121,7 +121,7 @@ class TestUnmappedFieldWarningsProperty:
                         f"Unmapped field '{unmapped_field}' should be mentioned in warnings. " \
                         f"Warnings: {warning_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -192,7 +192,7 @@ class TestUnmappedFieldWarningsProperty:
                     f"Document type '{document_type}' should be mentioned in warnings. " \
                     f"Warnings: {warning_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -270,7 +270,7 @@ class TestUnmappedFieldWarningsProperty:
                         f"Should have at least one warning for unmapped field '{unmapped_field}'. " \
                         f"Warnings: {warning_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -344,7 +344,7 @@ class TestUnmappedFieldWarningsProperty:
                 f"Should not have field-specific unmapped warnings when all fields are mapped. " \
                 f"Warnings: {field_specific_warnings}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()

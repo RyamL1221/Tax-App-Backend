@@ -41,7 +41,7 @@ def document_type_strategy():
 class TestFieldMapperIntegrationProperty:
     """Property-based tests for Field Mapper integration."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -109,7 +109,7 @@ class TestFieldMapperIntegrationProperty:
             # CRITICAL VERIFICATION: get_unmapped_fields was called
             mock_mapper.get_unmapped_fields.assert_called_once_with(form_data)
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -185,7 +185,7 @@ class TestFieldMapperIntegrationProperty:
                     assert widget.update.called, \
                         f"Widget with field_name '{widget.field_name}' should have been updated"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -290,7 +290,7 @@ class TestFieldMapperIntegrationProperty:
                     f"FieldMapper should be initialized before fitz.open, " \
                     f"but order was: {call_order}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()

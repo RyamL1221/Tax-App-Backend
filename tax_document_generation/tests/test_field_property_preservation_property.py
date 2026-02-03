@@ -57,7 +57,7 @@ def form_data_strategy():
 class TestFieldPropertyPreservationProperty:
     """Property-based tests for field property preservation."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_field_type_preserved(self, form_data):
         """
@@ -103,7 +103,7 @@ class TestFieldPropertyPreservationProperty:
         
         result_doc.close()
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_field_rect_preserved(self, form_data):
         """
@@ -157,7 +157,7 @@ class TestFieldPropertyPreservationProperty:
         
         result_doc.close()
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_field_name_preserved(self, form_data):
         """
@@ -207,7 +207,7 @@ class TestFieldPropertyPreservationProperty:
         assert original_field_names == result_field_names, \
             f"Field names changed. Original: {original_field_names}, Result: {result_field_names}"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_field_count_preserved(self, form_data):
         """

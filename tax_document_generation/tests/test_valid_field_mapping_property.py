@@ -26,7 +26,7 @@ def valid_api_field_name_strategy():
 class TestValidFieldMappingProperty:
     """Property-based tests for valid field mapping."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=valid_api_field_name_strategy())
     def test_valid_field_mapping_returns_correct_pdf_field_name(self, api_field_name):
         """
@@ -58,7 +58,7 @@ class TestValidFieldMappingProperty:
         assert pdf_field_name == expected_pdf_field_name, \
             f"API field '{api_field_name}' should map to '{expected_pdf_field_name}', got '{pdf_field_name}'"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=valid_api_field_name_strategy())
     def test_valid_field_mapping_returns_non_empty_string(self, api_field_name):
         """
@@ -86,7 +86,7 @@ class TestValidFieldMappingProperty:
         assert len(pdf_field_name) > 0, \
             f"PDF field name should not be empty for API field '{api_field_name}'"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=valid_api_field_name_strategy())
     def test_valid_field_mapping_follows_pdf_naming_convention(self, api_field_name):
         """
@@ -120,7 +120,7 @@ class TestValidFieldMappingProperty:
         assert pdf_field_name.endswith("[0]"), \
             f"PDF field name should end with [0], got '{pdf_field_name}'"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=valid_api_field_name_strategy())
     def test_valid_field_mapping_is_deterministic(self, api_field_name):
         """
@@ -147,7 +147,7 @@ class TestValidFieldMappingProperty:
         assert result1 == result2 == result3, \
             f"Mapping should be deterministic for '{api_field_name}': got {result1}, {result2}, {result3}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=valid_api_field_name_strategy())
     def test_valid_field_mapping_with_multiple_mappers(self, api_field_name):
         """

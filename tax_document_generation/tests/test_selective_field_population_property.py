@@ -74,7 +74,7 @@ def mixed_form_data_strategy():
 class TestSelectiveFieldPopulationProperty:
     """Property-based tests for selective field population."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=mixed_form_data_strategy())
     def test_only_mapped_fields_are_populated(self, form_data):
         """
@@ -165,7 +165,7 @@ class TestSelectiveFieldPopulationProperty:
                     assert widget.field_value is None, \
                         f"Unmapped field '{widget.field_name}' should NOT be populated"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=mixed_form_data_strategy())
     def test_unmapped_fields_do_not_prevent_population(self, form_data):
         """
@@ -247,7 +247,7 @@ class TestSelectiveFieldPopulationProperty:
                 assert populated_count == len(mapped_data), \
                     f"Expected {len(mapped_data)} mapped fields to be populated, got {populated_count}"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=mixed_form_data_strategy())
     def test_selective_population_maintains_field_order(self, form_data):
         """

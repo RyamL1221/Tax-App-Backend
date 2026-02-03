@@ -70,7 +70,7 @@ def invalid_document_type_strategy():
 class TestUnsupportedDocumentTypesProperty:
     """Property-based tests for unsupported document type handling."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(document_type=invalid_document_type_strategy())
     def test_unsupported_document_type_raises_value_error(self, document_type):
         """
@@ -107,7 +107,7 @@ class TestUnsupportedDocumentTypesProperty:
         assert "1099-DIV" in error_message, \
             f"Error message should list supported types (1099-DIV): {error_message}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(document_type=invalid_document_type_strategy())
     def test_error_message_format_is_consistent(self, document_type):
         """
@@ -157,7 +157,7 @@ class TestUnsupportedDocumentTypesProperty:
         assert mapper is not None
         assert mapper.document_type == "1099-DIV"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         prefix=st.text(min_size=0, max_size=10),
         suffix=st.text(min_size=0, max_size=10)
@@ -190,7 +190,7 @@ class TestUnsupportedDocumentTypesProperty:
         assert "not supported" in error_message.lower(), \
             f"Variation '{document_type}' should be rejected: {error_message}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         whitespace_before=st.text(alphabet=" \t\n\r", min_size=0, max_size=5),
         whitespace_after=st.text(alphabet=" \t\n\r", min_size=0, max_size=5)

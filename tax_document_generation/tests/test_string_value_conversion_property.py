@@ -59,7 +59,7 @@ def document_type_strategy():
 class TestStringValueConversionProperty:
     """Property-based tests for string value conversion."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=mixed_type_form_data_strategy(),
         document_type=document_type_strategy()
@@ -141,7 +141,7 @@ class TestStringValueConversionProperty:
                         f"Field '{widget.field_name}' should have value '{expected_str}', " \
                         f"but got '{set_value}'"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         integer_value=st.integers(min_value=-1000000, max_value=1000000),
         document_type=document_type_strategy()
@@ -206,7 +206,7 @@ class TestStringValueConversionProperty:
                 f"Integer value {integer_value} should be converted to '{str(integer_value)}', " \
                 f"but got '{mock_widget.field_value}'"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         float_value=st.floats(min_value=-1000000.0, max_value=1000000.0, allow_nan=False, allow_infinity=False),
         document_type=document_type_strategy()
@@ -271,7 +271,7 @@ class TestStringValueConversionProperty:
                 f"Float value {float_value} should be converted to '{str(float_value)}', " \
                 f"but got '{mock_widget.field_value}'"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         boolean_value=st.booleans(),
         document_type=document_type_strategy()

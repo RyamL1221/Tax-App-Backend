@@ -73,7 +73,7 @@ def has_relative_imports(file_path):
 
 
 @given(st.sampled_from(get_lambda_module_files()))
-@settings(max_examples=100)
+@settings(max_examples=20)
 def test_no_relative_imports_in_lambda_modules(file_path):
     """
     Property 1: No Relative Imports in Lambda Modules

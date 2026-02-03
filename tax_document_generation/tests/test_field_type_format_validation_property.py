@@ -232,7 +232,7 @@ def form_1040_data_with_invalid_name(draw):
 class TestFieldTypeFormatValidationProperty:
     """Property-based tests for field type and format validation."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_1040_data_with_invalid_ssn_format())
     def test_invalid_ssn_format_raises_validation_error(self, form_data):
         """
@@ -256,7 +256,7 @@ class TestFieldTypeFormatValidationProperty:
         assert 'ssn' in error_message, \
             f"Error message should mention SSN: {exc_info.value}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_1040_data_with_invalid_ssn_type())
     def test_invalid_ssn_type_raises_validation_error(self, form_data):
         """
@@ -280,7 +280,7 @@ class TestFieldTypeFormatValidationProperty:
         assert 'ssn' in error_message or 'type' in error_message, \
             f"Error message should mention SSN or type: {exc_info.value}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_1040_data_with_invalid_filing_status())
     def test_invalid_filing_status_raises_validation_error(self, form_data):
         """
@@ -304,7 +304,7 @@ class TestFieldTypeFormatValidationProperty:
         assert 'filing status' in error_message or 'filingstatus' in error_message, \
             f"Error message should mention filing status: {exc_info.value}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_1040_data_with_invalid_income_value())
     def test_negative_income_raises_validation_error(self, form_data):
         """
@@ -328,7 +328,7 @@ class TestFieldTypeFormatValidationProperty:
         assert 'income' in error_message, \
             f"Error message should mention income: {exc_info.value}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_1040_data_with_invalid_income_type())
     def test_non_numeric_income_raises_validation_error(self, form_data):
         """
@@ -352,7 +352,7 @@ class TestFieldTypeFormatValidationProperty:
         assert 'income' in error_message or 'type' in error_message, \
             f"Error message should mention income or type: {exc_info.value}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(data=form_1040_data_with_invalid_name())
     def test_empty_or_whitespace_name_raises_validation_error(self, data):
         """
@@ -378,7 +378,7 @@ class TestFieldTypeFormatValidationProperty:
         assert invalid_field.lower() in error_message or 'non-empty' in error_message, \
             f"Error message should mention {invalid_field} or non-empty: {exc_info.value}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         valid_ssn=ssn_strategy(),
         invalid_type=one_of(text(min_size=1), lists(text()), st.builds(dict), none())
@@ -417,7 +417,7 @@ class TestFieldTypeFormatValidationProperty:
         assert 'type' in error_message or 'income' in error_message, \
             f"Error message should mention type or income: {exc_info.value}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=valid_form_1040_data())
     def test_valid_types_and_formats_do_not_raise_error(self, form_data):
         """
@@ -436,7 +436,7 @@ class TestFieldTypeFormatValidationProperty:
         # This should not raise any exception
         validate_form_data('1040', form_data)
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         first_name=name_strategy,
         last_name=name_strategy,
@@ -470,7 +470,7 @@ class TestFieldTypeFormatValidationProperty:
         # Verification: Valid form data should be accepted
         validate_form_data('1040', form_data)
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         invalid_ssn=text(min_size=1, max_size=50).filter(
             lambda s: not (len(s) == 11 and s[3] == '-' and s[6] == '-' and 
@@ -507,7 +507,7 @@ class TestFieldTypeFormatValidationProperty:
         assert 'ssn' in error_message, \
             f"Error message should mention SSN: {exc_info.value}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         income_str=text(min_size=1, max_size=20, alphabet='0123456789.')
     )

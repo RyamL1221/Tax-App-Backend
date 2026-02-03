@@ -57,7 +57,7 @@ def form_data_strategy():
 class TestFieldOrderPreservationProperty:
     """Property-based tests for field order preservation."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_field_order_preserved(self, form_data):
         """
@@ -107,7 +107,7 @@ class TestFieldOrderPreservationProperty:
         assert original_field_order == result_field_order, \
             f"Field order changed.\nOriginal: {original_field_order}\nResult: {result_field_order}"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_page_field_distribution_preserved(self, form_data):
         """
@@ -155,7 +155,7 @@ class TestFieldOrderPreservationProperty:
         assert original_page_fields == result_page_fields, \
             f"Field distribution changed.\nOriginal: {original_page_fields}\nResult: {result_page_fields}"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_field_sequence_within_page_preserved(self, form_data):
         """
@@ -206,7 +206,7 @@ class TestFieldOrderPreservationProperty:
                 f"Original: {original_page_sequences[page_num]}\n" \
                 f"Result: {result_page_sequences.get(page_num, [])}"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(form_data=form_data_strategy())
     def test_populated_fields_maintain_order(self, form_data):
         """

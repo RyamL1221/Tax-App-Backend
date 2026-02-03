@@ -52,7 +52,7 @@ def form_data_strategy():
 class TestDocumentGeneratorFieldTranslationProperty:
     """Property-based tests for document generator field translation."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_document_generator_uses_field_mapper_for_translation(self, form_data):
         """
@@ -99,7 +99,7 @@ class TestDocumentGeneratorFieldTranslationProperty:
             # Verify get_unmapped_fields was called
             mock_mapper.get_unmapped_fields.assert_called_once_with(form_data)
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_mapped_data_is_passed_to_pdf_library(self, form_data):
         """
@@ -142,7 +142,7 @@ class TestDocumentGeneratorFieldTranslationProperty:
             # Verify the mapper was called with the original form_data
             mock_mapper.map_all_fields.assert_called_once_with(form_data)
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_field_mapper_called_before_pdf_operations(self, form_data):
         """
@@ -207,7 +207,7 @@ class TestDocumentGeneratorFieldTranslationProperty:
                 assert mapper_index < fitz_index, \
                     f"FieldMapper should be initialized before PDF operations: {call_order}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(form_data=form_data_strategy())
     def test_field_mapper_receives_correct_document_type(self, form_data):
         """

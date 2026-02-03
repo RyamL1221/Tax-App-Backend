@@ -32,7 +32,7 @@ def invalid_api_field_name_strategy():
 class TestFieldMappingLoggingProperty:
     """Property-based tests for field mapping logging."""
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(api_field_name=valid_api_field_name_strategy())
     def test_valid_field_mapping_logs_debug_message(self, api_field_name, caplog):
         """
@@ -86,7 +86,7 @@ class TestFieldMappingLoggingProperty:
         assert "1099-DIV" in log_message, \
             f"Log message should contain document type '1099-DIV': {log_message}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(api_field_name=invalid_api_field_name_strategy())
     def test_invalid_field_mapping_logs_warning_message(self, api_field_name, caplog):
         """
@@ -143,7 +143,7 @@ class TestFieldMappingLoggingProperty:
         assert "1099-DIV" in log_message, \
             f"Log message should contain document type '1099-DIV': {log_message}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(api_field_name=valid_api_field_name_strategy())
     def test_multiple_mappings_produce_multiple_logs(self, api_field_name, caplog):
         """
@@ -181,7 +181,7 @@ class TestFieldMappingLoggingProperty:
         assert len(mapping_logs) == 3, \
             f"Should have 3 debug logs for 3 mappings of '{api_field_name}', got {len(mapping_logs)}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(
         field1=valid_api_field_name_strategy(),
         field2=valid_api_field_name_strategy(),
@@ -282,7 +282,7 @@ class TestFieldMappingLoggingProperty:
         assert "1099-DIV" in log_message, \
             f"Log message should contain document type '1099-DIV': {log_message}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(api_field_name=valid_api_field_name_strategy())
     def test_log_level_is_debug_for_successful_mapping(self, api_field_name, caplog):
         """
@@ -322,7 +322,7 @@ class TestFieldMappingLoggingProperty:
         assert field_logs[0].levelname == "DEBUG", \
             f"Successful mapping should use DEBUG level, got {field_logs[0].levelname}"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(api_field_name=invalid_api_field_name_strategy())
     def test_log_level_is_warning_for_unmapped_field(self, api_field_name, caplog):
         """

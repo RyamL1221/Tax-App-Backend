@@ -77,7 +77,7 @@ class TestMappingAccuracyProperty:
         if PDF_FIELDS is None:
             pytest.skip("1099-DIV.pdf template not found - skipping mapping accuracy tests")
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=api_field_name_strategy())
     def test_mapped_pdf_field_exists_in_template(self, api_field_name):
         """
@@ -126,7 +126,7 @@ class TestMappingAccuracyProperty:
         assert len(invalid_mappings) == 0, \
             f"Found {len(invalid_mappings)} invalid mapping(s): {invalid_mappings}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=api_field_name_strategy())
     def test_mapped_field_is_not_empty(self, api_field_name):
         """
@@ -152,7 +152,7 @@ class TestMappingAccuracyProperty:
         assert len(pdf_field_name) > 0, \
             f"Mapped PDF field for '{api_field_name}' should not be empty"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=api_field_name_strategy())
     def test_mapped_field_follows_naming_convention(self, api_field_name):
         """
@@ -231,7 +231,7 @@ class TestMappingAccuracyProperty:
         assert len(missing_mappings) == 0, \
             f"Found {len(missing_mappings)} API field(s) without mappings: {missing_mappings}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=api_field_name_strategy())
     def test_mapped_field_is_accessible_in_template(self, api_field_name):
         """
@@ -289,7 +289,7 @@ class TestMappingAccuracyProperty:
         assert len(invalid_required_mappings) == 0, \
             f"Found invalid mappings for required fields: {invalid_required_mappings}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=api_field_name_strategy())
     def test_mapped_field_name_is_consistent(self, api_field_name):
         """

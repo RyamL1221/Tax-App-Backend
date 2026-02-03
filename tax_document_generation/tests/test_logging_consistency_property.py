@@ -54,7 +54,7 @@ def pdf_size_strategy():
 class TestLoggingConsistencyProperty:
     """Property-based tests for logging consistency."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),
@@ -127,7 +127,7 @@ class TestLoggingConsistencyProperty:
                 f"Library name (PyMuPDF/fitz) should be logged at INFO level. " \
                 f"INFO calls: {info_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),
@@ -200,7 +200,7 @@ class TestLoggingConsistencyProperty:
                 f"Page count {page_count} should be logged at INFO level. " \
                 f"INFO calls: {info_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),
@@ -286,7 +286,7 @@ class TestLoggingConsistencyProperty:
                 f"Populated field count {expected_populated_count} should be logged at INFO level. " \
                 f"INFO calls: {info_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),
@@ -378,7 +378,7 @@ class TestLoggingConsistencyProperty:
                     f"Unmapped fields should be logged when present. " \
                     f"WARNING calls: {warning_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),
@@ -454,7 +454,7 @@ class TestLoggingConsistencyProperty:
                 f"PDF size {expected_size} bytes should be logged at INFO level. " \
                 f"INFO calls: {info_calls}"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),

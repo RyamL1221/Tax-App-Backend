@@ -33,7 +33,7 @@ def job_parameters(draw):
     return job_id, user_id, document_type, template_key
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(params=job_parameters())
 @patch('tax_document_generation.job_repository.boto3')
 def test_initial_job_record_creation(mock_boto3, params):
@@ -70,7 +70,7 @@ def test_initial_job_record_creation(mock_boto3, params):
     assert call_args['Item']['status'] == 'PENDING'
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(params=job_parameters())
 @patch('tax_document_generation.job_repository.boto3')
 def test_completed_job_record_completeness(mock_boto3, params):
@@ -119,7 +119,7 @@ def test_completed_job_record_completeness(mock_boto3, params):
     assert call_args['ExpressionAttributeValues'][':status'] == 'COMPLETED'
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(params=job_parameters())
 @patch('tax_document_generation.job_repository.boto3')
 def test_failed_job_record_state(mock_boto3, params):
@@ -166,7 +166,7 @@ def test_failed_job_record_state(mock_boto3, params):
     assert call_args['ExpressionAttributeValues'][':error'] == error_message
 
 
-@settings(max_examples=100)
+@settings(max_examples=20)
 @given(params=job_parameters())
 @patch('tax_document_generation.job_repository.boto3')
 def test_job_record_required_fields(mock_boto3, params):

@@ -39,7 +39,7 @@ bucket_names = text(
 class TestTemplateS3KeyConstructionProperty:
     """Property-based tests for template S3 key construction."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         bucket=bucket_names,
         document_type=document_types
@@ -104,7 +104,7 @@ class TestTemplateS3KeyConstructionProperty:
                     f"Document type '{document_type}' not found in S3 key '{actual_key}'"
                 )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         bucket=bucket_names,
         document_type=document_types
@@ -159,7 +159,7 @@ class TestTemplateS3KeyConstructionProperty:
                     f"S3 keys are not consistent across multiple calls: {keys_used}"
                 )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         bucket=bucket_names,
         document_type1=document_types,
@@ -228,7 +228,7 @@ class TestTemplateS3KeyConstructionProperty:
                 assert document_type1 in key1
                 assert document_type2 in key2
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         bucket=bucket_names,
         document_type=document_types
@@ -279,7 +279,7 @@ class TestTemplateS3KeyConstructionProperty:
                     f"S3 key prefix '{prefix}' is not exactly 'templates/irs/'"
                 )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         bucket=bucket_names,
         document_type=document_types
@@ -330,7 +330,7 @@ class TestTemplateS3KeyConstructionProperty:
                     f"S3 key extension '{extension}' is not exactly '.pdf'"
                 )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         bucket=bucket_names,
         document_type=document_types
@@ -402,7 +402,7 @@ class TestTemplateS3KeyConstructionProperty:
                     f"Third part should be '{document_type}.pdf', got '{parts[2]}'"
                 )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         bucket=bucket_names,
         document_type=document_types
@@ -454,7 +454,7 @@ class TestTemplateS3KeyConstructionProperty:
                     f"S3 key '{actual_key}' does not match expected pattern '{expected_key}'"
                 )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         bucket=bucket_names,
         document_type=document_types

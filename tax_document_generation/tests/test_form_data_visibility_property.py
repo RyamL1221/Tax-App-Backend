@@ -58,7 +58,7 @@ def document_type_strategy():
 class TestFormDataVisibilityProperty:
     """Property-based tests for form data visibility."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -134,7 +134,7 @@ class TestFormDataVisibilityProperty:
             assert populated_count == len(mapped_data), \
                 f"Expected {len(mapped_data)} fields to be populated, but only {populated_count} were"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()

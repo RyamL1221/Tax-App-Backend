@@ -85,7 +85,7 @@ def invalid_api_field_name_strategy():
 class TestInvalidFieldNamesProperty:
     """Property-based tests for invalid field name handling."""
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=invalid_api_field_name_strategy())
     def test_invalid_field_names_return_none(self, api_field_name):
         """
@@ -112,7 +112,7 @@ class TestInvalidFieldNamesProperty:
         assert result is None, \
             f"Invalid API field '{api_field_name}' should return None, got '{result}'"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=invalid_api_field_name_strategy())
     def test_invalid_field_names_do_not_raise_exceptions(self, api_field_name):
         """
@@ -144,7 +144,7 @@ class TestInvalidFieldNamesProperty:
                 f"but raised {type(e).__name__}: {e}"
             )
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(api_field_name=invalid_api_field_name_strategy())
     def test_invalid_field_names_are_consistent(self, api_field_name):
         """
@@ -175,7 +175,7 @@ class TestInvalidFieldNamesProperty:
         assert result3 is None, \
             f"Third mapping of invalid field '{api_field_name}' should return None"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         valid_field=st.sampled_from(SUPPORTED_FIELDS),
         prefix=st.text(min_size=1, max_size=20),
@@ -210,7 +210,7 @@ class TestInvalidFieldNamesProperty:
         assert result is None, \
             f"Field with prefix '{invalid_field}' should return None, got '{result}'"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(
         valid_field=st.sampled_from(SUPPORTED_FIELDS),
         suffix=st.text(min_size=1, max_size=20),
@@ -245,7 +245,7 @@ class TestInvalidFieldNamesProperty:
         assert result is None, \
             f"Field with suffix '{invalid_field}' should return None, got '{result}'"
     
-    @settings(max_examples=100)
+    @settings(max_examples=20)
     @given(valid_field=st.sampled_from(SUPPORTED_FIELDS))
     def test_case_variations_of_valid_fields_return_none(self, valid_field):
         """

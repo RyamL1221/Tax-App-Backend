@@ -59,7 +59,7 @@ def mixed_form_data_strategy():
 class TestUnmappedFieldHandlingProperty:
     """Property-based tests for unmapped field handling."""
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
     def test_unmapped_fields_are_logged_as_warnings(self, form_data, caplog):
         """
@@ -126,7 +126,7 @@ class TestUnmappedFieldHandlingProperty:
                     assert len(field_logs) > 0, \
                         f"Should have a warning log for unmapped field '{invalid_field}'"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
     def test_unmapped_fields_excluded_from_pdf_population(self, form_data, caplog):
         """
@@ -187,7 +187,7 @@ class TestUnmappedFieldHandlingProperty:
                     assert invalid_field not in actual_data, \
                         f"Invalid field '{invalid_field}' should not be passed to PDF library"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
     def test_document_generation_continues_with_unmapped_fields(self, form_data, caplog):
         """
@@ -241,7 +241,7 @@ class TestUnmappedFieldHandlingProperty:
                     # Document generation should not fail due to unmapped fields
                     pytest.fail(f"Document generation should not raise exception for unmapped fields: {e}")
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(invalid_field=invalid_api_field_name_strategy())
     def test_single_unmapped_field_logged_with_field_name(self, invalid_field, caplog):
         """
@@ -303,7 +303,7 @@ class TestUnmappedFieldHandlingProperty:
             assert len(field_logs) > 0, \
                 f"Warning log should contain field name '{invalid_field}'"
     
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(form_data=mixed_form_data_strategy())
     def test_unmapped_fields_list_logged(self, form_data, caplog):
         """

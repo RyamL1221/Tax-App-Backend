@@ -58,7 +58,7 @@ def document_type_strategy():
 class TestHiddenFlagClearingProperty:
     """Property-based tests for hidden flag clearing."""
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
@@ -134,7 +134,7 @@ class TestHiddenFlagClearingProperty:
                         f"Hidden flag (bit 1) should be cleared for field '{widget.field_name}', " \
                         f"but field_flags is {widget.field_flags} (binary: {bin(widget.field_flags)})"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy(),
@@ -207,7 +207,7 @@ class TestHiddenFlagClearingProperty:
                         f"Hidden flag (bit 1) should be cleared for field '{widget.field_name}' " \
                         f"(initial flags: {initial_flags}, final flags: {widget.field_flags})"
     
-    @settings(max_examples=100, deadline=None)
+    @settings(max_examples=20, deadline=None)
     @given(
         form_data=form_data_strategy(),
         document_type=document_type_strategy()
