@@ -1,214 +1,397 @@
-# Form 1099-DIV Field Reference
+# 1099-DIV Field Reference
 
 ## Overview
 
-This document describes all fields supported by the 1099-DIV tax document generation API.
+This document provides a comprehensive reference for all fields in the IRS Form 1099-DIV API. Use this guide to understand which fields are required, their data types, validation rules, and example values.
+
+## Quick Reference Table
+
+| API Field Name | IRS Box | Required | Data Type | Section |
+|---------------|---------|----------|-----------|---------|
+| calendarYear | - | ✓ | string | metadata |
+| payerName | - | ✓ | string | payer |
+| payerTIN | - | ✓ | string | payer |
+| payerStreetAddress | - | | string | payer |
+| payerCity | - | | string | payer |
+| payerCountry | - | | string | payer |
+| payerPhone | - | | string | payer |
+| recipientName | - | ✓ | string | recipient |
+| recipientTIN | - | ✓ | string | recipient |
+| recipientStreetAddress | - | | string | recipient |
+| recipientCity | - | | string | recipient |
+| recipientState | - | | string | recipient |
+| recipientZip | - | | string | recipient |
+| recipientCountry | - | | string | recipient |
+| totalOrdinaryDividends | 1a | ✓ | decimal | dividends |
+| qualifiedDividends | 1b | | decimal | dividends |
+| totalCapitalGainDistributions | 2a | | decimal | capital_gains |
+| unrecapturedSection1250Gain | 2b | | decimal | capital_gains |
+| section1202Gain | 2c | | decimal | capital_gains |
+| collectibles28Gain | 2d | | decimal | capital_gains |
+| section897OrdinaryDividends | 2e | | decimal | capital_gains |
+| section897CapitalGain | 2f | | decimal | capital_gains |
+| nondividendDistributions | 3 | | decimal | distributions |
+| federalIncomeTaxWithheld | 4 | | decimal | taxes |
+| section199ADividends | 5 | | decimal | other |
+| investmentExpenses | 6 | | decimal | other |
+| foreignTaxPaid | 7 | | decimal | taxes |
+| foreignCountry | 8 | | string | other |
+| cashLiquidationDistributions | 9 | | decimal | distributions |
+| noncashLiquidationDistributions | 10 | | decimal | distributions |
+| fatcaFilingRequirement | 11 | | boolean | other |
+| exemptInterestDividends | 12 | | decimal | other |
+| specifiedPrivateActivityBondInterest | 13 | | decimal | other |
+| state | 14 | | string | taxes |
+| stateIdentificationNumber | 15 | | string | taxes |
+| stateTaxWithheld | 16 | | decimal | taxes |
+| accountNumber | - | | string | account |
 
 ## Required Fields
 
-These fields MUST be present in every 1099-DIV request:
+The following fields MUST be present in all 1099-DIV form submissions:
 
-| Field Name | Type | Format | Description | Example |
-|------------|------|--------|-------------|---------|
-| `payerName` | string | Non-empty | Name of the payer (investment company) | "Vanguard Investments" |
-| `payerTIN` | string | XX-XXXXXXX | Payer's Tax Identification Number (EIN) | "23-1945930" |
-| `recipientTIN` | string | XXX-XX-XXXX | Recipient's Tax Identification Number (SSN) | "123-45-6789" |
-| `recipientName` | string | Non-empty | Name of the recipient (taxpayer) | "John Doe" |
-| `totalOrdinaryDividends` | number | >= 0 | Box 1a: Total ordinary dividends | 5000.00 |
+1. **calendarYear** - Tax year for the form
+2. **payerName** - Name of the payer
+3. **payerTIN** - Payer's Tax Identification Number
+4. **recipientName** - Name of the recipient
+5. **recipientTIN** - Recipient's Tax Identification Number
+6. **totalOrdinaryDividends** - Total ordinary dividends (Box 1a)
 
-## Optional Payer Information Fields
+## Optional Fields
 
-| Field Name | Type | Format | Description | Example |
-|------------|------|--------|-------------|---------|
-| `payerStreetAddress` | string | Any | Payer's street address | "100 Vanguard Blvd" |
-| `payerCity` | string | Any | Payer's city | "Malvern" |
-| `payerState` | string | 2-letter code | Payer's state (US state/territory) | "PA" |
-| `payerCountry` | string | Any | Payer's country | "USA" |
-| `payerZip` | string | XXXXX or XXXXX-XXXX | Payer's ZIP code | "19355" or "19355-1234" |
-| `payerPhone` | string | XXX-XXX-XXXX | Payer's phone number | "800-662-7447" |
+All other fields are optional and may be omitted if not applicable.
 
-## Optional Recipient Information Fields
+## Field Descriptions
 
-| Field Name | Type | Format | Description | Example |
-|------------|------|--------|-------------|---------|
-| `recipientStreetAddress` | string | Any | Recipient's street address | "456 Main St, Apt 2B" |
-| `recipientCity` | string | Any | Recipient's city | "Boston" |
-| `recipientState` | string | 2-letter code | Recipient's state (US state/territory) | "MA" |
-| `recipientCountry` | string | Any | Recipient's country | "USA" |
-| `recipientZip` | string | XXXXX or XXXXX-XXXX | Recipient's ZIP code | "02101" |
+### Metadata Fields
 
-## Optional Account and Year Fields
+#### calendarYear
+- **Required:** Yes
+- **Data Type:** string (4 digits)
+- **Validation:** Must be a 4-digit year (e.g., "2024")
+- **Example:** `"2024"`
+- **Description:** The tax year for which this form is being filed.
 
-| Field Name | Type | Format | Description | Example |
-|------------|------|--------|-------------|---------|
-| `accountNumber` | string | Any | Account number | "12345678" |
-| `calendarYear` | string | YYYY | Tax year (1900-2100) | "2025" |
+### Payer Information
 
-## Optional Dividend Fields (Box 1-2)
+#### payerName
+- **Required:** Yes
+- **Data Type:** string (max 100 characters)
+- **Example:** `"Example Corporation"`
+- **Description:** The legal name of the company or individual making the dividend payments.
 
-| Field Name | Type | Format | Description | Example |
-|------------|------|--------|-------------|---------|
-| `qualifiedDividends` | number | >= 0 | Box 1b: Qualified dividends | 3000.00 |
-| `totalCapitalGainDistributions` | number | >= 0 | Box 2a: Total capital gain distributions | 1500.00 |
-| `unrecapturedSection1250Gain` | number | >= 0 | Box 2b: Unrecaptured Section 1250 gain | 0 |
-| `section1202Gain` | number | >= 0 | Box 2c: Section 1202 gain | 0 |
-| `collectibles28Gain` | number | >= 0 | Box 2d: Collectibles (28%) gain | 0 |
-| `section897OrdinaryDividends` | number | >= 0 | Box 2e: Section 897 ordinary dividends | 0 |
-| `section897CapitalGain` | number | >= 0 | Box 2f: Section 897 capital gain | 0 |
+#### payerTIN
+- **Required:** Yes
+- **Data Type:** string (EIN format)
+- **Validation:** Format XX-XXXXXXX (9 digits with optional hyphen)
+- **Example:** `"12-3456789"`
+- **Description:** The payer's Employer Identification Number (EIN) or Social Security Number (SSN).
 
-## Optional Distribution and Tax Fields (Box 3-7)
+#### payerStreetAddress
+- **Required:** No
+- **Data Type:** string (max 100 characters)
+- **Example:** `"123 Main Street"`
+- **Description:** The payer's street address.
 
-| Field Name | Type | Format | Description | Example |
-|------------|------|--------|-------------|---------|
-| `nondividendDistributions` | number | >= 0 | Box 3: Nondividend distributions | 0 |
-| `federalIncomeTaxWithheld` | number | >= 0 | Box 4: Federal income tax withheld | 500.00 |
-| `section199ADividends` | number | >= 0 | Box 5: Section 199A dividends | 2000.00 |
-| `investmentExpenses` | number | >= 0 | Box 6: Investment expenses | 50.00 |
-| `foreignTaxPaid` | number | >= 0 | Box 7: Foreign tax paid | 0 |
+#### payerCity
+- **Required:** No
+- **Data Type:** string (max 100 characters)
+- **Example:** `"New York, NY 10001"`
+- **Description:** The payer's city, state, and ZIP code (combined field).
 
-## Optional Foreign and Liquidation Fields (Box 8-13)
+#### payerCountry
+- **Required:** No
+- **Data Type:** string (max 50 characters)
+- **Example:** `"Canada"`
+- **Description:** The payer's country if not USA.
 
-| Field Name | Type | Format | Description | Example |
-|------------|------|--------|-------------|---------|
-| `foreignCountry` | string | Any | Box 8: Foreign country or U.S. possession | "Canada" |
-| `cashLiquidationDistributions` | number | >= 0 | Box 9: Cash liquidation distributions | 0 |
-| `noncashLiquidationDistributions` | number | >= 0 | Box 10: Noncash liquidation distributions | 0 |
-| `fatcaFilingRequirement` | boolean | true/false | Box 11: FATCA filing requirement | false |
-| `exemptInterestDividends` | number | >= 0 | Box 12: Exempt-interest dividends | 0 |
-| `specifiedPrivateActivityBondInterest` | number | >= 0 | Box 13: Specified private activity bond interest dividends | 0 |
+#### payerPhone
+- **Required:** No
+- **Data Type:** string (max 20 characters)
+- **Validation:** Phone number format (flexible)
+- **Example:** `"(555) 123-4567"`
+- **Description:** The payer's contact phone number.
 
-## Optional State Tax Fields (Box 14-16)
+### Recipient Information
 
-| Field Name | Type | Format | Description | Example |
-|------------|------|--------|-------------|---------|
-| `state` | string | 2-letter code | Box 14: State | "MA" |
-| `stateIdentificationNumber` | string | Any | Box 15: State identification number | "123456789" |
-| `stateTaxWithheld` | number | >= 0 | Box 16: State tax withheld | 250.00 |
+#### recipientName
+- **Required:** Yes
+- **Data Type:** string (max 100 characters)
+- **Example:** `"John Doe"`
+- **Description:** The legal name of the taxpayer receiving the dividends.
 
-## Complete Example
+#### recipientTIN
+- **Required:** Yes
+- **Data Type:** string (SSN format)
+- **Validation:** Format XXX-XX-XXXX (9 digits with optional hyphens)
+- **Example:** `"123-45-6789"`
+- **Description:** The recipient's Social Security Number (SSN) or Employer Identification Number (EIN).
+
+#### recipientStreetAddress
+- **Required:** No
+- **Data Type:** string (max 100 characters)
+- **Example:** `"456 Oak Avenue"`
+- **Description:** The recipient's street address.
+
+#### recipientCity
+- **Required:** No
+- **Data Type:** string (max 50 characters)
+- **Example:** `"Los Angeles"`
+- **Description:** The recipient's city.
+
+#### recipientState
+- **Required:** No
+- **Data Type:** string (2 characters)
+- **Validation:** Two-letter state code
+- **Example:** `"CA"`
+- **Description:** The recipient's state (two-letter abbreviation).
+
+#### recipientZip
+- **Required:** No
+- **Data Type:** string (5 or 9 digits)
+- **Validation:** Format XXXXX or XXXXX-XXXX
+- **Example:** `"90001"`
+- **Description:** The recipient's ZIP code.
+
+#### recipientCountry
+- **Required:** No
+- **Data Type:** string (max 50 characters)
+- **Example:** `"Mexico"`
+- **Description:** The recipient's country if not USA.
+
+### Box 1: Dividends
+
+#### totalOrdinaryDividends (Box 1a)
+- **Required:** Yes
+- **Data Type:** decimal
+- **Validation:** Numeric value with up to 2 decimal places
+- **Example:** `"1000.00"`
+- **Description:** Total ordinary dividends paid to the recipient.
+
+#### qualifiedDividends (Box 1b)
+- **Required:** No
+- **Data Type:** decimal
+- **Validation:** Numeric value with up to 2 decimal places
+- **Example:** `"800.00"`
+- **Description:** Qualified dividends (subset of Box 1a) eligible for lower tax rates.
+
+### Box 2: Capital Gains
+
+#### totalCapitalGainDistributions (Box 2a)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"500.00"`
+- **Description:** Total capital gain distributions.
+
+#### unrecapturedSection1250Gain (Box 2b)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"100.00"`
+- **Description:** Unrecaptured Section 1250 gain.
+
+#### section1202Gain (Box 2c)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"50.00"`
+- **Description:** Section 1202 gain.
+
+#### collectibles28Gain (Box 2d)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"25.00"`
+- **Description:** Collectibles (28%) gain.
+
+#### section897OrdinaryDividends (Box 2e)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"75.00"`
+- **Description:** Section 897 ordinary dividends.
+
+#### section897CapitalGain (Box 2f)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"60.00"`
+- **Description:** Section 897 capital gain.
+
+### Box 3-7: Distributions and Taxes
+
+#### nondividendDistributions (Box 3)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"200.00"`
+- **Description:** Nondividend distributions (return of capital).
+
+#### federalIncomeTaxWithheld (Box 4)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"150.00"`
+- **Description:** Federal income tax withheld.
+
+#### section199ADividends (Box 5)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"300.00"`
+- **Description:** Section 199A dividends.
+
+#### investmentExpenses (Box 6)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"50.00"`
+- **Description:** Investment expenses.
+
+#### foreignTaxPaid (Box 7)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"75.00"`
+- **Description:** Foreign tax paid.
+
+### Box 8-13: Foreign and Liquidation
+
+#### foreignCountry (Box 8)
+- **Required:** No
+- **Data Type:** string (max 50 characters)
+- **Example:** `"United Kingdom"`
+- **Description:** Foreign country or U.S. possession.
+
+#### cashLiquidationDistributions (Box 9)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"1000.00"`
+- **Description:** Cash liquidation distributions.
+
+#### noncashLiquidationDistributions (Box 10)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"500.00"`
+- **Description:** Noncash liquidation distributions.
+
+#### fatcaFilingRequirement (Box 11)
+- **Required:** No
+- **Data Type:** boolean
+- **Example:** `true`
+- **Description:** FATCA filing requirement checkbox.
+
+#### exemptInterestDividends (Box 12)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"250.00"`
+- **Description:** Exempt-interest dividends.
+
+#### specifiedPrivateActivityBondInterest (Box 13)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"100.00"`
+- **Description:** Specified private activity bond interest dividends.
+
+### Box 14-16: State Tax
+
+#### state (Box 14)
+- **Required:** No
+- **Data Type:** string (2 characters)
+- **Validation:** Two-letter state code
+- **Example:** `"NY"`
+- **Description:** State abbreviation.
+
+#### stateIdentificationNumber (Box 15)
+- **Required:** No
+- **Data Type:** string (max 20 characters)
+- **Example:** `"12-3456789"`
+- **Description:** State identification number.
+
+#### stateTaxWithheld (Box 16)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"50.00"`
+- **Description:** State tax withheld.
+
+### Account Information
+
+#### accountNumber
+- **Required:** No
+- **Data Type:** string (max 20 characters)
+- **Example:** `"1234567890"`
+- **Description:** Optional account number for the recipient.
+
+## Example API Requests
+
+### Minimal Request (Required Fields Only)
 
 ```json
 {
   "documentType": "1099-DIV",
   "formData": {
-    "payerName": "Vanguard Investments",
-    "payerStreetAddress": "100 Vanguard Blvd",
-    "payerCity": "Malvern",
-    "payerState": "PA",
-    "payerCountry": "USA",
-    "payerZip": "19355",
-    "payerPhone": "800-662-7447",
-    "payerTIN": "23-1945930",
-    "recipientTIN": "123-45-6789",
+    "calendarYear": "2024",
+    "payerName": "Example Corporation",
+    "payerTIN": "12-3456789",
     "recipientName": "John Doe",
-    "recipientStreetAddress": "456 Main St, Apt 2B",
-    "recipientCity": "Boston",
-    "recipientState": "MA",
-    "recipientCountry": "USA",
-    "recipientZip": "02101",
-    "accountNumber": "12345678",
-    "calendarYear": "2025",
-    "totalOrdinaryDividends": 5000.00,
-    "qualifiedDividends": 3000.00,
-    "totalCapitalGainDistributions": 1500.00,
-    "unrecapturedSection1250Gain": 0,
-    "section1202Gain": 0,
-    "collectibles28Gain": 0,
-    "section897OrdinaryDividends": 0,
-    "section897CapitalGain": 0,
-    "nondividendDistributions": 0,
-    "federalIncomeTaxWithheld": 500.00,
-    "section199ADividends": 2000.00,
-    "investmentExpenses": 50.00,
-    "foreignTaxPaid": 0,
-    "foreignCountry": "",
-    "cashLiquidationDistributions": 0,
-    "noncashLiquidationDistributions": 0,
-    "fatcaFilingRequirement": false,
-    "exemptInterestDividends": 0,
-    "specifiedPrivateActivityBondInterest": 0,
-    "state": "MA",
-    "stateIdentificationNumber": "123456789",
-    "stateTaxWithheld": 250.00
+    "recipientTIN": "123-45-6789",
+    "totalOrdinaryDividends": "1000.00"
   }
 }
 ```
 
-## Minimal Example
+### Complete Request (With Optional Fields)
 
 ```json
 {
   "documentType": "1099-DIV",
   "formData": {
-    "payerName": "Fidelity Investments",
-    "payerTIN": "04-3232190",
-    "recipientTIN": "987-65-4321",
-    "recipientName": "Jane Smith",
-    "totalOrdinaryDividends": 1250.50
+    "calendarYear": "2024",
+    "payerName": "Example Corporation",
+    "payerTIN": "12-3456789",
+    "payerStreetAddress": "123 Main Street",
+    "payerCity": "New York, NY 10001",
+    "payerPhone": "(555) 123-4567",
+    "recipientName": "John Doe",
+    "recipientTIN": "123-45-6789",
+    "recipientStreetAddress": "456 Oak Avenue",
+    "recipientCity": "Los Angeles",
+    "recipientState": "CA",
+    "recipientZip": "90001",
+    "totalOrdinaryDividends": "1000.00",
+    "qualifiedDividends": "800.00",
+    "totalCapitalGainDistributions": "500.00",
+    "federalIncomeTaxWithheld": "150.00",
+    "section199ADividends": "300.00",
+    "foreignTaxPaid": "75.00",
+    "foreignCountry": "United Kingdom",
+    "state": "NY",
+    "stateTaxWithheld": "50.00",
+    "accountNumber": "1234567890"
   }
 }
 ```
 
 ## Validation Rules
 
-### Format Validations
+### String Fields
+- Must not exceed maximum length
+- Special characters are allowed unless otherwise specified
+- Empty strings are not allowed for required fields
 
-- **TIN (payerTIN)**: Must match pattern `XX-XXXXXXX` (e.g., "23-1945930")
-- **SSN (recipientTIN)**: Must match pattern `XXX-XX-XXXX` (e.g., "123-45-6789")
-- **ZIP Code**: Must match pattern `XXXXX` or `XXXXX-XXXX` (e.g., "02101" or "02101-1234")
-- **Phone**: Must match pattern `XXX-XXX-XXXX` (e.g., "800-662-7447")
-- **State**: Must be a valid 2-letter US state/territory code (e.g., "MA", "CA", "NY")
-- **Year**: Must be a 4-digit year between 1900 and 2100 (e.g., "2025")
+### Decimal Fields
+- Must be numeric values
+- Up to 2 decimal places recommended
+- Negative values are not allowed
+- Format: `"1000.00"` (as string in JSON)
 
-### Value Validations
+### Boolean Fields
+- Accepted values: `true`, `false`
+- Used for checkbox fields (e.g., FATCA filing requirement)
 
-- **All monetary amounts**: Must be non-negative numbers (>= 0)
-- **Name fields**: Must be non-empty strings after trimming whitespace
-- **Boolean fields**: Must be `true` or `false`
+### TIN Fields
+- Payer TIN: EIN format (XX-XXXXXXX)
+- Recipient TIN: SSN format (XXX-XX-XXXX)
+- Hyphens are optional but recommended
 
-### Common Validation Errors
+### State Codes
+- Must be valid two-letter U.S. state abbreviations
+- Uppercase letters only
 
-```json
-// Missing required field
-{
-  "error": "ValidationError",
-  "message": "Missing required field: payerName"
-}
+## Notes
 
-// Invalid TIN format
-{
-  "error": "ValidationError",
-  "message": "TIN must be in format XX-XXXXXXX"
-}
-
-// Invalid SSN format
-{
-  "error": "ValidationError",
-  "message": "SSN must be in format XXX-XX-XXXX"
-}
-
-// Negative amount
-{
-  "error": "ValidationError",
-  "message": "Field 'totalOrdinaryDividends' must be a non-negative number"
-}
-
-// Invalid state code
-{
-  "error": "ValidationError",
-  "message": "State must be a valid US state/territory code"
-}
-```
-
-## Valid US State/Territory Codes
-
-AL, AK, AZ, AR, CA, CO, CT, DE, FL, GA, HI, ID, IL, IN, IA, KS, KY, LA, ME, MD, MA, MI, MN, MS, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SC, SD, TN, TX, UT, VT, VA, WA, WV, WI, WY, DC, PR, VI, GU, AS, MP
-
-## Tips for Testing
-
-1. **Start with minimal fields**: Test with only the 5 required fields first
-2. **Add fields incrementally**: Add optional fields one at a time to test validation
-3. **Test format validations**: Try invalid formats for TIN, SSN, ZIP, phone, etc.
-4. **Test negative amounts**: Verify that negative numbers are rejected
-5. **Test empty strings**: Verify that empty name fields are rejected
-6. **Test invalid state codes**: Try "XX" or "ZZ" to test state validation
+- All monetary values should be provided as strings with 2 decimal places
+- The form generates three copies automatically (Copy A, Copy B, Copy C)
+- Field names use camelCase convention for consistency
+- Payer fields are prefixed with "payer"
+- Recipient fields are prefixed with "recipient"

@@ -11,6 +11,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Import the new canonical configuration
+try:
+    from field_mappings.canonical_div_1099 import CANONICAL_FIELD_MAPPING
+    from field_mappings.field_metadata import FIELD_METADATA, FieldMetadata
+    from field_mappings.deprecated_aliases import DEPRECATED_ALIASES
+    _USE_CANONICAL = True
+except ImportError:
+    # Fallback to old configuration if new one doesn't exist
+    _USE_CANONICAL = False
+    logger.warning("Canonical field mapping not found, using legacy configuration")
+
 
 class FieldMapper:
     """
@@ -34,7 +45,7 @@ class FieldMapper:
         Raises:
             ValueError: If document_type is not supported
             
-        Requirements: 2.1, 2.2
+        Requirements: 1.1, 2.1
         """
         if document_type not in self.SUPPORTED_TYPES:
             raise ValueError(
@@ -45,10 +56,22 @@ class FieldMapper:
         self.document_type = document_type
         self._mapping = self._load_mapping(document_type)
         
-        logger.info(
-            f"Initialized FieldMapper for document type '{document_type}' "
-            f"with {len(self._mapping)} field mappings"
-        )
+        # Load metadata and aliases if using canonical configuration
+        if _USE_CANONICAL and document_type == "1099-DIV":
+            self._metadata = FIELD_METADATA
+            self._aliases = DEPRECATED_ALIASES
+            required_count = len([m for m in self._metadata.values() if m["required"]])
+            logger.info(
+                f"Initialized FieldMapper for document type '{document_type}' "
+                f"with {len(self._mapping)} field mappings, {required_count} required fields"
+            )
+        else:
+            self._metadata = {}
+            self._aliases = {}
+            logger.info(
+                f"Initialized FieldMapper for document type '{document_type}' "
+                f"with {len(self._mapping)} field mappings"
+            )
     
     def _load_mapping(self, document_type: str) -> Dict[str, str]:
         """
@@ -65,8 +88,13 @@ class FieldMapper:
         """
         if document_type == "1099-DIV":
             try:
-                from field_mappings.div_1099 import FIELD_MAPPING
-                return FIELD_MAPPING
+                # Try to load canonical mapping first
+                if _USE_CANONICAL:
+                    return CANONICAL_FIELD_MAPPING
+                else:
+                    # Fallback to legacy mapping
+                    from field_mappings.div_1099 import FIELD_MAPPING
+                    return FIELD_MAPPING
             except ImportError as e:
                 raise ImportError(
                     f"No mapping configuration found for document type '{document_type}'"
@@ -117,15 +145,20 @@ class FieldMapper:
         """
         Map an API field name to its PDF field name.
         
+        Resolves deprecated field names before mapping.
+        
         Args:
             api_field_name: The user-friendly field name from the API
             
         Returns:
             The PDF form field name, or None if no mapping exists
             
-        Requirements: 1.1, 1.3, 4.1
+        Requirements: 1.1, 1.3, 4.1, 4.4, 8.2
         """
-        pdf_field_name = self._mapping.get(api_field_name)
+        # Resolve deprecated aliases
+        canonical_name = self.resolve_field_name(api_field_name)
+        
+        pdf_field_name = self._mapping.get(canonical_name)
         
         if pdf_field_name is not None:
             logger.debug(
@@ -146,6 +179,7 @@ class FieldMapper:
         
         For each API field, generates mappings for Copy1, Copy2, and CopyB.
         All three copies receive the same value from the form data.
+        Resolves deprecated field names before mapping.
         
         Args:
             form_data: Dictionary with API field names as keys
@@ -154,7 +188,7 @@ class FieldMapper:
             Dictionary with PDF field names as keys (includes all copies),
             unmapped fields excluded
             
-        Requirements: 1.1, 1.2, 1.3, 3.1, 4.3, 5.1
+        Requirements: 1.1, 1.2, 1.3, 3.1, 4.3, 4.4, 5.1, 5.3, 8.2
         """
         if not form_data:
             logger.info("No form data provided, returning empty dictionary")
@@ -164,7 +198,9 @@ class FieldMapper:
         total_copies_generated = 0
         
         for api_field_name, value in form_data.items():
-            pdf_field_name = self.map_field(api_field_name)
+            # Resolve deprecated aliases before mapping
+            canonical_name = self.resolve_field_name(api_field_name)
+            pdf_field_name = self._mapping.get(canonical_name)
             
             if pdf_field_name is not None:
                 # Generate field name variants for all copies
@@ -209,3 +245,90 @@ class FieldMapper:
             )
         
         return unmapped
+    
+    def resolve_field_name(self, field_name: str) -> str:
+        """
+        Resolve a field name, handling deprecated aliases.
+        
+        If the field name is in the deprecated aliases dictionary,
+        logs a warning and returns the canonical field name. Otherwise,
+        returns the field name unchanged.
+        
+        Args:
+            field_name: The API field name (possibly deprecated)
+            
+        Returns:
+            The canonical field name
+            
+        Requirements: 4.4, 8.2, 8.3
+        """
+        if field_name in self._aliases:
+            canonical_name = self._aliases[field_name]
+            logger.warning(
+                f"Field name '{field_name}' is deprecated. "
+                f"Use '{canonical_name}' instead."
+            )
+            return canonical_name
+        return field_name
+    
+    def get_field_metadata(self, field_name: str) -> Optional[FieldMetadata]:
+        """
+        Get metadata for a field.
+        
+        Resolves deprecated field names before looking up metadata.
+        
+        Args:
+            field_name: The API field name (possibly deprecated)
+            
+        Returns:
+            Field metadata dictionary, or None if field not found
+            
+        Requirements: 2.1, 2.4
+        """
+        canonical_name = self.resolve_field_name(field_name)
+        return self._metadata.get(canonical_name)
+    
+    def is_required_field(self, field_name: str) -> bool:
+        """
+        Check if a field is required.
+        
+        Args:
+            field_name: The API field name (possibly deprecated)
+            
+        Returns:
+            True if the field is required, False otherwise
+            
+        Requirements: 2.1, 2.5
+        """
+        metadata = self.get_field_metadata(field_name)
+        return metadata["required"] if metadata else False
+    
+    def validate_required_fields(self, form_data: Dict[str, Any]) -> List[str]:
+        """
+        Validate that all required fields are present.
+        
+        Returns a list of missing required fields using canonical names only.
+        Accepts both canonical and deprecated field names in form_data.
+        
+        Args:
+            form_data: Dictionary with API field names as keys
+            
+        Returns:
+            List of missing required field names (canonical names only)
+            
+        Requirements: 2.5, 8.5
+        """
+        missing_fields = []
+        
+        # Resolve all field names in form_data to canonical names
+        canonical_form_data = {
+            self.resolve_field_name(field_name): value
+            for field_name, value in form_data.items()
+        }
+        
+        # Check each required field
+        for field_name, metadata in self._metadata.items():
+            if metadata["required"] and field_name not in canonical_form_data:
+                missing_fields.append(field_name)
+        
+        return missing_fields

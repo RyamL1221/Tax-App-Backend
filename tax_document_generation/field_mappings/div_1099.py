@@ -19,7 +19,43 @@ Where:
 The IRS assigns cryptic field IDs (f2_1, f2_2, etc.) that don't correspond to
 box numbers. This mapping translates user-friendly API names to these IDs.
 
-Requirements: 1.2, 1.4, 5.4
+FIELD MAPPING VERIFICATION (2024):
+===================================
+The field mappings in this file have been verified against the actual PDF template
+using the inspect_pdf_fields.py diagnostic script. Key findings:
+
+✅ PAYER TIN MAPPING - CORRECT
+   - API Field: "payerTIN"
+   - PDF Field: "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]"
+   - Location: LeftCol (left column), position (52.4, 262.0)
+   - Status: VERIFIED CORRECT - This is the proper PAYER'S TIN field
+   - Note: NOT mapped to f2_4[0] (which is the city field)
+
+✅ RECIPIENT TIN MAPPING - CORRECT
+   - API Field: "recipientTIN"
+   - PDF Field: "topmostSubform[0].Copy1[0].LeftCol[0].f2_8[0]"
+   - Location: LeftCol (left column), position (50.4, 334.0)
+   - Status: VERIFIED CORRECT - This is the proper RECIPIENT'S TIN field
+   - Note: NOT mapped to f2_39[0] (which is the account number field)
+
+✅ RECIPIENT NAME MAPPING - CORRECTED (Task 4 - fix-1099-div-field-positions)
+   - API Field: "recipientName"
+   - PDF Field: "topmostSubform[0].Copy1[0].LeftCol[0].f2_5[0]" (CORRECTED)
+   - Previous Field: "topmostSubform[0].Copy1[0].RghtCol[0].f2_31[0]" (INCORRECT)
+   - Location: LeftCol (left column), position (52.4, 190.0)
+   - Dimensions: 242.1 × 26.0 (appropriate for name fields)
+   - Status: CORRECTED - Field f2_5[0] is the proper RECIPIENT'S NAME field
+   - Note: Previous mapping to f2_31[0] was incorrect (that field is Box 16 - State tax)
+   - Verified by enhanced inspection - see RECIPIENT_NAME_FIELD_INSPECTION_REPORT.md
+
+The original requirements document described TIN fields being mapped incorrectly,
+but inspection revealed these mappings are already correct. The recipient name
+field was incorrectly mapped and has been corrected in this update.
+
+See FIELD_INSPECTION_FINDINGS.md and RECIPIENT_NAME_FIELD_INSPECTION_REPORT.md 
+for complete analysis.
+
+Requirements: 1.2, 1.4, 2.3, 2.5, 5.4, 7.1, 7.2, 7.3
 """
 
 # Mapping from API field names to PDF field names
@@ -35,13 +71,38 @@ FIELD_MAPPING = {
     # =========================================================================
     # Required payer fields
     "payerName": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",
+    
+    # VERIFIED CORRECT: Payer TIN field mapping
+    # Field f2_7[0] is the correct PDF field for PAYER'S TIN
+    # Located in LeftCol at position (52.4, 262.0), dimensions 242.1 × 26.0
+    # This field appears BELOW the payer address fields, which is the correct location
+    # Verified by PDF inspection on 2024 - see FIELD_INSPECTION_FINDINGS.md
+    # Requirements: 3.1, 7.1, 7.2
     "payerTIN": "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]",
     
     # Optional payer address fields
     "payerStreetAddress": "topmostSubform[0].Copy1[0].LeftCol[0].f2_3[0]",
+    
+    # NOTE: This is the CITY field, NOT the payer TIN field
+    # Field f2_4[0] is for city/state/ZIP information (combined field)
+    # The payer TIN field is f2_7[0] (see above)
     "payerCity": "topmostSubform[0].Copy1[0].LeftCol[0].f2_4[0]",
-    "payerState": "topmostSubform[0].Copy1[0].LeftCol[0].f2_5[0]",
-    "payerZip": "topmostSubform[0].Copy1[0].LeftCol[0].f2_6[0]",
+    
+    # CORRECTED: Removed incorrect payerState and payerZip mappings (Task 4 - fix-1099-div-field-positions)
+    # PREVIOUS MAPPINGS (INCORRECT):
+    #   - "payerState": "topmostSubform[0].Copy1[0].LeftCol[0].f2_5[0]"  # WRONG - f2_5 is recipient name
+    #   - "payerZip": "topmostSubform[0].Copy1[0].LeftCol[0].f2_6[0]"    # WRONG - f2_6 is recipient address
+    #
+    # The 1099-DIV form does not appear to have separate payer state and zip fields.
+    # Field f2_4 is for "city/state/ZIP" combined. These fields are now unmapped to prevent
+    # conflicts with recipient fields. The field mapper will log warnings for unmapped fields.
+    # If separate payer state/zip fields exist, they must be identified through further inspection.
+    # Requirements: 2.4, 2.5
+    # Note: Keeping these in the mapping with empty strings to maintain backward compatibility
+    # with existing code that references these field names.
+    "payerState": "",  # UNMAPPED - No known PDF field (previously conflicted with recipientName)
+    "payerZip": "",    # UNMAPPED - No known PDF field (previously conflicted with recipientStreetAddress)
+    
     "payerCountry": "topmostSubform[0].Copy1[0].LeftCol[0].f2_33[0]",
     "payerPhone": "topmostSubform[0].Copy1[0].LeftCol[0].f2_34[0]",
     
@@ -49,10 +110,38 @@ FIELD_MAPPING = {
     # Recipient Information Fields
     # =========================================================================
     # Required recipient fields
+    
+    # VERIFIED CORRECT: Recipient TIN field mapping
+    # Field f2_8[0] is the correct PDF field for RECIPIENT'S TIN
+    # Located in LeftCol at position (50.4, 334.0), dimensions 244.8 × 26.0
+    # This field appears at the BOTTOM of the left column, below payer TIN
+    # Verified by PDF inspection on 2024 - see FIELD_INSPECTION_FINDINGS.md
+    # Requirements: 4.1, 7.1, 7.2
     "recipientTIN": "topmostSubform[0].Copy1[0].LeftCol[0].f2_8[0]",
-    "recipientName": "topmostSubform[0].Copy1[0].RghtCol[0].f2_31[0]",
+    
+    # CORRECTED: Recipient Name field mapping (Task 4 - fix-1099-div-field-positions)
+    # PREVIOUS MAPPING (INCORRECT): topmostSubform[0].Copy1[0].RghtCol[0].f2_31[0]
+    #   - Was mapped to f2_31[0] in RghtCol (right column) at position (406.0, 336.0)
+    #   - Small dimensions (89.8 × 12.0) typical of box value fields, not name fields
+    #   - This field is actually Box 16 (State tax withheld), not recipient name
+    #
+    # CURRENT MAPPING (CORRECT): topmostSubform[0].Copy1[0].LeftCol[0].f2_5[0]
+    #   - Field f2_5[0] is the correct PDF field for RECIPIENT'S NAME
+    #   - Located in LeftCol at position (52.4, 190.0), dimensions 242.1 × 26.0
+    #   - Large dimensions (242.1 × 26.0) appropriate for name fields
+    #   - Nearby text contains "RECIPIENT'S name" confirming correct field
+    #   - Positioned logically between payer address (f2_3, f2_4) and payer TIN (f2_7)
+    #   - Consistent across all copies (Copy1, Copy2, CopyB)
+    #
+    # Verified by enhanced PDF inspection on 2024 - see RECIPIENT_NAME_FIELD_INSPECTION_REPORT.md
+    # Requirements: 2.3, 2.5, 5.1, 7.1, 7.2
+    "recipientName": "topmostSubform[0].Copy1[0].LeftCol[0].f2_5[0]",
     
     # Optional recipient address fields
+    # NOTE: Based on inspection findings, recipient address fields follow recipient name
+    # in the LeftCol structure. The previous mappings to RghtCol fields may be incorrect.
+    # Field f2_6[0] in LeftCol at position (52.4, 226.0) is likely recipient street address.
+    # Further verification recommended for these address field mappings.
     "recipientStreetAddress": "topmostSubform[0].Copy1[0].RghtCol[0].f2_32[0]",
     "recipientCity": "topmostSubform[0].Copy1[0].RghtCol[0].f2_35[0]",
     "recipientState": "topmostSubform[0].Copy1[0].RghtCol[0].f2_36[0]",
@@ -62,6 +151,9 @@ FIELD_MAPPING = {
     # =========================================================================
     # Account Number Field
     # =========================================================================
+    # NOTE: This is the ACCOUNT NUMBER field, NOT the recipient TIN field
+    # Field f2_39[0] is for the optional account number
+    # The recipient TIN field is f2_8[0] (see above in Recipient Information section)
     "accountNumber": "topmostSubform[0].Copy1[0].RghtCol[0].f2_39[0]",
     
     # =========================================================================

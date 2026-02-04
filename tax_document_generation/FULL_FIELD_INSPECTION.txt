@@ -1,0 +1,755 @@
+Inspecting PDF: samples/1099-DIV.pdf
+
+================================================================================
+PDF FIELD INSPECTION SUMMARY
+================================================================================
+Total fields found: 140
+Total pages: 4
+Highlighting fields containing: TIN, Name, City, Account
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+PAGE 2 (36 fields)
+────────────────────────────────────────────────────────────────────────────────
+
+  Field Name: topmostSubform[0].CopyA[0].CopyHeader[0].CalendarYear[0].f1_1[0]
+  Type: Text
+  Position: x=417.6, y=96.0
+  Dimensions: width=28.8, height=10.0
+
+  Field Name: topmostSubform[0].CopyA[0].CopyHeader[0].c1_1[0]
+  Type: CheckBox
+  Position: x=187.2, y=25.0
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+
+  Field Name: topmostSubform[0].CopyA[0].CopyHeader[0].c1_1[1]
+  Type: CheckBox
+  Position: x=244.8, y=25.0
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+
+  Field Name: topmostSubform[0].CopyA[0].LeftCol[0].f1_2[0]
+  Type: Text
+  Position: x=52.4, y=56.0
+  Dimensions: width=242.1, height=76.0
+
+  Field Name: topmostSubform[0].CopyA[0].LeftCol[0].f1_3[0]
+  Type: Text
+  Position: x=50.4, y=144.0
+  Dimensions: width=122.4, height=36.0
+
+  Field Name: topmostSubform[0].CopyA[0].LeftCol[0].f1_4[0]
+  Type: Text
+  Position: x=172.8, y=144.0
+  Dimensions: width=122.4, height=36.0
+
+  Field Name: topmostSubform[0].CopyA[0].LeftCol[0].f1_5[0]
+  Type: Text
+  Position: x=52.4, y=190.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].CopyA[0].LeftCol[0].f1_6[0]
+  Type: Text
+  Position: x=52.4, y=226.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].CopyA[0].LeftCol[0].f1_7[0]
+  Type: Text
+  Position: x=52.4, y=262.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].CopyA[0].LeftCol[0].f1_8[0]
+  Type: Text
+  Position: x=50.4, y=334.0
+  Dimensions: width=187.2, height=26.0
+
+  Field Name: topmostSubform[0].CopyA[0].LeftCol[0].c1_4[0]
+  Type: CheckBox
+  Position: x=262.2, y=337.5
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_9[0]
+  Type: Text
+  Position: x=305.2, y=60.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_10[0]
+  Type: Text
+  Position: x=305.2, y=96.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box2a_ReadOrder[0].f1_11[0]
+  Type: Text
+  Position: x=305.2, y=120.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_12[0]
+  Type: Text
+  Position: x=406.0, y=120.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box2c_ReadOrder[0].f1_13[0]
+  Type: Text
+  Position: x=305.2, y=144.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_14[0]
+  Type: Text
+  Position: x=406.0, y=144.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box2e_ReadOrder[0].f1_15[0]
+  Type: Text
+  Position: x=305.2, y=168.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_16[0]
+  Type: Text
+  Position: x=406.0, y=168.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box3_ReadOrder[0].f1_17[0]
+  Type: Text
+  Position: x=305.2, y=192.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_18[0]
+  Type: Text
+  Position: x=406.0, y=192.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box5_ReadOrder[0].f1_19[0]
+  Type: Text
+  Position: x=305.2, y=216.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_20[0]
+  Type: Text
+  Position: x=406.0, y=216.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box7_ReadOrder[0].f1_21[0]
+  Type: Text
+  Position: x=305.2, y=252.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_22[0]
+  Type: Text
+  Position: x=398.0, y=252.0
+  Dimensions: width=98.0, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box9_ReadOrder[0].f1_23[0]
+  Type: Text
+  Position: x=305.2, y=276.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_24[0]
+  Type: Text
+  Position: x=406.0, y=276.0
+  Dimensions: width=89.8, height=12.0
+
+  ★ HIGHLIGHTED FIELD ★
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].TagCorrectingSubform[0].c1_3[0]
+  Type: CheckBox
+  Position: x=262.2, y=310.3
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+  ★ Contains keyword(s): ['TIN']
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box12_ReadOrder[0].f1_25[0]
+  Type: Text
+  Position: x=305.2, y=312.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_26[0]
+  Type: Text
+  Position: x=406.0, y=312.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box14_ReadOrder[0].f1_27[0]
+  Type: Text
+  Position: x=295.2, y=334.0
+  Dimensions: width=36.0, height=14.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box14_ReadOrder[0].f1_28[0]
+  Type: Text
+  Position: x=295.2, y=348.0
+  Dimensions: width=36.0, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box15_ReadOrder[0].f1_29[0]
+  Type: Text
+  Position: x=331.2, y=334.0
+  Dimensions: width=64.8, height=14.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].Box15_ReadOrder[0].f1_30[0]
+  Type: Text
+  Position: x=331.2, y=348.0
+  Dimensions: width=64.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_31[0]
+  Type: Text
+  Position: x=406.0, y=336.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyA[0].RghtCol[0].f1_32[0]
+  Type: Text
+  Position: x=406.0, y=348.0
+  Dimensions: width=89.8, height=12.0
+
+
+────────────────────────────────────────────────────────────────────────────────
+PAGE 3 (35 fields)
+────────────────────────────────────────────────────────────────────────────────
+
+  Field Name: topmostSubform[0].Copy1[0].CopyHeader[0].CalendarYear[0].f2_1[0]
+  Type: Text
+  Position: x=417.6, y=96.0
+  Dimensions: width=28.8, height=10.0
+
+  Field Name: topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[0]
+  Type: CheckBox
+  Position: x=187.2, y=25.0
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+
+  Field Name: topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[1]
+  Type: CheckBox
+  Position: x=244.8, y=25.0
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+
+  Field Name: topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]
+  Type: Text
+  Position: x=52.4, y=56.0
+  Dimensions: width=242.1, height=76.0
+
+  Field Name: topmostSubform[0].Copy1[0].LeftCol[0].f2_3[0]
+  Type: Text
+  Position: x=50.4, y=142.0
+  Dimensions: width=122.4, height=38.0
+
+  Field Name: topmostSubform[0].Copy1[0].LeftCol[0].f2_4[0]
+  Type: Text
+  Position: x=172.8, y=142.0
+  Dimensions: width=122.4, height=38.0
+
+  Field Name: topmostSubform[0].Copy1[0].LeftCol[0].f2_5[0]
+  Type: Text
+  Position: x=52.4, y=190.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].Copy1[0].LeftCol[0].f2_6[0]
+  Type: Text
+  Position: x=52.4, y=226.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]
+  Type: Text
+  Position: x=52.4, y=262.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].Copy1[0].LeftCol[0].f2_8[0]
+  Type: Text
+  Position: x=50.4, y=334.0
+  Dimensions: width=244.8, height=26.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_9[0]
+  Type: Text
+  Position: x=305.2, y=60.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_10[0]
+  Type: Text
+  Position: x=305.2, y=96.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box2a_ReadOrder[0].f2_11[0]
+  Type: Text
+  Position: x=305.2, y=120.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_12[0]
+  Type: Text
+  Position: x=406.0, y=120.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box2c_ReadOrder[0].f2_13[0]
+  Type: Text
+  Position: x=305.2, y=144.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_14[0]
+  Type: Text
+  Position: x=406.0, y=144.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box2e_ReadOrder[0].f2_15[0]
+  Type: Text
+  Position: x=305.2, y=168.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_16[0]
+  Type: Text
+  Position: x=406.0, y=168.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box3_ReadOrder[0].f2_17[0]
+  Type: Text
+  Position: x=305.2, y=192.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_18[0]
+  Type: Text
+  Position: x=406.0, y=192.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box5_ReadOrder[0].f2_19[0]
+  Type: Text
+  Position: x=305.2, y=216.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_20[0]
+  Type: Text
+  Position: x=406.0, y=216.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box7_ReadOrder[0].f2_21[0]
+  Type: Text
+  Position: x=305.2, y=252.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_22[0]
+  Type: Text
+  Position: x=398.0, y=252.0
+  Dimensions: width=98.0, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box9_ReadOrder[0].f2_23[0]
+  Type: Text
+  Position: x=305.2, y=276.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_24[0]
+  Type: Text
+  Position: x=406.0, y=276.0
+  Dimensions: width=89.8, height=12.0
+
+  ★ HIGHLIGHTED FIELD ★
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].TagCorrectingSubform[0].c2_3[0]
+  Type: CheckBox
+  Position: x=262.2, y=310.3
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+  ★ Contains keyword(s): ['TIN']
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box12_ReadOrder[0].f2_25[0]
+  Type: Text
+  Position: x=305.2, y=312.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_26[0]
+  Type: Text
+  Position: x=406.0, y=312.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box14_ReadOrder[0].f2_27[0]
+  Type: Text
+  Position: x=295.2, y=334.0
+  Dimensions: width=36.0, height=14.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box14_ReadOrder[0].f2_28[0]
+  Type: Text
+  Position: x=295.2, y=348.0
+  Dimensions: width=36.0, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box15_ReadOrder[0].f2_29[0]
+  Type: Text
+  Position: x=331.2, y=334.0
+  Dimensions: width=64.8, height=14.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].Box15_ReadOrder[0].f2_30[0]
+  Type: Text
+  Position: x=331.2, y=348.0
+  Dimensions: width=64.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_31[0]
+  Type: Text
+  Position: x=406.0, y=336.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy1[0].RghtCol[0].f2_32[0]
+  Type: Text
+  Position: x=406.0, y=348.0
+  Dimensions: width=89.8, height=12.0
+
+
+────────────────────────────────────────────────────────────────────────────────
+PAGE 4 (34 fields)
+────────────────────────────────────────────────────────────────────────────────
+
+  Field Name: topmostSubform[0].CopyB[0].CopyHeader[0].CalendarYear[0].f2_1[0]
+  Type: Text
+  Position: x=417.6, y=96.0
+  Dimensions: width=28.8, height=10.0
+
+  Field Name: topmostSubform[0].CopyB[0].CopyHeader[0].c2_1[0]
+  Type: CheckBox
+  Position: x=244.8, y=25.0
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+
+  Field Name: topmostSubform[0].CopyB[0].LeftCol[0].f2_2[0]
+  Type: Text
+  Position: x=52.4, y=56.0
+  Dimensions: width=242.1, height=76.0
+
+  Field Name: topmostSubform[0].CopyB[0].LeftCol[0].f2_3[0]
+  Type: Text
+  Position: x=50.4, y=142.0
+  Dimensions: width=122.4, height=38.0
+
+  Field Name: topmostSubform[0].CopyB[0].LeftCol[0].f2_4[0]
+  Type: Text
+  Position: x=172.8, y=142.0
+  Dimensions: width=122.4, height=38.0
+
+  Field Name: topmostSubform[0].CopyB[0].LeftCol[0].f2_5[0]
+  Type: Text
+  Position: x=52.4, y=190.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].CopyB[0].LeftCol[0].f2_6[0]
+  Type: Text
+  Position: x=52.4, y=226.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].CopyB[0].LeftCol[0].f2_7[0]
+  Type: Text
+  Position: x=52.4, y=262.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].CopyB[0].LeftCol[0].f2_8[0]
+  Type: Text
+  Position: x=50.4, y=334.0
+  Dimensions: width=244.8, height=26.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_9[0]
+  Type: Text
+  Position: x=305.2, y=60.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_10[0]
+  Type: Text
+  Position: x=305.2, y=96.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box2a_ReadOrder[0].f2_11[0]
+  Type: Text
+  Position: x=305.2, y=120.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_12[0]
+  Type: Text
+  Position: x=406.0, y=120.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box2c_ReadOrder[0].f2_13[0]
+  Type: Text
+  Position: x=305.2, y=144.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_14[0]
+  Type: Text
+  Position: x=406.0, y=144.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box2e_ReadOrder[0].f2_15[0]
+  Type: Text
+  Position: x=305.2, y=168.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_16[0]
+  Type: Text
+  Position: x=406.0, y=168.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box3_ReadOrder[0].f2_17[0]
+  Type: Text
+  Position: x=305.2, y=192.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_18[0]
+  Type: Text
+  Position: x=406.0, y=192.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box5_ReadOrder[0].f2_19[0]
+  Type: Text
+  Position: x=305.2, y=216.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_20[0]
+  Type: Text
+  Position: x=406.0, y=216.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box7_ReadOrder[0].f2_21[0]
+  Type: Text
+  Position: x=305.2, y=252.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_22[0]
+  Type: Text
+  Position: x=398.0, y=252.0
+  Dimensions: width=98.0, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box9_ReadOrder[0].f2_23[0]
+  Type: Text
+  Position: x=305.2, y=276.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_24[0]
+  Type: Text
+  Position: x=406.0, y=276.0
+  Dimensions: width=89.8, height=12.0
+
+  ★ HIGHLIGHTED FIELD ★
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].TagCorrectingSubform[0].c2_3[0]
+  Type: CheckBox
+  Position: x=262.2, y=310.3
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+  ★ Contains keyword(s): ['TIN']
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box12_ReadOrder[0].f2_25[0]
+  Type: Text
+  Position: x=305.2, y=312.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_26[0]
+  Type: Text
+  Position: x=406.0, y=312.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box14_ReadOrder[0].f2_27[0]
+  Type: Text
+  Position: x=295.2, y=334.0
+  Dimensions: width=36.0, height=14.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box14_ReadOrder[0].f2_28[0]
+  Type: Text
+  Position: x=295.2, y=348.0
+  Dimensions: width=36.0, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box15_ReadOrder[0].f2_29[0]
+  Type: Text
+  Position: x=331.2, y=334.0
+  Dimensions: width=64.8, height=14.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].Box15_ReadOrder[0].f2_30[0]
+  Type: Text
+  Position: x=331.2, y=348.0
+  Dimensions: width=64.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_31[0]
+  Type: Text
+  Position: x=406.0, y=336.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].CopyB[0].RghtCol[0].f2_32[0]
+  Type: Text
+  Position: x=406.0, y=348.0
+  Dimensions: width=89.8, height=12.0
+
+
+────────────────────────────────────────────────────────────────────────────────
+PAGE 6 (35 fields)
+────────────────────────────────────────────────────────────────────────────────
+
+  Field Name: topmostSubform[0].Copy2[0].CopyHeader[0].CalendarYear[0].f2_1[0]
+  Type: Text
+  Position: x=417.6, y=96.0
+  Dimensions: width=28.8, height=10.0
+
+  Field Name: topmostSubform[0].Copy2[0].CopyHeader[0].c2_1[0]
+  Type: CheckBox
+  Position: x=187.2, y=25.0
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+
+  Field Name: topmostSubform[0].Copy2[0].CopyHeader[0].c2_1[1]
+  Type: CheckBox
+  Position: x=244.8, y=25.0
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+
+  Field Name: topmostSubform[0].Copy2[0].LeftCol[0].f2_2[0]
+  Type: Text
+  Position: x=52.4, y=56.0
+  Dimensions: width=242.1, height=76.0
+
+  Field Name: topmostSubform[0].Copy2[0].LeftCol[0].f2_3[0]
+  Type: Text
+  Position: x=50.4, y=142.0
+  Dimensions: width=122.4, height=38.0
+
+  Field Name: topmostSubform[0].Copy2[0].LeftCol[0].f2_4[0]
+  Type: Text
+  Position: x=172.8, y=142.0
+  Dimensions: width=122.4, height=38.0
+
+  Field Name: topmostSubform[0].Copy2[0].LeftCol[0].f2_5[0]
+  Type: Text
+  Position: x=52.4, y=190.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].Copy2[0].LeftCol[0].f2_6[0]
+  Type: Text
+  Position: x=52.4, y=226.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].Copy2[0].LeftCol[0].f2_7[0]
+  Type: Text
+  Position: x=52.4, y=262.0
+  Dimensions: width=242.1, height=26.0
+
+  Field Name: topmostSubform[0].Copy2[0].LeftCol[0].f2_8[0]
+  Type: Text
+  Position: x=50.4, y=334.0
+  Dimensions: width=244.8, height=26.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_9[0]
+  Type: Text
+  Position: x=305.2, y=60.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_10[0]
+  Type: Text
+  Position: x=305.2, y=96.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box2a_ReadOrder[0].f2_11[0]
+  Type: Text
+  Position: x=305.2, y=120.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_12[0]
+  Type: Text
+  Position: x=406.0, y=120.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box2c_ReadOrder[0].f2_13[0]
+  Type: Text
+  Position: x=305.2, y=144.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_14[0]
+  Type: Text
+  Position: x=406.0, y=144.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box2e_ReadOrder[0].f2_15[0]
+  Type: Text
+  Position: x=305.2, y=168.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_16[0]
+  Type: Text
+  Position: x=406.0, y=168.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box3_ReadOrder[0].f2_17[0]
+  Type: Text
+  Position: x=305.2, y=192.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_18[0]
+  Type: Text
+  Position: x=406.0, y=192.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box5_ReadOrder[0].f2_19[0]
+  Type: Text
+  Position: x=305.2, y=216.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_20[0]
+  Type: Text
+  Position: x=406.0, y=216.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box7_ReadOrder[0].f2_21[0]
+  Type: Text
+  Position: x=305.2, y=252.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_22[0]
+  Type: Text
+  Position: x=398.0, y=252.0
+  Dimensions: width=98.0, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box9_ReadOrder[0].f2_23[0]
+  Type: Text
+  Position: x=305.2, y=276.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_24[0]
+  Type: Text
+  Position: x=406.0, y=276.0
+  Dimensions: width=89.8, height=12.0
+
+  ★ HIGHLIGHTED FIELD ★
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].TagCorrectingSubform[0].c2_3[0]
+  Type: CheckBox
+  Position: x=262.2, y=310.3
+  Dimensions: width=9.0, height=9.0
+  Current Value: Off
+  ★ Contains keyword(s): ['TIN']
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box12_ReadOrder[0].f2_25[0]
+  Type: Text
+  Position: x=305.2, y=312.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_26[0]
+  Type: Text
+  Position: x=406.0, y=312.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box14_ReadOrder[0].f2_27[0]
+  Type: Text
+  Position: x=295.2, y=334.0
+  Dimensions: width=36.0, height=14.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box14_ReadOrder[0].f2_28[0]
+  Type: Text
+  Position: x=295.2, y=348.0
+  Dimensions: width=36.0, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box15_ReadOrder[0].f2_29[0]
+  Type: Text
+  Position: x=331.2, y=334.0
+  Dimensions: width=64.8, height=14.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].Box15_ReadOrder[0].f2_30[0]
+  Type: Text
+  Position: x=331.2, y=348.0
+  Dimensions: width=64.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_31[0]
+  Type: Text
+  Position: x=406.0, y=336.0
+  Dimensions: width=89.8, height=12.0
+
+  Field Name: topmostSubform[0].Copy2[0].RghtCol[0].f2_32[0]
+  Type: Text
+  Position: x=406.0, y=348.0
+  Dimensions: width=89.8, height=12.0
+
+
+================================================================================
+INSPECTION COMPLETE
+================================================================================
+

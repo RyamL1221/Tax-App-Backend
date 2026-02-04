@@ -1,0 +1,21 @@
+{
+  "documentType": "1099-DIV",
+  "formData": {
+    "calendarYear": "2024",
+    "payerName": "Example Investment Corporation",
+    "payerTIN": "12-3456789",
+    "payerStreetAddress": "123 Wall Street",
+    "payerCity": "New York, NY 10005",
+    "payerPhone": "555-123-4567",
+    "recipientName": "John Doe",
+    "recipientTIN": "123-45-6789",
+    "recipientStreetAddress": "456 Oak Avenue",
+    "recipientCity": "Los Angeles",
+    "recipientState": "CA",
+    "recipientZip": "90001",
+    "totalOrdinaryDividends": 1000.00,
+    "qualifiedDividends": 800.00,
+    "federalIncomeTaxWithheld": 150.00,
+    "accountNumber": "1234567890"
+  }
+}

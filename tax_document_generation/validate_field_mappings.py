@@ -30,7 +30,7 @@ except ImportError as e:
 # Add parent directory to path to import field mappings
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from tax_document_generation.field_mappings.div_1099 import FIELD_MAPPING
+from tax_document_generation.field_mappings.canonical_div_1099 import CANONICAL_FIELD_MAPPING as FIELD_MAPPING
 
 
 def load_pdf_template(template_path: str) -> fitz.Document:
@@ -183,7 +183,10 @@ def main():
         "1099-DIV.pdf",  # Current directory
         "../1099-DIV.pdf",  # Parent directory
         "../../1099-DIV.pdf",  # Two levels up
+        "samples/1099-DIV.pdf",  # Samples directory
+        "../samples/1099-DIV.pdf",  # Samples directory from subdirectory
         os.path.join(os.path.dirname(__file__), "..", "..", "1099-DIV.pdf"),  # Relative to script
+        os.path.join(os.path.dirname(__file__), "..", "samples", "1099-DIV.pdf"),  # Samples relative to script
     ]
     
     template_path = None
