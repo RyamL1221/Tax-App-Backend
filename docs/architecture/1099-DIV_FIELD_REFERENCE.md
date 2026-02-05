@@ -13,8 +13,10 @@ This document provides a comprehensive reference for all fields in the IRS Form 
 | payerTIN | - | ✓ | string | payer |
 | payerStreetAddress | - | | string | payer |
 | payerCity | - | | string | payer |
+| payerState | - | | string | payer |
 | payerCountry | - | | string | payer |
-| payerPhone | - | | string | payer |
+| payerZip | - | | string | payer |
+| payerTelephoneNumber | - | | string | payer |
 | recipientName | - | ✓ | string | recipient |
 | recipientTIN | - | ✓ | string | recipient |
 | recipientStreetAddress | - | | string | recipient |
@@ -44,6 +46,9 @@ This document provides a comprehensive reference for all fields in the IRS Form 
 | state | 14 | | string | taxes |
 | stateIdentificationNumber | 15 | | string | taxes |
 | stateTaxWithheld | 16 | | decimal | taxes |
+| state2 | 14 | | string | taxes |
+| stateIdentificationNumber2 | 15 | | string | taxes |
+| stateTaxWithheld2 | 16 | | decimal | taxes |
 | accountNumber | - | | string | account |
 
 ## Required Fields
@@ -96,8 +101,16 @@ All other fields are optional and may be omitted if not applicable.
 #### payerCity
 - **Required:** No
 - **Data Type:** string (max 100 characters)
-- **Example:** `"New York, NY 10001"`
-- **Description:** The payer's city, state, and ZIP code (combined field).
+- **Example:** `"New York"`
+- **Description:** The payer's city or town.
+- **Note:** This field can be used separately (new format) or combined with state and ZIP in the old format ("City, State ZIP"). The system supports both formats for backward compatibility.
+
+#### payerState
+- **Required:** No
+- **Data Type:** string (2 characters)
+- **Validation:** Two-letter state code (e.g., "NY", "CA")
+- **Example:** `"NY"`
+- **Description:** The payer's state or province (two-letter abbreviation).
 
 #### payerCountry
 - **Required:** No
@@ -105,12 +118,19 @@ All other fields are optional and may be omitted if not applicable.
 - **Example:** `"Canada"`
 - **Description:** The payer's country if not USA.
 
-#### payerPhone
+#### payerZip
+- **Required:** No
+- **Data Type:** string (max 10 characters)
+- **Validation:** Format XXXXX or XXXXX-XXXX
+- **Example:** `"10001"` or `"10001-1234"`
+- **Description:** The payer's ZIP or foreign postal code.
+
+#### payerTelephoneNumber
 - **Required:** No
 - **Data Type:** string (max 20 characters)
 - **Validation:** Phone number format (flexible)
 - **Example:** `"(555) 123-4567"`
-- **Description:** The payer's contact phone number.
+- **Description:** The payer's contact telephone number.
 
 ### Recipient Information
 
@@ -285,24 +305,45 @@ All other fields are optional and may be omitted if not applicable.
 
 ### Box 14-16: State Tax
 
+The 1099-DIV form supports reporting state tax information for up to **two states**. Use the first set of fields (state, stateIdentificationNumber, stateTaxWithheld) for the primary state, and the second set (state2, stateIdentificationNumber2, stateTaxWithheld2) for an additional state if applicable.
+
 #### state (Box 14)
 - **Required:** No
 - **Data Type:** string (2 characters)
 - **Validation:** Two-letter state code
 - **Example:** `"NY"`
-- **Description:** State abbreviation.
+- **Description:** State abbreviation (first state).
 
 #### stateIdentificationNumber (Box 15)
 - **Required:** No
 - **Data Type:** string (max 20 characters)
 - **Example:** `"12-3456789"`
-- **Description:** State identification number.
+- **Description:** State identification number (first state).
 
 #### stateTaxWithheld (Box 16)
 - **Required:** No
 - **Data Type:** decimal
 - **Example:** `"50.00"`
-- **Description:** State tax withheld.
+- **Description:** State tax withheld (first state).
+
+#### state2 (Box 14, Row 2)
+- **Required:** No
+- **Data Type:** string (2 characters)
+- **Validation:** Two-letter state code
+- **Example:** `"CA"`
+- **Description:** State abbreviation (second state). Use this field when reporting tax information for a second state.
+
+#### stateIdentificationNumber2 (Box 15, Row 2)
+- **Required:** No
+- **Data Type:** string (max 20 characters)
+- **Example:** `"98-7654321"`
+- **Description:** State identification number (second state). Use this field when reporting tax information for a second state.
+
+#### stateTaxWithheld2 (Box 16, Row 2)
+- **Required:** No
+- **Data Type:** decimal
+- **Example:** `"25.00"`
+- **Description:** State tax withheld (second state). Use this field when reporting tax information for a second state.
 
 ### Account Information
 
@@ -340,8 +381,10 @@ All other fields are optional and may be omitted if not applicable.
     "payerName": "Example Corporation",
     "payerTIN": "12-3456789",
     "payerStreetAddress": "123 Main Street",
-    "payerCity": "New York, NY 10001",
-    "payerPhone": "(555) 123-4567",
+    "payerCity": "New York",
+    "payerState": "NY",
+    "payerZip": "10001",
+    "payerTelephoneNumber": "(555) 123-4567",
     "recipientName": "John Doe",
     "recipientTIN": "123-45-6789",
     "recipientStreetAddress": "456 Oak Avenue",
@@ -356,7 +399,11 @@ All other fields are optional and may be omitted if not applicable.
     "foreignTaxPaid": "75.00",
     "foreignCountry": "United Kingdom",
     "state": "NY",
+    "stateIdentificationNumber": "12-3456789",
     "stateTaxWithheld": "50.00",
+    "state2": "CA",
+    "stateIdentificationNumber2": "98-7654321",
+    "stateTaxWithheld2": "25.00",
     "accountNumber": "1234567890"
   }
 }
@@ -395,3 +442,69 @@ All other fields are optional and may be omitted if not applicable.
 - Field names use camelCase convention for consistency
 - Payer fields are prefixed with "payer"
 - Recipient fields are prefixed with "recipient"
+
+## Backward Compatibility
+
+### Address Field Formats
+
+The system supports both old and new address field formats for backward compatibility:
+
+**Old Format (Combined):**
+```json
+{
+  "payerCity": "New York, NY 10001"
+}
+```
+
+**New Format (Separate):**
+```json
+{
+  "payerCity": "New York",
+  "payerState": "NY",
+  "payerZip": "10001"
+}
+```
+
+Both formats are accepted. When using the old combined format, the system will automatically parse the city, state, and ZIP components. However, the new separate format is recommended for clarity and validation.
+
+**Deprecation Notice:** The combined address format is deprecated and will be removed in a future version. A deprecation warning will be logged when the old format is detected. Please migrate to the new separate format.
+
+## Multi-State Tax Reporting
+
+The 1099-DIV form supports reporting state tax information for up to **two states**. This is useful when dividends are subject to tax withholding in multiple states.
+
+### Structure
+
+- **First State:** Use `state`, `stateIdentificationNumber`, `stateTaxWithheld`
+- **Second State:** Use `state2`, `stateIdentificationNumber2`, `stateTaxWithheld2`
+
+### Example: Multi-State Reporting
+
+```json
+{
+  "documentType": "1099-DIV",
+  "formData": {
+    "calendarYear": "2024",
+    "payerName": "Example Corporation",
+    "payerTIN": "12-3456789",
+    "recipientName": "John Doe",
+    "recipientTIN": "123-45-6789",
+    "totalOrdinaryDividends": "1000.00",
+    
+    "state": "NY",
+    "stateIdentificationNumber": "12-3456789",
+    "stateTaxWithheld": "50.00",
+    
+    "state2": "CA",
+    "stateIdentificationNumber2": "98-7654321",
+    "stateTaxWithheld2": "25.00"
+  }
+}
+```
+
+### Important Notes
+
+- The association between state name, state ID number, and tax withheld is maintained for each state
+- If only one state is applicable, only use the first set of fields (without the "2" suffix)
+- Both states are optional - you can omit state tax information entirely if not applicable
+- Each state's fields should be provided together (state, ID, and tax withheld)

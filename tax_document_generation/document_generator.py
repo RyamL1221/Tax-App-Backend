@@ -8,9 +8,9 @@ IRS templates with user-supplied form data.
 from typing import Dict
 import logging
 
-# Import PyMuPDF (fitz) - the sole PDF library for this module
+# Import PyMuPDF - the sole PDF library for this module
 try:
-    import fitz  # PyMuPDF
+    import pymupdf as fitz
 except ImportError as e:
     raise ImportError(
         "PyMuPDF is required for PDF generation. "
@@ -201,9 +201,11 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
     
     This function:
     1. Loads the PDF template
-    2. Translates API field names to PDF field names using FieldMapper
-    3. Populates form fields with provided data
-    4. Returns the generated PDF as bytes
+    2. Normalizes address fields (handles backward compatibility)
+    3. Combines address components into multi-line blocks for PDF fields
+    4. Translates API field names to PDF field names using FieldMapper
+    5. Populates form fields with provided data
+    6. Returns the generated PDF as bytes
     
     Args:
         template: Raw template file content (PDF bytes)
@@ -222,7 +224,17 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
         logger.info(f"Starting document generation for type: {document_type}")
         logger.info("Using library: PyMuPDF (fitz)")
         
-        # Initialize field mapper for this document type
+        # Step 1: Normalize address fields (handles backward compatibility with old combined format)
+        from address_normalizer import normalize_address_fields
+        logger.info("Normalizing address fields for backward compatibility")
+        form_data = normalize_address_fields(form_data)
+        
+        # Step 2: Combine address components into multi-line blocks for PDF fields
+        from address_combiner import combine_address_fields
+        logger.info("Combining address components into PDF-ready fields")
+        form_data = combine_address_fields(form_data)
+        
+        # Step 3: Initialize field mapper for this document type
         mapper = FieldMapper(document_type)
         
         # Translate API field names to PDF field names
@@ -246,6 +258,22 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
         doc = fitz.open(stream=template, filetype="pdf")
         
         logger.info(f"Template has {len(doc)} page(s)")
+        
+        # Print all PDF fields for debugging
+        print("\n" + "="*80)
+        print("ALL PDF FIELDS IN TEMPLATE:")
+        print("="*80)
+        all_fields = []
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            widgets = list(page.widgets())
+            for widget in widgets:
+                field_name = widget.field_name
+                if field_name:
+                    all_fields.append(field_name)
+                    print(f"Page {page_num + 1}: {field_name}")
+        print(f"\nTotal fields found: {len(all_fields)}")
+        print("="*80 + "\n")
         
         # ============================================
         # PDF FLATTENING APPROACH

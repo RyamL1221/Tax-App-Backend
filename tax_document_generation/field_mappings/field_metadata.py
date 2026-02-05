@@ -95,6 +95,16 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "validation_pattern": None,
         "example_value": "Example Corporation"
     },
+    "payerAddressBlock": {
+        "required": False,
+        "irs_box": None,
+        "description": "Combined payer address block (auto-generated from individual address components)",
+        "section": "payer",
+        "data_type": "string",
+        "max_length": 500,
+        "validation_pattern": None,
+        "example_value": "Example Corporation\n123 Main Street\nNew York, NY 10001\n(555) 123-4567"
+    },
     "payerTIN": {
         "required": True,
         "irs_box": None,
@@ -124,6 +134,46 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "max_length": 100,
         "validation_pattern": None,
         "example_value": "New York, NY 10001"
+    },
+    "payerState": {
+        "required": False,
+        "irs_box": None,
+        "description": "Payer's state or province (two-letter code)",
+        "section": "payer",
+        "data_type": "string",
+        "max_length": 2,
+        "validation_pattern": r"^[A-Z]{2}$",
+        "example_value": "NY"
+    },
+    "payerCountry": {
+        "required": False,
+        "irs_box": None,
+        "description": "Payer's country (if not USA)",
+        "section": "payer",
+        "data_type": "string",
+        "max_length": 50,
+        "validation_pattern": None,
+        "example_value": "Canada"
+    },
+    "payerZip": {
+        "required": False,
+        "irs_box": None,
+        "description": "Payer's ZIP or foreign postal code",
+        "section": "payer",
+        "data_type": "string",
+        "max_length": 10,
+        "validation_pattern": r"^\d{5}(-\d{4})?$",
+        "example_value": "10001"
+    },
+    "payerTelephoneNumber": {
+        "required": False,
+        "irs_box": None,
+        "description": "Payer's telephone number",
+        "section": "payer",
+        "data_type": "string",
+        "max_length": 20,
+        "validation_pattern": r"^\+?[\d\s\-\(\)]+$",
+        "example_value": "(555) 123-4567"
     },
     
     # =========================================================================
@@ -158,6 +208,56 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "max_length": 100,
         "validation_pattern": None,
         "example_value": "456 Oak Avenue"
+    },
+    "recipientCityStateZip": {
+        "required": False,
+        "irs_box": None,
+        "description": "Combined recipient city/state/ZIP (auto-generated from individual address components)",
+        "section": "recipient",
+        "data_type": "string",
+        "max_length": 100,
+        "validation_pattern": None,
+        "example_value": "Los Angeles, CA 90001"
+    },
+    "recipientCity": {
+        "required": False,
+        "irs_box": None,
+        "description": "Recipient's city or town",
+        "section": "recipient",
+        "data_type": "string",
+        "max_length": 50,
+        "validation_pattern": None,
+        "example_value": "Los Angeles"
+    },
+    "recipientState": {
+        "required": False,
+        "irs_box": None,
+        "description": "Recipient's state or province (two-letter code)",
+        "section": "recipient",
+        "data_type": "string",
+        "max_length": 2,
+        "validation_pattern": r"^[A-Z]{2}$",
+        "example_value": "CA"
+    },
+    "recipientCountry": {
+        "required": False,
+        "irs_box": None,
+        "description": "Recipient's country (if not USA)",
+        "section": "recipient",
+        "data_type": "string",
+        "max_length": 50,
+        "validation_pattern": None,
+        "example_value": "Canada"
+    },
+    "recipientZip": {
+        "required": False,
+        "irs_box": None,
+        "description": "Recipient's ZIP or foreign postal code",
+        "section": "recipient",
+        "data_type": "string",
+        "max_length": 10,
+        "validation_pattern": r"^\d{5}(-\d{4})?$",
+        "example_value": "90001"
     },
     
     # =========================================================================
@@ -398,6 +498,40 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
         "example_value": "50.00"
+    },
+    
+    # =========================================================================
+    # Box 14-16: Second State Tax (Multi-State Reporting)
+    # =========================================================================
+    "state2": {
+        "required": False,
+        "irs_box": "14",
+        "description": "Second state (two-letter code)",
+        "section": "taxes",
+        "data_type": "string",
+        "max_length": 2,
+        "validation_pattern": r"^[A-Z]{2}$",
+        "example_value": "CA"
+    },
+    "stateIdentificationNumber2": {
+        "required": False,
+        "irs_box": "15",
+        "description": "Second state identification number",
+        "section": "taxes",
+        "data_type": "string",
+        "max_length": 20,
+        "validation_pattern": None,
+        "example_value": "98-7654321"
+    },
+    "stateTaxWithheld2": {
+        "required": False,
+        "irs_box": "16",
+        "description": "Second state tax withheld",
+        "section": "taxes",
+        "data_type": "decimal",
+        "max_length": None,
+        "validation_pattern": r"^\d+(\.\d{2})?$",
+        "example_value": "25.00"
     },
     
     # =========================================================================

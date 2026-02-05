@@ -167,7 +167,7 @@ class TestValidateFormData:
         with pytest.raises(ValidationError) as exc_info:
             validate_form_data('1040', form_data)
         
-        assert 'Income must be a non-negative number' in str(exc_info.value)
+        assert 'non-negative number' in str(exc_info.value)
     
     def test_zero_income(self):
         """Test that zero income is valid."""

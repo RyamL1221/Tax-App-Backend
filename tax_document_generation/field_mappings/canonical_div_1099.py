@@ -5,6 +5,12 @@ This module provides the standardized, well-documented mapping structure
 organized by official IRS box numbers. This is the authoritative source
 for all 1099-DIV field mappings.
 
+Address Field Handling:
+- Payer address components are combined into `payerAddressBlock` before PDF generation
+- Recipient city/state/ZIP are combined into `recipientCityStateZip` before PDF generation
+- Individual component mappings are kept for backward compatibility
+- The address_combiner module handles the combination logic
+
 Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 3.1, 3.2, 3.3, 3.4
 """
 
@@ -20,18 +26,51 @@ CANONICAL_FIELD_MAPPING: Dict[str, str] = {
     
     # =========================================================================
     # Payer Information (LeftCol)
+    # Combined Address Field:
+    #   - payerAddressBlock: Auto-generated combined field containing all payer
+    #     address components (name, street, city, state, zip, country, telephone)
+    #     formatted as a multi-line string. This is the primary field used for
+    #     PDF generation.
+    # Individual Component Fields:
+    #   - Kept for backward compatibility with existing API contracts
+    #   - These are combined into payerAddressBlock by address_combiner module
+    #   - If payerAddressBlock exists, it takes precedence over individual components
     # =========================================================================
-    "payerName": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",
-    "payerStreetAddress": "topmostSubform[0].Copy1[0].LeftCol[0].f2_3[0]",
-    "payerCity": "topmostSubform[0].Copy1[0].LeftCol[0].f2_4[0]",
-    "payerTIN": "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]",
+    "payerAddressBlock": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",  # Combined multi-line address
+    "payerName": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",  # Backward compatibility
+    "payerStreetAddress": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",  # Backward compatibility
+    "payerCity": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",  # Backward compatibility
+    "payerState": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",  # Backward compatibility
+    "payerCountry": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",  # Backward compatibility
+    "payerZip": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",  # Backward compatibility
+    "payerTelephoneNumber": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",  # Backward compatibility
+    "payerTIN": "topmostSubform[0].Copy1[0].LeftCol[0].f2_3[0]",
     
     # =========================================================================
     # Recipient Information (LeftCol)
+    # Combined Address Field:
+    #   - recipientCityStateZip: Auto-generated combined field containing recipient
+    #     city, state, ZIP, and country formatted as a single or multi-line string.
+    #     This is the primary field used for PDF generation.
+    # Individual Component Fields:
+    #   - Kept for backward compatibility with existing API contracts
+    #   - These are combined into recipientCityStateZip by address_combiner module
+    #   - If recipientCityStateZip exists, it takes precedence over individual components
+    # Note: recipientName and recipientStreetAddress remain separate (they have their own PDF fields)
     # =========================================================================
+    "recipientTIN": "topmostSubform[0].Copy1[0].LeftCol[0].f2_4[0]",
     "recipientName": "topmostSubform[0].Copy1[0].LeftCol[0].f2_5[0]",
     "recipientStreetAddress": "topmostSubform[0].Copy1[0].LeftCol[0].f2_6[0]",
-    "recipientTIN": "topmostSubform[0].Copy1[0].LeftCol[0].f2_8[0]",
+    "recipientCityStateZip": "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]",  # Combined city/state/ZIP
+    "recipientCity": "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]",  # Backward compatibility
+    "recipientState": "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]",  # Backward compatibility
+    "recipientCountry": "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]",  # Backward compatibility
+    "recipientZip": "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]",  # Backward compatibility
+    
+    # =========================================================================
+    # Account Number (LeftCol)
+    # =========================================================================
+    "accountNumber": "topmostSubform[0].Copy1[0].LeftCol[0].f2_8[0]",
     
     # =========================================================================
     # Box 1: Dividends (RghtCol)
@@ -70,13 +109,12 @@ CANONICAL_FIELD_MAPPING: Dict[str, str] = {
     
     # =========================================================================
     # Box 14-16: State Tax (RghtCol)
+    # Two rows for reporting up to two states
     # =========================================================================
-    "state": "topmostSubform[0].Copy1[0].RghtCol[0].Box14_ReadOrder[0].f2_27[0]",  # Box 14
-    "stateIdentificationNumber": "topmostSubform[0].Copy1[0].RghtCol[0].Box14_ReadOrder[0].f2_28[0]",  # Box 15
-    "stateTaxWithheld": "topmostSubform[0].Copy1[0].RghtCol[0].Box15_ReadOrder[0].f2_29[0]",  # Box 16
-    
-    # =========================================================================
-    # Account Number (RghtCol)
-    # =========================================================================
-    "accountNumber": "topmostSubform[0].Copy1[0].RghtCol[0].f2_31[0]",
+    "state": "topmostSubform[0].Copy1[0].RghtCol[0].Box14_ReadOrder[0].f2_27[0]",  # Box 14 Row 1
+    "stateIdentificationNumber": "topmostSubform[0].Copy1[0].RghtCol[0].Box15_ReadOrder[0].f2_29[0]",  # Box 15 Row 1
+    "stateTaxWithheld": "topmostSubform[0].Copy1[0].RghtCol[0].f2_31[0]",  # Box 16 Row 1
+    "state2": "topmostSubform[0].Copy1[0].RghtCol[0].Box14_ReadOrder[0].f2_28[0]",  # Box 14 Row 2
+    "stateIdentificationNumber2": "topmostSubform[0].Copy1[0].RghtCol[0].Box15_ReadOrder[0].f2_30[0]",  # Box 15 Row 2
+    "stateTaxWithheld2": "topmostSubform[0].Copy1[0].RghtCol[0].f2_32[0]",  # Box 16 Row 2
 }

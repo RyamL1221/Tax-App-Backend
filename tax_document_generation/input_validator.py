@@ -13,6 +13,7 @@ import logging
 from typing import Dict, Any, List
 
 from exceptions import ValidationError
+from address_normalizer import normalize_address_fields
 
 
 logger = logging.getLogger(__name__)
@@ -28,8 +29,9 @@ DATE_PATTERN = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 # ZIP code pattern: XXXXX or XXXXX-XXXX
 ZIP_PATTERN = re.compile(r'^\d{5}(-\d{4})?$')
 
-# Phone pattern: XXX-XXX-XXXX
-PHONE_PATTERN = re.compile(r'^\d{3}-\d{3}-\d{4}$')
+# Phone pattern: Flexible format supporting international and various formats
+# Allows: +1 (555) 123-4567, 555-123-4567, (555) 123-4567, +44 20 1234 5678, etc.
+PHONE_PATTERN = re.compile(r'^\+?[\d\s\-\(\)]+$')
 
 
 # Required fields for Form 1040
@@ -63,7 +65,8 @@ FORM_1099_DIV_OPTIONAL_FIELDS = {
     'payerState': str,
     'payerCountry': str,
     'payerZip': str,
-    'payerPhone': str,
+    'payerPhone': str,  # Legacy field name
+    'payerTelephoneNumber': str,  # New field name
     
     # Recipient address
     'recipientStreetAddress': str,
@@ -102,10 +105,15 @@ FORM_1099_DIV_OPTIONAL_FIELDS = {
     'exemptInterestDividends': (int, float),
     'specifiedPrivateActivityBondInterest': (int, float),
     
-    # Box 14-16: State information
+    # Box 14-16: State information (first state)
     'state': str,
     'stateIdentificationNumber': str,
     'stateTaxWithheld': (int, float),
+    
+    # Box 14-16: State information (second state)
+    'state2': str,
+    'stateIdentificationNumber2': str,
+    'stateTaxWithheld2': (int, float),
 }
 
 # Required fields for Form 1099 (generic)
@@ -155,6 +163,10 @@ def validate_form_data(document_type: str, form_data: dict) -> None:
     This function checks that all required fields are present, validates field
     data types, and verifies field formats (SSN, dates, numeric values, etc.).
     
+    Before validation, address fields are normalized to support both legacy
+    combined format ("City, State ZIP") and new separate format (city, state,
+    and ZIP as separate fields).
+    
     Args:
         document_type: The IRS form type (e.g., "1040")
         form_data: Dictionary of form field values
@@ -166,6 +178,8 @@ def validate_form_data(document_type: str, form_data: dict) -> None:
         - 2.1: Validates that all required form fields are present
         - 2.2: Verifies that field values conform to expected data types and formats
         - 2.3: Raises ValidationError with descriptive messages for failures
+        - 6.1: Support existing API requests with current field names
+        - 6.2: Support new field names alongside old field names
         
     Examples:
         >>> validate_form_data('1040', {
@@ -189,6 +203,11 @@ def validate_form_data(document_type: str, form_data: dict) -> None:
     if not isinstance(form_data, dict):
         logger.warning("Form data is not a dictionary")
         raise ValidationError("Form data must be a dictionary")
+    
+    # Normalize address fields to support both old and new formats (Requirements 6.1, 6.2)
+    # This extracts separate address components from combined format if present
+    # and returns a normalized dictionary
+    form_data = normalize_address_fields(form_data)
     
     # Get required fields for this document type
     required_fields = DOCUMENT_TYPE_FIELDS[document_type]
@@ -284,15 +303,16 @@ def _validate_field_types_and_formats(document_type: str, form_data: Dict[str, A
                            'section897CapitalGain', 'nondividendDistributions', 'federalIncomeTaxWithheld',
                            'section199ADividends', 'investmentExpenses', 'foreignTaxPaid',
                            'cashLiquidationDistributions', 'noncashLiquidationDistributions',
-                           'exemptInterestDividends', 'specifiedPrivateActivityBondInterest', 'stateTaxWithheld']:
+                           'exemptInterestDividends', 'specifiedPrivateActivityBondInterest', 
+                           'stateTaxWithheld', 'stateTaxWithheld2']:
             _validate_amount(field_name, field_value)
         elif field_name in ['firstName', 'lastName', 'payerName', 'recipientName']:
             _validate_name_field(field_name, field_value)
         elif field_name in ['payerZip', 'recipientZip']:
             _validate_zip_code(field_value)
-        elif field_name == 'payerPhone':
+        elif field_name in ['payerPhone', 'payerTelephoneNumber']:
             _validate_phone_number(field_value)
-        elif field_name == 'state':
+        elif field_name in ['state', 'payerState', 'recipientState', 'state2']:
             _validate_state_code(field_value)
         elif field_name == 'calendarYear':
             _validate_year(field_value)
@@ -348,7 +368,13 @@ def _validate_zip_code(zip_code: str) -> None:
 
 def _validate_phone_number(phone: str) -> None:
     """
-    Validates phone number format (XXX-XXX-XXXX).
+    Validates phone number format.
+    
+    Accepts various formats including:
+    - (555) 123-4567
+    - 555-123-4567
+    - +1 (555) 123-4567
+    - +44 20 1234 5678
     
     Args:
         phone: Phone number string
@@ -357,7 +383,14 @@ def _validate_phone_number(phone: str) -> None:
         ValidationError: If phone number format is invalid
     """
     if not PHONE_PATTERN.match(phone):
-        error_msg = "Phone number must be in format XXX-XXX-XXXX"
+        error_msg = "Phone number must contain only digits, spaces, hyphens, parentheses, and optional leading +"
+        logger.info(error_msg)
+        raise ValidationError(error_msg)
+    
+    # Additional validation: must have at least 10 digits
+    digits_only = ''.join(c for c in phone if c.isdigit())
+    if len(digits_only) < 10:
+        error_msg = "Phone number must contain at least 10 digits"
         logger.info(error_msg)
         raise ValidationError(error_msg)
 
@@ -366,13 +399,23 @@ def _validate_state_code(state: str) -> None:
     """
     Validates state code is a valid US state/territory abbreviation.
     
+    State codes must be exactly 2 uppercase letters (e.g., 'NY', 'CA').
+    Lowercase codes are not accepted.
+    
     Args:
         state: State code string
         
     Raises:
-        ValidationError: If state code is invalid
+        ValidationError: If state code is invalid or not uppercase
     """
-    if state.upper() not in VALID_STATE_CODES:
+    # Check format first (must be 2 uppercase letters)
+    if not re.match(r'^[A-Z]{2}$', state):
+        error_msg = f"State code must be exactly 2 uppercase letters (e.g., 'NY', 'CA')"
+        logger.info(error_msg)
+        raise ValidationError(error_msg)
+    
+    # Then check if it's a valid state/territory
+    if state not in VALID_STATE_CODES:
         error_msg = f"State must be a valid US state/territory code"
         logger.info(error_msg)
         raise ValidationError(error_msg)

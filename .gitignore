@@ -251,5 +251,12 @@ $RECYCLE.BIN/
 # LocalStack runtime data
 localstack-data/
 
+# Backups
+.backups/
+
 # Kiro
 .kiro/
+
+# Patterns added by SAM build diagnostic tool
+# Generated: 2026-02-05 16:30:46
+.DS_Store

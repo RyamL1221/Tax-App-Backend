@@ -23,7 +23,7 @@ class TestSpecificFieldMappings:
         """Test that payerTIN maps to correct PDF field."""
         mapper = FieldMapper("1099-DIV")
         pdf_field = mapper.map_field("payerTIN")
-        assert pdf_field == "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]"
+        assert pdf_field == "topmostSubform[0].Copy1[0].LeftCol[0].f2_3[0]"
     
     def test_recipient_name_mapping(self):
         """Test that recipientName maps to correct PDF field."""
@@ -35,7 +35,7 @@ class TestSpecificFieldMappings:
         """Test that recipientTIN maps to correct PDF field."""
         mapper = FieldMapper("1099-DIV")
         pdf_field = mapper.map_field("recipientTIN")
-        assert pdf_field == "topmostSubform[0].Copy1[0].LeftCol[0].f2_8[0]"
+        assert pdf_field == "topmostSubform[0].Copy1[0].LeftCol[0].f2_4[0]"
     
     def test_total_ordinary_dividends_mapping(self):
         """Test that totalOrdinaryDividends maps to correct PDF field (Box 1a)."""
