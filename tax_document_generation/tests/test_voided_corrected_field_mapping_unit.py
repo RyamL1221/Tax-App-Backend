@@ -28,7 +28,7 @@ class TestVoidedFieldMapping:
         form_data = {"voided": True}
         mapped_data = mapper.map_all_fields(form_data)
         
-        copya_field = "topmostSubform[0].CopyA[0].CopyHeader[0].c2_1[0]"
+        copya_field = "topmostSubform[0].CopyA[0].CopyHeader[0].c1_1[0]"
         assert copya_field in mapped_data, f"CopyA variant not found: {copya_field}"
         assert mapped_data[copya_field] == True
     
@@ -81,7 +81,7 @@ class TestCorrectedFieldMapping:
         form_data = {"corrected": True}
         mapped_data = mapper.map_all_fields(form_data)
         
-        copya_field = "topmostSubform[0].CopyA[0].CopyHeader[0].c2_1[1]"
+        copya_field = "topmostSubform[0].CopyA[0].CopyHeader[0].c1_1[1]"
         assert copya_field in mapped_data, f"CopyA variant not found: {copya_field}"
         assert mapped_data[copya_field] == True
     

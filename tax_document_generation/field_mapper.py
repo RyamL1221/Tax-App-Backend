@@ -108,9 +108,9 @@ class FieldMapper:
         Generate field name variants for all form copies.
         
         Takes a Copy1 PDF field name and generates corresponding field names
-        for CopyA, Copy2, and CopyB by replacing the copy prefix while preserving
-        all other path components. CopyA uses a different field name pattern
-        (f1_ instead of f2_) which is handled automatically.
+        for CopyA, Copy2, and CopyB by replacing the copy prefix and field
+        type prefixes. CopyA uses different field name patterns (f1_ instead
+        of f2_, c1_ instead of c2_) which are handled automatically.
         
         Args:
             pdf_field_name: The Copy1 PDF field name
@@ -138,7 +138,8 @@ class FieldMapper:
         # Generate CopyA variant (new logic)
         # Replace Copy1[0] with CopyA[0] and f2_ with f1_
         copyA_name = pdf_field_name.replace("Copy1[0]", "CopyA[0]")
-        copyA_name = copyA_name.replace("f2_", "f1_")
+        copyA_name = copyA_name.replace("f2_", "f1_")  # Text field prefix
+        copyA_name = copyA_name.replace("c2_", "c1_")  # Checkbox field prefix
         
         logger.debug(
             f"Generated copy variants for field: "
