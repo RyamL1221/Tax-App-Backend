@@ -25,6 +25,14 @@ CANONICAL_FIELD_MAPPING: Dict[str, str] = {
     "calendarYear": "topmostSubform[0].Copy1[0].CopyHeader[0].CalendarYear[0].f2_1[0]",
     
     # =========================================================================
+    # VOIDED and CORRECTED Checkboxes (CopyHeader)
+    # These checkboxes appear at the top of each copy to indicate form status
+    # Note: CopyB only has CORRECTED checkbox (no VOIDED)
+    # =========================================================================
+    "voided": "topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[0]",  # VOIDED checkbox
+    "corrected": "topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[1]",  # CORRECTED checkbox
+    
+    # =========================================================================
     # Payer Information (LeftCol)
     # Combined Address Field:
     #   - payerAddressBlock: Auto-generated combined field containing all payer

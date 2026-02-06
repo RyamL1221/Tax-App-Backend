@@ -458,6 +458,14 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
         # Step 3: Initialize field mapper for this document type
         mapper = FieldMapper(document_type)
         
+        # Check for mutual exclusivity warning (VOIDED and CORRECTED both true)
+        if form_data.get('voided') and form_data.get('corrected'):
+            logger.warning(
+                "Both 'voided' and 'corrected' are set to true. "
+                "This may not be valid according to IRS guidelines. "
+                "The PDF will be generated with both checkboxes checked."
+            )
+        
         # Translate API field names to PDF field names
         mapped_data = mapper.map_all_fields(form_data)
         unmapped_fields = mapper.get_unmapped_fields(form_data)

@@ -9,6 +9,8 @@ This document provides a comprehensive reference for all fields in the IRS Form 
 | API Field Name | IRS Box | Required | Data Type | Section |
 |---------------|---------|----------|-----------|---------|
 | calendarYear | - | ✓ | string | metadata |
+| voided | - | | boolean | header |
+| corrected | - | | boolean | header |
 | payerName | - | ✓ | string | payer |
 | payerTIN | - | ✓ | string | payer |
 | payerStreetAddress | - | | string | payer |
@@ -79,6 +81,35 @@ All other fields are optional and may be omitted if not applicable.
 - **Multi-Copy:** This field appears on all four copies of the form (CopyA, Copy1, Copy2, CopyB) to ensure IRS compliance.
 - **Field Flags:** The CopyA calendar year field has a READ-ONLY flag set in the PDF template, which is automatically cleared by the document generator before filling.
 - **Rendering:** Calendar year fields are very small (28.8×10.0 points) and use a minimum font size of 5.0pt for proper rendering.
+
+### Form Status Checkboxes
+
+#### voided
+- **Required:** No
+- **Data Type:** boolean
+- **Example:** `true` or `false`
+- **Description:** VOIDED checkbox indicates that this form should be disregarded. When set to `true`, the VOIDED checkbox is checked on all applicable copies.
+- **Multi-Copy:** This checkbox appears on CopyA, Copy1, and Copy2. CopyB does not have a VOIDED checkbox.
+- **Position:** x=187.2, y=25.0 (9×9 points)
+- **PDF Field Names:**
+  - CopyA: `topmostSubform[0].CopyA[0].CopyHeader[0].c2_1[0]`
+  - Copy1: `topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[0]`
+  - Copy2: `topmostSubform[0].Copy2[0].CopyHeader[0].c2_1[0]`
+- **Mutual Exclusivity:** While both `voided` and `corrected` can technically be set to `true`, a warning will be logged as this may not be valid according to IRS guidelines.
+
+#### corrected
+- **Required:** No
+- **Data Type:** boolean
+- **Example:** `true` or `false`
+- **Description:** CORRECTED checkbox indicates that this form replaces a previously filed form. When set to `true`, the CORRECTED checkbox is checked on all copies.
+- **Multi-Copy:** This checkbox appears on all four copies (CopyA, Copy1, Copy2, CopyB).
+- **Position:** x=244.8, y=25.0 (9×9 points)
+- **PDF Field Names:**
+  - CopyA: `topmostSubform[0].CopyA[0].CopyHeader[0].c2_1[1]`
+  - Copy1: `topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[1]`
+  - Copy2: `topmostSubform[0].Copy2[0].CopyHeader[0].c2_1[1]`
+  - CopyB: `topmostSubform[0].CopyB[0].CopyHeader[0].c2_1[1]`
+- **Mutual Exclusivity:** While both `voided` and `corrected` can technically be set to `true`, a warning will be logged as this may not be valid according to IRS guidelines.
 
 ### Payer Information
 

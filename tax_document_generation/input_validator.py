@@ -79,6 +79,10 @@ FORM_1099_DIV_OPTIONAL_FIELDS = {
     'accountNumber': str,
     'calendarYear': str,
     
+    # VOIDED and CORRECTED checkboxes
+    'voided': bool,
+    'corrected': bool,
+    
     # Box 1: Dividends
     'qualifiedDividends': (int, float),
     

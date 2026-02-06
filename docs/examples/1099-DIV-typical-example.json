@@ -2,6 +2,7 @@
   "documentType": "1099-DIV",
   "formData": {
     "calendarYear": "2024",
+    "corrected": true,
     "payerName": "Example Investment Corporation",
     "payerTIN": "12-3456789",
     "payerStreetAddress": "123 Wall Street",

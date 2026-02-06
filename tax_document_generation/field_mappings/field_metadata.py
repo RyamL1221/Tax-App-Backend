@@ -83,6 +83,30 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
     },
     
     # =========================================================================
+    # VOIDED and CORRECTED Checkboxes
+    # =========================================================================
+    "voided": {
+        "required": False,
+        "irs_box": None,
+        "description": "VOIDED checkbox - indicates form should be disregarded",
+        "section": "header",
+        "data_type": "boolean",
+        "max_length": None,
+        "validation_pattern": None,
+        "example_value": "true"
+    },
+    "corrected": {
+        "required": False,
+        "irs_box": None,
+        "description": "CORRECTED checkbox - indicates form replaces previously filed form",
+        "section": "header",
+        "data_type": "boolean",
+        "max_length": None,
+        "validation_pattern": None,
+        "example_value": "true"
+    },
+    
+    # =========================================================================
     # Payer Information
     # =========================================================================
     "payerName": {
