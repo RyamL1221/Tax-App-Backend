@@ -35,6 +35,7 @@ class TestCombinePayerAddress:
             "Example Investment Corporation\n"
             "123 Wall Street\n"
             "New York, NY 10005\n"
+            "USA\n"
             "(555) 123-4567"
         )
         assert result == expected
@@ -183,8 +184,8 @@ class TestCombinePayerAddress:
         )
         assert result == expected
     
-    def test_usa_country_omitted(self):
-        """Test that USA country is omitted from address."""
+    def test_usa_country_included(self):
+        """Test that USA country is included in address."""
         result = combine_payer_address(
             payer_name="Example Corp",
             payer_city="New York",
@@ -193,12 +194,12 @@ class TestCombinePayerAddress:
             payer_country="USA"
         )
         
-        # USA should not appear in result
-        assert "USA" not in result
-        assert result == "Example Corp\nNew York, NY 10001"
+        # USA should appear in result
+        assert "USA" in result
+        assert result == "Example Corp\nNew York, NY 10001\nUSA"
     
-    def test_us_country_omitted(self):
-        """Test that US country is omitted from address."""
+    def test_us_country_included(self):
+        """Test that US country is included in address."""
         result = combine_payer_address(
             payer_name="Example Corp",
             payer_city="New York",
@@ -207,12 +208,12 @@ class TestCombinePayerAddress:
             payer_country="US"
         )
         
-        # US should not appear in result
-        assert "US" not in result
-        assert result == "Example Corp\nNew York, NY 10001"
+        # US should appear in result
+        assert "US" in result
+        assert result == "Example Corp\nNew York, NY 10001\nUS"
     
-    def test_united_states_country_omitted(self):
-        """Test that 'United States' country is omitted from address."""
+    def test_united_states_country_included(self):
+        """Test that 'United States' country is included in address."""
         result = combine_payer_address(
             payer_name="Example Corp",
             payer_city="New York",
@@ -221,9 +222,9 @@ class TestCombinePayerAddress:
             payer_country="United States"
         )
         
-        # United States should not appear in result
-        assert "United States" not in result
-        assert result == "Example Corp\nNew York, NY 10001"
+        # United States should appear in result
+        assert "United States" in result
+        assert result == "Example Corp\nNew York, NY 10001\nUnited States"
     
     def test_no_blank_lines(self):
         """Test that result never contains blank lines (consecutive newlines)."""
@@ -363,8 +364,8 @@ class TestCombineRecipientAddress:
             recipient_country="USA"
         )
         
-        # USA should be omitted
-        assert result == "Los Angeles, CA 90001"
+        # USA should be included
+        assert result == "Los Angeles, CA 90001\nUSA"
     
     def test_missing_country(self):
         """Test combining recipient address with missing country (USA default)."""

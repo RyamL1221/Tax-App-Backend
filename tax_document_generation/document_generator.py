@@ -287,8 +287,9 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
         logger.info("Flattening PDF form fields to static text for Adobe Reader compatibility")
         logger.info("Note: Fields will be non-editable but visible in all PDF viewers")
         
-        # Step 1: Collect field data (position, value, properties)
+        # Step 1: Set checkbox values and collect text field data
         fields_to_flatten = []
+        checkbox_count = 0
         
         for page_num in range(len(doc)):
             page = doc[page_num]
@@ -298,34 +299,54 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                 field_name = widget.field_name
                 if field_name in mapped_data:
                     try:
-                        value = str(mapped_data[field_name])
+                        value = mapped_data[field_name]
                         rect = widget.rect
+                        field_type = widget.field_type
                         
-                        # Get text properties
-                        try:
-                            font_name = widget.text_font or "helv"
-                            font_size = widget.text_fontsize or 10
-                            text_color = widget.text_color or (0, 0, 0)
-                        except:
-                            font_name = "helv"
-                            font_size = 10
-                            text_color = (0, 0, 0)
-                        
-                        fields_to_flatten.append({
-                            'page_num': page_num,
-                            'value': value,
-                            'rect': rect,
-                            'font_name': font_name,
-                            'font_size': font_size,
-                            'text_color': text_color,
-                            'field_name': field_name
-                        })
-                        
-                        logger.debug(f"Prepared field '{field_name}' for flattening: value='{value}'")
+                        # Handle checkboxes differently from text fields
+                        if field_type == fitz.PDF_WIDGET_TYPE_CHECKBOX:
+                            # For checkboxes, convert boolean to "Yes"/"Off" and set immediately
+                            checkbox_value = "Off"
+                            if isinstance(value, bool):
+                                checkbox_value = "Yes" if value else "Off"
+                            elif isinstance(value, str):
+                                checkbox_value = "Yes" if value.lower() in ['true', 'yes', '1'] else "Off"
+                            
+                            # Set the checkbox value immediately while widget is bound to page
+                            widget.field_value = checkbox_value
+                            widget.update()
+                            checkbox_count += 1
+                            
+                            logger.info(f"Set checkbox '{field_name}' to '{checkbox_value}'")
+                        else:
+                            # For text fields, convert to string and collect for later flattening
+                            value = str(value)
+                            
+                            # Get text properties
+                            try:
+                                font_name = widget.text_font or "helv"
+                                font_size = widget.text_fontsize or 10
+                                text_color = widget.text_color or (0, 0, 0)
+                            except:
+                                font_name = "helv"
+                                font_size = 10
+                                text_color = (0, 0, 0)
+                            
+                            fields_to_flatten.append({
+                                'page_num': page_num,
+                                'value': value,
+                                'rect': rect,
+                                'font_name': font_name,
+                                'font_size': font_size,
+                                'text_color': text_color,
+                                'field_name': field_name
+                            })
+                            
+                            logger.debug(f"Prepared text field '{field_name}' for flattening: value='{value}'")
                     except Exception as e:
-                        logger.warning(f"Failed to prepare field '{field_name}' for flattening: {str(e)}")
+                        logger.warning(f"Failed to process field '{field_name}': {str(e)}")
         
-        logger.info(f"Prepared {len(fields_to_flatten)} fields for flattening")
+        logger.info(f"Set {checkbox_count} checkbox(es) and prepared {len(fields_to_flatten)} text fields for flattening")
         
         # Step 2: Insert static text at field locations using built-in Helvetica font
         populated_count = 0

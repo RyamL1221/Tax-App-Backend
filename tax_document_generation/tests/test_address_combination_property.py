@@ -125,8 +125,8 @@ def test_address_block_contains_all_components(
     if zip_code:
         assert zip_code in result, f"ZIP '{zip_code}' not found in result: {result}"
     
-    # Country should only appear if it's not USA
-    if country and country.upper() not in ['USA', 'US', 'UNITED STATES']:
+    # Country should always appear if provided
+    if country:
         assert country in result, f"Country '{country}' not found in result: {result}"
     
     if telephone:
@@ -168,8 +168,8 @@ def test_recipient_address_contains_all_components(city, state, zip_code, countr
     if zip_code:
         assert zip_code in result, f"ZIP '{zip_code}' not found in result: {result}"
     
-    # Country should only appear if it's not USA
-    if country and country.upper() not in ['USA', 'US', 'UNITED STATES']:
+    # Country should always appear if provided
+    if country:
         assert country in result, f"Country '{country}' not found in result: {result}"
 
 

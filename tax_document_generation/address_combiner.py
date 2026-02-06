@@ -73,7 +73,7 @@ def combine_payer_address(
         payer_city: City name (e.g., "New York")
         payer_state: Two-letter state code (e.g., "NY")
         payer_zip: ZIP or postal code (e.g., "10001" or "10001-1234")
-        payer_country: Country name (e.g., "USA", "Canada") - omit for USA
+        payer_country: Country name (e.g., "USA", "Canada")
         payer_telephone_number: Phone number (e.g., "(555) 123-4567")
         
     Returns:
@@ -107,6 +107,16 @@ def combine_payer_address(
         ...     payer_country="Canada"
         ... )
         'International Corp\\n456 Main St\\nToronto, ON M5H 2N2\\nCanada'
+        
+        >>> combine_payer_address(
+        ...     payer_name="US Corp",
+        ...     payer_street_address="789 Oak Ave",
+        ...     payer_city="Chicago",
+        ...     payer_state="IL",
+        ...     payer_zip="60601",
+        ...     payer_country="USA"
+        ... )
+        'US Corp\\n789 Oak Ave\\nChicago, IL 60601\\nUSA'
     
     Requirements:
         - 1.2: All payer address components are combined into a single multi-line string
@@ -159,8 +169,8 @@ def combine_payer_address(
     if city_state_zip_line:
         address_lines.append("".join(city_state_zip_line))
     
-    # Line 4: Country (if provided and not USA)
-    if payer_country and payer_country.upper() not in ["USA", "US", "UNITED STATES"]:
+    # Line 4: Country (if provided)
+    if payer_country:
         address_lines.append(payer_country)
     
     # Line 5: Telephone number
@@ -200,7 +210,7 @@ def combine_recipient_address(
         recipient_city: City name (e.g., "Los Angeles")
         recipient_state: Two-letter state code (e.g., "CA")
         recipient_zip: ZIP or postal code (e.g., "90001" or "90001-1234")
-        recipient_country: Country name (e.g., "USA", "Canada") - omit for USA
+        recipient_country: Country name (e.g., "USA", "Canada")
         
     Returns:
         Formatted address string (single or multi-line) with empty components omitted.
@@ -227,6 +237,14 @@ def combine_recipient_address(
         ...     recipient_country="Canada"
         ... )
         'Toronto, ON M5H 2N2\\nCanada'
+        
+        >>> combine_recipient_address(
+        ...     recipient_city="Miami",
+        ...     recipient_state="FL",
+        ...     recipient_zip="33101",
+        ...     recipient_country="USA"
+        ... )
+        'Miami, FL 33101\\nUSA'
         
         >>> combine_recipient_address(
         ...     recipient_zip="10001"
@@ -275,8 +293,8 @@ def combine_recipient_address(
     if city_state_zip_line:
         address_lines.append("".join(city_state_zip_line))
     
-    # Line 2: Country (if provided and not USA)
-    if recipient_country and recipient_country.upper() not in ["USA", "US", "UNITED STATES"]:
+    # Line 2: Country (if provided)
+    if recipient_country:
         address_lines.append(recipient_country)
     
     # Join all lines with newline characters
