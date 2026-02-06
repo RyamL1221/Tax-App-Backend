@@ -11,6 +11,7 @@ This document provides a comprehensive reference for all fields in the IRS Form 
 | calendarYear | - | ✓ | string | metadata |
 | voided | - | | boolean | header |
 | corrected | - | | boolean | header |
+| secondTinNotification | - | | boolean | header |
 | payerName | - | ✓ | string | payer |
 | payerTIN | - | ✓ | string | payer |
 | payerStreetAddress | - | | string | payer |
@@ -116,6 +117,22 @@ All other fields are optional and may be omitted if not applicable.
 - **Visibility:** ✅ Verified visible in Adobe Reader, Preview, and Chrome PDF viewer (Feb 2026)
 - **Rendering:** Checkbox is flattened to static graphic using `flatten_checkbox()` function
 - **Mutual Exclusivity:** While both `voided` and `corrected` can technically be set to `true`, a warning will be logged as this may not be valid according to IRS guidelines.
+
+#### secondTinNotification
+- **Required:** No
+- **Data Type:** boolean
+- **Example:** `true` or `false`
+- **Description:** 2nd TIN not. (Second TIN Notification) checkbox indicates that the IRS has notified the payer twice within three calendar years that the payee provided an incorrect TIN. When checked, this triggers backup withholding requirements under IRS regulations.
+- **Multi-Copy:** This checkbox appears ONLY on CopyA (IRS copy). It does not appear on Copy1, Copy2, or CopyB.
+- **Position:** x=262.2, y=310.3 (9×9 points)
+- **PDF Field Names:**
+  - CopyA: `topmostSubform[0].CopyA[0].LeftCol[0].c1_4[0]`
+  - Copy1: Not present
+  - Copy2: Not present
+  - CopyB: Not present
+- **Visibility:** ✅ Verified visible in Adobe Reader, Preview, and Chrome PDF viewer (Feb 2026)
+- **Rendering:** Checkbox is flattened to static graphic using `flatten_checkbox()` function
+- **IRS Compliance:** Mark this checkbox when the IRS has sent two B-notices (backup withholding notices) within three calendar years indicating the recipient's TIN is incorrect. This notifies the recipient that backup withholding has been initiated.
 
 ### Payer Information
 

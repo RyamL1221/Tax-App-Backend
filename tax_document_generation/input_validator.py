@@ -106,6 +106,7 @@ FORM_1099_DIV_OPTIONAL_FIELDS = {
     'cashLiquidationDistributions': (int, float),
     'noncashLiquidationDistributions': (int, float),
     'fatcaFilingRequirement': bool,
+    'secondTinNotification': bool,  # 2nd TIN not. checkbox (CopyA only)
     'exemptInterestDividends': (int, float),
     'specifiedPrivateActivityBondInterest': (int, float),
     

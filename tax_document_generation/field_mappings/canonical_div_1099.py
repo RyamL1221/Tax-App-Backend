@@ -112,6 +112,7 @@ CANONICAL_FIELD_MAPPING: Dict[str, str] = {
     "cashLiquidationDistributions": "topmostSubform[0].Copy1[0].RghtCol[0].Box9_ReadOrder[0].f2_23[0]",  # Box 9
     "noncashLiquidationDistributions": "topmostSubform[0].Copy1[0].RghtCol[0].f2_24[0]",  # Box 10
     "fatcaFilingRequirement": "topmostSubform[0].Copy1[0].RghtCol[0].TagCorrectingSubform[0].c2_3[0]",  # Box 11
+    "secondTinNotification": "topmostSubform[0].CopyA[0].LeftCol[0].c1_4[0]",  # 2nd TIN not. checkbox (CopyA only)
     "exemptInterestDividends": "topmostSubform[0].Copy1[0].RghtCol[0].Box12_ReadOrder[0].f2_25[0]",  # Box 12
     "specifiedPrivateActivityBondInterest": "topmostSubform[0].Copy1[0].RghtCol[0].f2_26[0]",  # Box 13
     

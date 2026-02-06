@@ -469,6 +469,16 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "validation_pattern": None,
         "example_value": "true"
     },
+    "secondTinNotification": {
+        "required": False,
+        "irs_box": None,
+        "description": "2nd TIN not. checkbox - indicates IRS notified payer twice that recipient provided incorrect TIN",
+        "section": "header",
+        "data_type": "boolean",
+        "max_length": None,
+        "validation_pattern": None,
+        "example_value": "true"
+    },
     "exemptInterestDividends": {
         "required": False,
         "irs_box": "12",
