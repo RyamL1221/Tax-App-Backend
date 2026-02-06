@@ -195,6 +195,106 @@ def insert_text_with_fallback(
     return False
 
 
+def flatten_checkbox(
+    page: fitz.Page,
+    widget: fitz.Widget,
+    value: str
+) -> None:
+    """
+    Flatten checkbox to static graphic for visibility in all PDF viewers.
+    
+    This function converts a checkbox form field into a static graphic by:
+    1. Drawing a checkbox border (empty box)
+    2. Drawing a checkmark if the checkbox is checked
+    3. Using proportional sizing based on the checkbox dimensions
+    
+    The function is necessary because PyMuPDF 1.26.7 does not support
+    widget.update_appearance(), and setting field_value alone does not
+    create visible checkmarks in PDF viewers.
+    
+    Based on research findings:
+    - All checkboxes in IRS 1099-DIV are uniformly 9×9 points
+    - On state is '1' or '2' (not 'Yes')
+    - Checkmark uses proportional coordinates for scalability
+    
+    Args:
+        page: PyMuPDF page object where the checkbox is located
+        widget: PyMuPDF widget object representing the checkbox
+        value: Checkbox value - on_state value (e.g., '1', '2') for checked,
+               'Off' for unchecked
+    
+    Returns:
+        None - modifies the page in place
+        
+    Raises:
+        Exception: Logs but does not raise exceptions to allow graceful degradation
+        
+    Requirements: 1.1, 1.2, 2.1, 2.2
+    
+    Example:
+        >>> widget = page.widgets()[0]
+        >>> on_state = widget.on_state() if hasattr(widget, 'on_state') else '1'
+        >>> flatten_checkbox(page, widget, on_state)
+    """
+    try:
+        rect = widget.rect
+        
+        # Validate rect exists
+        if rect is None:
+            logger.error("Cannot flatten checkbox: widget.rect is None")
+            return
+        
+        # Draw checkbox border (empty box)
+        # Use 0.5pt line width for clean appearance
+        page.draw_rect(rect, color=(0, 0, 0), width=0.5)
+        
+        # Determine if checkbox is checked
+        # Value is checked if it matches the on_state (not 'Off')
+        is_checked = value != "Off"
+        
+        # If checked, draw checkmark
+        if is_checked:
+            # Extract rectangle coordinates
+            x0, y0, x1, y1 = rect
+            width = x1 - x0
+            height = y1 - y0
+            
+            # Calculate proportional checkmark coordinates
+            # Checkmark consists of two strokes forming a check shape:
+            # - Left stroke: from bottom-left to middle
+            # - Right stroke: from middle to top-right
+            
+            # Left stroke: from bottom-left to middle
+            p1 = fitz.Point(x0 + width * 0.2, y0 + height * 0.5)
+            p2 = fitz.Point(x0 + width * 0.4, y0 + height * 0.7)
+            
+            # Right stroke: from middle to top-right
+            p3 = fitz.Point(x0 + width * 0.4, y0 + height * 0.7)
+            p4 = fitz.Point(x0 + width * 0.8, y0 + height * 0.3)
+            
+            # Draw checkmark strokes
+            # Use 1.5pt line width for visibility
+            page.draw_line(p1, p2, color=(0, 0, 0), width=1.5)
+            page.draw_line(p3, p4, color=(0, 0, 0), width=1.5)
+            
+            logger.debug(
+                f"Drew checkmark in checkbox at ({x0:.1f}, {y0:.1f}) "
+                f"with dimensions {width:.1f}×{height:.1f}pt"
+            )
+        else:
+            logger.debug(
+                f"Drew empty checkbox at ({rect.x0:.1f}, {rect.y0:.1f}) "
+                f"with dimensions {rect.width:.1f}×{rect.height:.1f}pt"
+            )
+            
+    except Exception as e:
+        # Log error but don't raise - allow document generation to continue
+        logger.error(
+            f"Failed to flatten checkbox at ({rect.x0:.1f}, {rect.y0:.1f}): "
+            f"{type(e).__name__}: {str(e)}"
+        )
+
+
 def generate_document(template: bytes, form_data: Dict, document_type: str) -> bytes:
     """
     Generates a completed tax document by populating a template with form data.
@@ -305,19 +405,24 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                         
                         # Handle checkboxes differently from text fields
                         if field_type == fitz.PDF_WIDGET_TYPE_CHECKBOX:
-                            # For checkboxes, convert boolean to "Yes"/"Off" and set immediately
+                            # For checkboxes, convert boolean to appropriate value
                             checkbox_value = "Off"
                             if isinstance(value, bool):
                                 checkbox_value = "Yes" if value else "Off"
                             elif isinstance(value, str):
                                 checkbox_value = "Yes" if value.lower() in ['true', 'yes', '1'] else "Off"
                             
-                            # Set the checkbox value immediately while widget is bound to page
+                            # Set the checkbox value
                             widget.field_value = checkbox_value
                             widget.update()
+                            
+                            # Flatten checkbox to static graphic for visibility
+                            # PyMuPDF 1.26.7 does not support widget.update_appearance()
+                            # Flattening ensures checkbox is visible in all PDF viewers
+                            flatten_checkbox(page, widget, checkbox_value)
                             checkbox_count += 1
                             
-                            logger.info(f"Set checkbox '{field_name}' to '{checkbox_value}'")
+                            logger.info(f"Flattened checkbox '{field_name}' to static graphic (value: {checkbox_value})")
                         else:
                             # For text fields, convert to string and collect for later flattening
                             value = str(value)
