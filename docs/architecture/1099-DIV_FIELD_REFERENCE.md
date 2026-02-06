@@ -92,9 +92,12 @@ All other fields are optional and may be omitted if not applicable.
 - **Multi-Copy:** This checkbox appears on CopyA, Copy1, and Copy2. CopyB does not have a VOIDED checkbox.
 - **Position:** x=187.2, y=25.0 (9×9 points)
 - **PDF Field Names:**
-  - CopyA: `topmostSubform[0].CopyA[0].CopyHeader[0].c2_1[0]`
+  - CopyA: `topmostSubform[0].CopyA[0].CopyHeader[0].c1_1[0]`
   - Copy1: `topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[0]`
   - Copy2: `topmostSubform[0].Copy2[0].CopyHeader[0].c2_1[0]`
+- **Field Flags:** CopyA VOIDED checkbox has READ-ONLY flag set, which is automatically cleared by the document generator.
+- **Visibility:** ✅ Verified visible in Adobe Reader, Preview, and Chrome PDF viewer (Feb 2026)
+- **Rendering:** Checkbox is flattened to static graphic using `flatten_checkbox()` function
 - **Mutual Exclusivity:** While both `voided` and `corrected` can technically be set to `true`, a warning will be logged as this may not be valid according to IRS guidelines.
 
 #### corrected
@@ -105,10 +108,13 @@ All other fields are optional and may be omitted if not applicable.
 - **Multi-Copy:** This checkbox appears on all four copies (CopyA, Copy1, Copy2, CopyB).
 - **Position:** x=244.8, y=25.0 (9×9 points)
 - **PDF Field Names:**
-  - CopyA: `topmostSubform[0].CopyA[0].CopyHeader[0].c2_1[1]`
+  - CopyA: `topmostSubform[0].CopyA[0].CopyHeader[0].c1_1[1]`
   - Copy1: `topmostSubform[0].Copy1[0].CopyHeader[0].c2_1[1]`
   - Copy2: `topmostSubform[0].Copy2[0].CopyHeader[0].c2_1[1]`
-  - CopyB: `topmostSubform[0].CopyB[0].CopyHeader[0].c2_1[1]`
+  - CopyB: `topmostSubform[0].CopyB[0].CopyHeader[0].c2_1[0]` (Note: CopyB uses c2_1[0] for CORRECTED)
+- **Field Flags:** CopyA CORRECTED checkbox has READ-ONLY flag set, which is automatically cleared by the document generator.
+- **Visibility:** ✅ Verified visible in Adobe Reader, Preview, and Chrome PDF viewer (Feb 2026)
+- **Rendering:** Checkbox is flattened to static graphic using `flatten_checkbox()` function
 - **Mutual Exclusivity:** While both `voided` and `corrected` can technically be set to `true`, a warning will be logged as this may not be valid according to IRS guidelines.
 
 ### Payer Information
