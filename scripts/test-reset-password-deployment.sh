@@ -42,7 +42,7 @@ test_endpoint() {
     
     echo -n "Testing: $test_name... "
     
-    response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/reset-password \
+    response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/auth/reset-password \
         -H "Content-Type: application/json" \
         -d "$payload")
     
@@ -114,7 +114,7 @@ echo "=========================================="
 echo ""
 echo "Testing with invalid token format..."
 # Accept either 400 or 401 for invalid token (both are application-level responses, not 502)
-response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/reset-password \
+response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/auth/reset-password \
     -H "Content-Type: application/json" \
     -d '{"token": "invalid", "new_password": "TestPassword123!"}')
 body=$(echo "$response" | sed '$d')
@@ -135,7 +135,7 @@ fi
 echo ""
 echo "Testing with weak password..."
 # Accept either 400 or 401 for validation errors (both are application-level responses, not 502)
-response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/reset-password \
+response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/auth/reset-password \
     -H "Content-Type: application/json" \
     -d '{"token": "valid-looking-token-12345", "new_password": "weak"}')
 body=$(echo "$response" | sed '$d')
@@ -160,7 +160,7 @@ echo "=========================================="
 echo ""
 echo "Testing with non-existent token..."
 # Accept 200, 400, or 401 (all are application-level responses, not 502)
-response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/reset-password \
+response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/auth/reset-password \
     -H "Content-Type: application/json" \
     -d '{"token": "akujcAnUs4b4OUo-mFljwhNw3R4tjf-C5tVsk_gzQRw=", "new_password": "NewPassword123!"}')
 body=$(echo "$response" | sed '$d')
@@ -184,7 +184,7 @@ echo "Test 4: Malformed JSON"
 echo "=========================================="
 echo ""
 echo "Testing with malformed JSON..."
-response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/reset-password \
+response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/auth/reset-password \
     -H "Content-Type: application/json" \
     -d 'invalid json')
 status=$(echo "$response" | tail -n 1)

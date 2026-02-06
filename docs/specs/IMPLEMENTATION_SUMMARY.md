@@ -154,7 +154,7 @@ All 20 properties from the design document have been implemented and tested:
 
 ## API Endpoints
 
-### POST /generate
+### POST /documents/generate
 
 **Request:**
 ```json

@@ -24,7 +24,7 @@ else
     echo "$TOKEN"
     echo ""
     echo "Full reset link:"
-    echo "http://localhost:3000/reset-password?token=$TOKEN"
+    echo "http://localhost:3000/auth/reset-password?token=$TOKEN"
     echo ""
     echo "Use this token in your Postman request or copy it to test the reset-password endpoint."
 fi

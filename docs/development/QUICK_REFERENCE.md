@@ -190,10 +190,10 @@ sam local start-api --env-vars env.json --docker-network tax-app-network
 
 ### User Registration
 
-**Endpoint:** `POST /register`
+**Endpoint:** `POST /auth/register`
 
-**Local:** `http://localhost:3000/register`  
-**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/register`
+**Local:** `http://localhost:3000/auth/register`  
+**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/auth/register`
 
 **Request Body:**
 ```json
@@ -226,10 +226,10 @@ sam local start-api --env-vars env.json --docker-network tax-app-network
 
 ### User Login
 
-**Endpoint:** `POST /login`
+**Endpoint:** `POST /auth/login`
 
-**Local:** `http://localhost:3000/login`  
-**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/login`
+**Local:** `http://localhost:3000/auth/login`  
+**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/auth/login`
 
 **Request Body:**
 ```json
@@ -266,10 +266,10 @@ Since JWTs are stateless tokens, the server doesn't maintain session state. A se
 
 ### Password Recovery
 
-**Forgot Password Endpoint:** `POST /forgot-password`
+**Forgot Password Endpoint:** `POST /auth/forgot-password`
 
-**Local:** `http://localhost:3000/forgot-password`  
-**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/forgot-password`
+**Local:** `http://localhost:3000/auth/forgot-password`  
+**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/auth/forgot-password`
 
 **Request Body:**
 ```json
@@ -285,10 +285,10 @@ Since JWTs are stateless tokens, the server doesn't maintain session state. A se
 }
 ```
 
-**Reset Password Endpoint:** `POST /reset-password`
+**Reset Password Endpoint:** `POST /auth/reset-password`
 
-**Local:** `http://localhost:3000/reset-password`  
-**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/reset-password`
+**Local:** `http://localhost:3000/auth/reset-password`  
+**Production:** `https://{api-id}.execute-api.{region}.amazonaws.com/Prod/auth/reset-password`
 
 **Request Body:**
 ```json

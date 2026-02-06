@@ -29,7 +29,7 @@ test_endpoint() {
     
     echo -n "Testing: $test_name... "
     
-    response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/forgot-password \
+    response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/auth/forgot-password \
         -H "Content-Type: application/json" \
         -d "$payload")
     
@@ -96,7 +96,7 @@ test_endpoint \
 echo ""
 echo "5. Testing malformed JSON"
 echo "   Validates: Error handling works"
-response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/forgot-password \
+response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/auth/forgot-password \
     -H "Content-Type: application/json" \
     -d 'invalid json')
 status=$(echo "$response" | tail -n 1)

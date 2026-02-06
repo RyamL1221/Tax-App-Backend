@@ -20,7 +20,7 @@ echo "Testing reset-password endpoint..."
 echo "Token: $TOKEN"
 echo ""
 
-curl -X POST http://localhost:3000/reset-password \
+curl -X POST http://localhost:3000/auth/reset-password \
   -H "Content-Type: application/json" \
   -d "{
     \"token\": \"$TOKEN\",

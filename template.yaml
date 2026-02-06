@@ -176,13 +176,13 @@ Resources:
         RegisterUser:
           Type: Api
           Properties:
-            Path: /register
+            Path: /auth/register
             Method: post
             RestApiId: !Ref ServerlessRestApi
         RegisterUserOptions:
           Type: Api
           Properties:
-            Path: /register
+            Path: /auth/register
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -206,13 +206,13 @@ Resources:
         LoginUser:
           Type: Api
           Properties:
-            Path: /login
+            Path: /auth/login
             Method: post
             RestApiId: !Ref ServerlessRestApi
         LoginUserOptions:
           Type: Api
           Properties:
-            Path: /login
+            Path: /auth/login
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -249,13 +249,13 @@ Resources:
         ForgotPassword:
           Type: Api
           Properties:
-            Path: /forgot-password
+            Path: /auth/forgot-password
             Method: post
             RestApiId: !Ref ServerlessRestApi
         ForgotPasswordOptions:
           Type: Api
           Properties:
-            Path: /forgot-password
+            Path: /auth/forgot-password
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -281,13 +281,13 @@ Resources:
         ResetPassword:
           Type: Api
           Properties:
-            Path: /reset-password
+            Path: /auth/reset-password
             Method: post
             RestApiId: !Ref ServerlessRestApi
         ResetPasswordOptions:
           Type: Api
           Properties:
-            Path: /reset-password
+            Path: /auth/reset-password
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -319,13 +319,13 @@ Resources:
         GenerateTaxDocument:
           Type: Api
           Properties:
-            Path: /generate
+            Path: /documents/generate
             Method: post
             RestApiId: !Ref ServerlessRestApi
         GenerateTaxDocumentOptions:
           Type: Api
           Properties:
-            Path: /generate
+            Path: /documents/generate
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -381,7 +381,7 @@ Outputs:
     Value: !GetAtt RateLimits.Arn
   UserRegistrationApi:
     Description: API Gateway endpoint URL for Prod stage for User Registration function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/register/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/register/"
   UserRegistrationFunction:
     Description: User Registration Lambda Function ARN
     Value: !GetAtt UserRegistrationFunction.Arn
@@ -390,7 +390,7 @@ Outputs:
     Value: !GetAtt UserRegistrationFunctionRole.Arn
   UserLoginApi:
     Description: API Gateway endpoint URL for Prod stage for User Login function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/login/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/login/"
   UserLoginFunction:
     Description: User Login Lambda Function ARN
     Value: !GetAtt UserLoginFunction.Arn
@@ -399,7 +399,7 @@ Outputs:
     Value: !GetAtt UserLoginFunctionRole.Arn
   ForgotPasswordApi:
     Description: API Gateway endpoint URL for Prod stage for Forgot Password function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/forgot-password/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/forgot-password/"
   ForgotPasswordFunction:
     Description: Forgot Password Lambda Function ARN
     Value: !GetAtt ForgotPasswordFunction.Arn
@@ -408,7 +408,7 @@ Outputs:
     Value: !GetAtt ForgotPasswordFunctionRole.Arn
   ResetPasswordApi:
     Description: API Gateway endpoint URL for Prod stage for Reset Password function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/reset-password/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/reset-password/"
   ResetPasswordFunction:
     Description: Reset Password Lambda Function ARN
     Value: !GetAtt ResetPasswordFunction.Arn
@@ -433,7 +433,7 @@ Outputs:
     Value: !GetAtt TaxDocumentJobs.Arn
   GenerateTaxDocumentApi:
     Description: API Gateway endpoint URL for Prod stage for Generate Tax Document function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/generate/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/documents/generate/"
   GenerateTaxDocumentFunction:
     Description: Generate Tax Document Lambda Function ARN
     Value: !GetAtt GenerateTaxDocumentFunction.Arn

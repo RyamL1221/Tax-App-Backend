@@ -30,11 +30,11 @@
               "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"name\": \"John Doe\",\n  \"password\": \"SecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Register a new user with valid email, name, and strong password"
           },
@@ -55,11 +55,11 @@
               "raw": "{\n  \"email\": \"not-an-email\",\n  \"name\": \"Test User\",\n  \"password\": \"SecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Invalid email format"
           },
@@ -80,11 +80,11 @@
               "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"name\": \"Jane Doe\",\n  \"password\": \"AnotherPass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Email already registered"
           },
@@ -105,11 +105,11 @@
               "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"name\": \"New User\",\n  \"password\": \"weak\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Password must be at least 8 characters"
           },
@@ -130,11 +130,11 @@
               "raw": "{\n  \"email\": \"newuser2@example.com\",\n  \"name\": \"New User 2\",\n  \"password\": \"password123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Password must contain uppercase letter"
           },
@@ -155,11 +155,11 @@
               "raw": "{\n  \"email\": \"newuser3@example.com\",\n  \"name\": \"New User 3\",\n  \"password\": \"PASSWORD123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Password must contain lowercase letter"
           },
@@ -180,11 +180,11 @@
               "raw": "{\n  \"email\": \"newuser4@example.com\",\n  \"name\": \"New User 4\",\n  \"password\": \"PasswordOnly!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Password must contain number"
           },
@@ -205,11 +205,11 @@
               "raw": "{\n  \"email\": \"newuser5@example.com\",\n  \"name\": \"New User 5\",\n  \"password\": \"Password123\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Password must contain special character"
           },
@@ -230,11 +230,11 @@
               "raw": "{\n  \"name\": \"Test User\",\n  \"password\": \"SecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Email is required"
           },
@@ -255,11 +255,11 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Name is required"
           },
@@ -280,11 +280,11 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"name\": \"Test User\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Password is required"
           },
@@ -305,11 +305,11 @@
               "raw": "{}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - All fields are required"
           },
@@ -330,11 +330,11 @@
               "raw": "{\n  \"email\": \"\",\n  \"name\": \"Test User\",\n  \"password\": \"SecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Email cannot be empty"
           },
@@ -355,11 +355,11 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"name\": \"\",\n  \"password\": \"SecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Name cannot be empty"
           },
@@ -380,11 +380,11 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"name\": \"Test User\",\n  \"password\": \"\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/register",
+              "raw": "http://localhost:3000/auth/register",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["register"]
+              "path": ["auth", "register"]
             },
             "description": "Should return 400 - Password cannot be empty"
           },
@@ -426,11 +426,11 @@
               "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/login",
+              "raw": "http://localhost:3000/auth/login",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["login"]
+              "path": ["auth", "login"]
             },
             "description": "Login and automatically save JWT token to collection variable"
           },
@@ -451,11 +451,11 @@
               "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"WrongPassword123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/login",
+              "raw": "http://localhost:3000/auth/login",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["login"]
+              "path": ["auth", "login"]
             }
           },
           "response": []
@@ -475,11 +475,11 @@
               "raw": "{\n  \"email\": \"nonexistent@example.com\",\n  \"password\": \"SomePassword123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/login",
+              "raw": "http://localhost:3000/auth/login",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["login"]
+              "path": ["auth", "login"]
             }
           },
           "response": []
@@ -504,11 +504,11 @@
               "raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/forgot-password",
+              "raw": "http://localhost:3000/auth/forgot-password",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["forgot-password"]
+              "path": ["auth", "forgot-password"]
             },
             "description": "Request a password reset token. Check LocalStack logs for the email with reset token."
           },
@@ -529,11 +529,11 @@
               "raw": "{\n  \"email\": \"nonexistent@example.com\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/forgot-password",
+              "raw": "http://localhost:3000/auth/forgot-password",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["forgot-password"]
+              "path": ["auth", "forgot-password"]
             },
             "description": "Returns same response as existing user (non-enumeration protection)"
           },
@@ -554,11 +554,11 @@
               "raw": "{\n  \"email\": \"not-an-email\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/forgot-password",
+              "raw": "http://localhost:3000/auth/forgot-password",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["forgot-password"]
+              "path": ["auth", "forgot-password"]
             }
           },
           "response": []
@@ -578,11 +578,11 @@
               "raw": "{\n  \"token\": \"PASTE_TOKEN_FROM_LOCALSTACK_LOGS_HERE\",\n  \"new_password\": \"NewSecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/reset-password",
+              "raw": "http://localhost:3000/auth/reset-password",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["reset-password"]
+              "path": ["auth", "reset-password"]
             },
             "description": "Reset password using token from forgot-password email. Get token from LocalStack logs."
           },
@@ -603,11 +603,11 @@
               "raw": "{\n  \"token\": \"invalid-token-12345\",\n  \"new_password\": \"NewSecurePass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/reset-password",
+              "raw": "http://localhost:3000/auth/reset-password",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["reset-password"]
+              "path": ["auth", "reset-password"]
             }
           },
           "response": []
@@ -627,11 +627,11 @@
               "raw": "{\n  \"token\": \"PASTE_TOKEN_FROM_LOCALSTACK_LOGS_HERE\",\n  \"new_password\": \"weak\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/reset-password",
+              "raw": "http://localhost:3000/auth/reset-password",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["reset-password"]
+              "path": ["auth", "reset-password"]
             }
           },
           "response": []
@@ -651,11 +651,11 @@
               "raw": "{\n  \"token\": \"PASTE_ALREADY_USED_TOKEN_HERE\",\n  \"new_password\": \"AnotherNewPass123!\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/reset-password",
+              "raw": "http://localhost:3000/auth/reset-password",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["reset-password"]
+              "path": ["auth", "reset-password"]
             },
             "description": "Attempt to reuse a token that was already used. Should fail."
           },
@@ -686,11 +686,11 @@
               "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Vanguard Investments\",\n    \"payerStreetAddress\": \"100 Vanguard Blvd\",\n    \"payerCity\": \"Malvern\",\n    \"payerState\": \"PA\",\n    \"payerCountry\": \"USA\",\n    \"payerZip\": \"19355\",\n    \"payerPhone\": \"800-662-7447\",\n    \"payerTIN\": \"23-1945930\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"John Doe\",\n    \"recipientStreetAddress\": \"456 Main St, Apt 2B\",\n    \"recipientCity\": \"Boston\",\n    \"recipientState\": \"MA\",\n    \"recipientCountry\": \"USA\",\n    \"recipientZip\": \"02101\",\n    \"accountNumber\": \"12345678\",\n    \"calendarYear\": \"2025\",\n    \"totalOrdinaryDividends\": 5000.00,\n    \"qualifiedDividends\": 3000.00,\n    \"totalCapitalGainDistributions\": 1500.00,\n    \"federalIncomeTaxWithheld\": 500.00,\n    \"section199ADividends\": 2000.00\n  }\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/Prod/generate",
+              "raw": "http://localhost:3000/documents/generate",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["Prod", "generate"]
+              "path": ["documents", "generate"]
             },
             "description": "Generate a complete Form 1099-DIV with payer, recipient, and dividend information. Requires JWT token from login."
           },
@@ -715,11 +715,11 @@
               "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Fidelity Investments\",\n    \"payerTIN\": \"04-3232190\",\n    \"recipientTIN\": \"987-65-4321\",\n    \"recipientName\": \"Jane Smith\",\n    \"totalOrdinaryDividends\": 1250.50\n  }\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/Prod/generate",
+              "raw": "http://localhost:3000/documents/generate",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["Prod", "generate"]
+              "path": ["documents", "generate"]
             },
             "description": "Generate Form 1099-DIV with only required fields (minimal data)"
           },
@@ -744,11 +744,11 @@
               "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"International Fund LLC\",\n    \"payerTIN\": \"98-7654321\",\n    \"recipientTIN\": \"555-66-7777\",\n    \"recipientName\": \"Alice Johnson\",\n    \"totalOrdinaryDividends\": 8000.00,\n    \"qualifiedDividends\": 6000.00,\n    \"foreignTaxPaid\": 800.00,\n    \"foreignCountry\": \"Canada\"\n  }\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/Prod/generate",
+              "raw": "http://localhost:3000/documents/generate",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["Prod", "generate"]
+              "path": ["documents", "generate"]
             },
             "description": "Generate Form 1099-DIV with foreign tax paid"
           },
@@ -773,11 +773,11 @@
               "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerTIN\": \"12-3456789\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"Test User\",\n    \"totalOrdinaryDividends\": 1000\n  }\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/Prod/generate",
+              "raw": "http://localhost:3000/documents/generate",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["Prod", "generate"]
+              "path": ["documents", "generate"]
             },
             "description": "Should return 400 - Missing required field: payerName"
           },
@@ -802,11 +802,11 @@
               "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Test Company\",\n    \"payerTIN\": \"123456789\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"Test User\",\n    \"totalOrdinaryDividends\": 1000\n  }\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/Prod/generate",
+              "raw": "http://localhost:3000/documents/generate",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["Prod", "generate"]
+              "path": ["documents", "generate"]
             },
             "description": "Should return 400 - TIN must be in format XX-XXXXXXX"
           },
@@ -831,11 +831,11 @@
               "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Test Company\",\n    \"payerTIN\": \"12-3456789\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"Test User\",\n    \"totalOrdinaryDividends\": 1000\n  }\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/Prod/generate",
+              "raw": "http://localhost:3000/documents/generate",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["Prod", "generate"]
+              "path": ["documents", "generate"]
             },
             "description": "Should return 401 - Invalid JWT token"
           },
@@ -856,11 +856,11 @@
               "raw": "{\n  \"documentType\": \"1099-DIV\",\n  \"formData\": {\n    \"payerName\": \"Test Company\",\n    \"payerTIN\": \"12-3456789\",\n    \"recipientTIN\": \"123-45-6789\",\n    \"recipientName\": \"Test User\",\n    \"totalOrdinaryDividends\": 1000\n  }\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/Prod/generate",
+              "raw": "http://localhost:3000/documents/generate",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["Prod", "generate"]
+              "path": ["documents", "generate"]
             },
             "description": "Should return 401 - Missing Authorization header"
           },
@@ -885,11 +885,11 @@
               "raw": "{\n  \"documentType\": \"1040\",\n  \"formData\": {\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"ssn\": \"123-45-6789\",\n    \"filingStatus\": \"single\",\n    \"income\": 50000\n  }\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/Prod/generate",
+              "raw": "http://localhost:3000/documents/generate",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["Prod", "generate"]
+              "path": ["documents", "generate"]
             },
             "description": "Should return 404 - Template not found (1040.pdf doesn't exist in S3)"
           },
