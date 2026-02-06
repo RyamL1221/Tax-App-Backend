@@ -41,8 +41,129 @@ FIELD_RENDERING_CONFIG = {
         'default_font_size': 10.0,
         'min_font_size': 8.0,
         'max_font_size': 12.0,
+    },
+    # Special config for very small fields (< 30 points wide)
+    'SmallField': {
+        'default_font_size': 6.0,
+        'min_font_size': 5.0,
+        'max_font_size': 7.0,
     }
 }
+
+# Threshold for small field detection (in points)
+SMALL_FIELD_WIDTH_THRESHOLD = 30.0
+
+
+def check_field_flags(widget: fitz.Widget) -> Dict[str, any]:
+    """
+    Check field flags and return status dictionary.
+    
+    This function examines the field_flags bitmask on a PDF widget to determine
+    which flags are set. Common flags include:
+    - Bit 0: READ-ONLY - Field cannot be modified
+    - Bit 1: HIDDEN - Field is not visible
+    - Bit 2: REQUIRED - Field must be filled
+    
+    Args:
+        widget: PyMuPDF widget object representing a form field
+        
+    Returns:
+        Dictionary with flag status:
+        {
+            'is_readonly': bool,  # True if READ-ONLY flag is set
+            'is_hidden': bool,    # True if HIDDEN flag is set
+            'is_required': bool,  # True if REQUIRED flag is set
+            'flags_value': int    # Raw flags bitmask value
+        }
+        
+    Requirements: 4.1, 4.2
+    
+    Example:
+        >>> widget = page.widgets()[0]
+        >>> flags = check_field_flags(widget)
+        >>> if flags['is_readonly']:
+        ...     print(f"Field is read-only, flags: {flags['flags_value']}")
+    """
+    flags_value = widget.field_flags
+    
+    return {
+        'is_readonly': bool(flags_value & (1 << 0)),  # Bit 0
+        'is_hidden': bool(flags_value & (1 << 1)),    # Bit 1
+        'is_required': bool(flags_value & (1 << 2)),  # Bit 2
+        'flags_value': flags_value
+    }
+
+
+def clear_readonly_flag(widget: fitz.Widget) -> bool:
+    """
+    Clear the READ-ONLY flag from a field widget.
+    
+    The READ-ONLY flag (bit 0 of field_flags) prevents modification of a field.
+    This function clears that flag using bitwise AND with the complement of the
+    READ-ONLY bit mask, then calls widget.update() to apply the change.
+    
+    Args:
+        widget: PyMuPDF widget object representing a form field
+        
+    Returns:
+        True if the READ-ONLY flag was cleared (it was previously set),
+        False if no action was needed (flag was not set)
+        
+    Requirements: 6.1, 6.2
+    
+    Example:
+        >>> widget = page.widgets()[0]
+        >>> if widget.field_flags & (1 << 0):
+        ...     print("Field is read-only")
+        ...     cleared = clear_readonly_flag(widget)
+        ...     print(f"Flag cleared: {cleared}")
+    """
+    # Check if READ-ONLY flag is set (bit 0)
+    is_readonly = bool(widget.field_flags & (1 << 0))
+    
+    if is_readonly:
+        # Clear READ-ONLY flag using bitwise AND with complement
+        widget.field_flags = widget.field_flags & ~(1 << 0)
+        widget.update()
+        return True
+    
+    return False
+
+
+def clear_hidden_flag(widget: fitz.Widget) -> bool:
+    """
+    Clear the HIDDEN flag from a field widget.
+    
+    The HIDDEN flag (bit 1 of field_flags) makes a field invisible.
+    This function clears that flag using bitwise AND with the complement of the
+    HIDDEN bit mask, then calls widget.update() to apply the change.
+    
+    Args:
+        widget: PyMuPDF widget object representing a form field
+        
+    Returns:
+        True if the HIDDEN flag was cleared (it was previously set),
+        False if no action was needed (flag was not set)
+        
+    Requirements: 4.2
+    
+    Example:
+        >>> widget = page.widgets()[0]
+        >>> if widget.field_flags & (1 << 1):
+        ...     print("Field is hidden")
+        ...     cleared = clear_hidden_flag(widget)
+        ...     print(f"Flag cleared: {cleared}")
+    """
+    # Check if HIDDEN flag is set (bit 1)
+    is_hidden = bool(widget.field_flags & (1 << 1))
+    
+    if is_hidden:
+        # Clear HIDDEN flag using bitwise AND with complement
+        widget.field_flags = widget.field_flags & ~(1 << 1)
+        widget.update()
+        return True
+    
+    return False
 
 
 def calculate_font_size(
@@ -387,7 +508,48 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
         logger.info("Flattening PDF form fields to static text for Adobe Reader compatibility")
         logger.info("Note: Fields will be non-editable but visible in all PDF viewers")
         
-        # Step 1: Set checkbox values and collect text field data
+        # Step 1: Check and clear field flags that prevent modification
+        logger.info("Checking and clearing field flags that prevent modification...")
+        flags_cleared_count = 0
+        
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            widgets = list(page.widgets())
+            
+            for widget in widgets:
+                field_name = widget.field_name
+                if field_name in mapped_data:
+                    # Check field flags
+                    flags = check_field_flags(widget)
+                    
+                    # Log calendar year fields specifically
+                    if "CalendarYear[0]" in field_name:
+                        logger.info(f"Processing calendar year field '{field_name}'")
+                        logger.info(f"  Dimensions: {widget.rect.width:.1f}x{widget.rect.height:.1f} points")
+                        logger.info(f"  Field flags: {flags['flags_value']}")
+                        logger.info(f"  Is READ-ONLY: {flags['is_readonly']}")
+                        logger.info(f"  Is HIDDEN: {flags['is_hidden']}")
+                    
+                    # Clear READ-ONLY flag if present
+                    if flags['is_readonly']:
+                        logger.warning(f"Field '{field_name}' is READ-ONLY, clearing flag")
+                        if clear_readonly_flag(widget):
+                            flags_cleared_count += 1
+                            logger.info(f"  Cleared READ-ONLY flag, new flags value: {widget.field_flags}")
+                    
+                    # Clear HIDDEN flag if present
+                    if flags['is_hidden']:
+                        logger.warning(f"Field '{field_name}' is HIDDEN, clearing flag")
+                        if clear_hidden_flag(widget):
+                            flags_cleared_count += 1
+                            logger.info(f"  Cleared HIDDEN flag, new flags value: {widget.field_flags}")
+        
+        if flags_cleared_count > 0:
+            logger.info(f"Cleared flags on {flags_cleared_count} field(s)")
+        else:
+            logger.info("No problematic field flags found")
+        
+        # Step 2: Set checkbox values and collect text field data
         fields_to_flatten = []
         checkbox_count = 0
         
@@ -453,7 +615,7 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
         
         logger.info(f"Set {checkbox_count} checkbox(es) and prepared {len(fields_to_flatten)} text fields for flattening")
         
-        # Step 2: Insert static text at field locations using built-in Helvetica font
+        # Step 3: Insert static text at field locations using built-in Helvetica font
         populated_count = 0
         failed_fields = []
         
@@ -470,6 +632,10 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                 field_name = field_data['field_name']
                 rect = field_data['rect']
                 value = field_data['value']
+                
+                # Enhanced logging for calendar year fields
+                if "CalendarYear[0]" in field_name:
+                    logger.info(f"Filling calendar year field '{field_name}' with value '{value}'")
                 
                 # Determine which copy this field belongs to
                 copy_id = None
@@ -488,6 +654,11 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                     column_type = 'RghtCol'
                 elif 'CopyHeader' in field_name:
                     column_type = 'CopyHeader'
+                
+                # Check if this is a small field (< 30 points wide)
+                if rect.width < SMALL_FIELD_WIDTH_THRESHOLD:
+                    logger.info(f"Small field detected ({rect.width:.1f}x{rect.height:.1f}), using SmallField config")
+                    column_type = 'SmallField'
                 
                 # Look up rendering config for this column
                 config = FIELD_RENDERING_CONFIG.get(column_type, FIELD_RENDERING_CONFIG['LeftCol'])
@@ -519,6 +690,10 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                         logger.debug(f"Successfully populated {copy_id} field '{field_name}' with value '{value}'")
                     else:
                         logger.debug(f"Flattened field '{field_name}' with value '{value}'")
+                    
+                    # Enhanced logging for calendar year fields
+                    if "CalendarYear[0]" in field_name:
+                        logger.info(f"  ✅ Successfully filled calendar year field '{field_name}'")
                 else:
                     if copy_id:
                         copy_stats[copy_id]['failed'].append(field_name)
@@ -526,6 +701,10 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                     else:
                         logger.warning(f"Failed to insert text for field '{field_name}'")
                     failed_fields.append(field_name)
+                    
+                    # Enhanced logging for calendar year fields
+                    if "CalendarYear[0]" in field_name:
+                        logger.error(f"  ❌ Failed to fill calendar year field '{field_name}'")
                     
             except Exception as e:
                 field_name = field_data['field_name']
@@ -546,7 +725,7 @@ def generate_document(template: bytes, form_data: Dict, document_type: str) -> b
                     logger.warning(f"Failed to flatten field '{field_name}': {str(e)}")
                 failed_fields.append(field_name)
         
-        # Step 3: Remove form field widgets (convert to static content)
+        # Step 4: Remove form field widgets (convert to static content)
         logger.info("Removing form field widgets (converting to static content)...")
         removed_count = 0
         

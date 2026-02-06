@@ -220,23 +220,24 @@ class TestFieldMapperUnit:
         # Map the fields
         result = mapper.map_all_fields(form_data)
         
-        # Verify only valid fields are in the result (2 API fields × 3 copies = 6 PDF fields)
-        assert len(result) == 6, \
-            "Result should contain 6 PDF fields (2 API fields × 3 copies each)"
+        # Verify only valid fields are in the result (2 API fields × 4 copies = 8 PDF fields)
+        assert len(result) == 8, \
+            "Result should contain 8 PDF fields (2 API fields × 4 copies each)"
         
         # Verify the invalid field is not in the result
         for key in result.keys():
             assert key != "invalidField", \
                 "Invalid field should not be in the result"
         
-        # Verify all three copies are present for each valid field
-        payer_name_copies = [k for k in result.keys() if "f2_2[0]" in k]
-        assert len(payer_name_copies) == 3, \
-            "Should have 3 copies of payerName field"
+        # Verify all four copies are present for each valid field
+        # Note: CopyA uses f1_ pattern while others use f2_ pattern
+        payer_name_copies = [k for k in result.keys() if ("f2_2[0]" in k or "f1_2[0]" in k)]
+        assert len(payer_name_copies) == 4, \
+            f"Should have 4 copies of payerName field, got {len(payer_name_copies)}: {payer_name_copies}"
         
-        dividends_copies = [k for k in result.keys() if "f2_9[0]" in k]
-        assert len(dividends_copies) == 3, \
-            "Should have 3 copies of totalOrdinaryDividends field"
+        dividends_copies = [k for k in result.keys() if ("f2_9[0]" in k or "f1_9[0]" in k)]
+        assert len(dividends_copies) == 4, \
+            f"Should have 4 copies of totalOrdinaryDividends field, got {len(dividends_copies)}: {dividends_copies}"
     
     def test_get_unmapped_fields_returns_correct_list(self):
         """

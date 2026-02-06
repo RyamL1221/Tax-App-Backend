@@ -108,16 +108,17 @@ class FieldMapper:
         Generate field name variants for all form copies.
         
         Takes a Copy1 PDF field name and generates corresponding field names
-        for Copy2 and CopyB by replacing the copy prefix while preserving
-        all other path components.
+        for CopyA, Copy2, and CopyB by replacing the copy prefix while preserving
+        all other path components. CopyA uses a different field name pattern
+        (f1_ instead of f2_) which is handled automatically.
         
         Args:
             pdf_field_name: The Copy1 PDF field name
             
         Returns:
-            List of field names for Copy1, Copy2, and CopyB. If the field name
-            doesn't contain "Copy1[0]", returns a list with only the original
-            field name.
+            List of field names for CopyA, Copy1, Copy2, and CopyB (in that order).
+            If the field name doesn't contain "Copy1[0]", returns a list with only
+            the original field name.
             
         Requirements: 1.1, 1.2, 1.4, 2.1, 2.2, 2.3, 2.4
         """
@@ -129,17 +130,22 @@ class FieldMapper:
             )
             return [pdf_field_name]
         
-        # Generate variants by replacing Copy1[0] with Copy2[0] and CopyB[0]
+        # Generate Copy1, Copy2, CopyB variants (existing logic)
         copy1_name = pdf_field_name
         copy2_name = pdf_field_name.replace("Copy1[0]", "Copy2[0]")
         copyb_name = pdf_field_name.replace("Copy1[0]", "CopyB[0]")
         
+        # Generate CopyA variant (new logic)
+        # Replace Copy1[0] with CopyA[0] and f2_ with f1_
+        copyA_name = pdf_field_name.replace("Copy1[0]", "CopyA[0]")
+        copyA_name = copyA_name.replace("f2_", "f1_")
+        
         logger.debug(
             f"Generated copy variants for field: "
-            f"Copy1='{copy1_name}', Copy2='{copy2_name}', CopyB='{copyb_name}'"
+            f"CopyA='{copyA_name}', Copy1='{copy1_name}', Copy2='{copy2_name}', CopyB='{copyb_name}'"
         )
         
-        return [copy1_name, copy2_name, copyb_name]
+        return [copyA_name, copy1_name, copy2_name, copyb_name]
     
     def map_field(self, api_field_name: str) -> Optional[str]:
         """

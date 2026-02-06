@@ -76,6 +76,9 @@ All other fields are optional and may be omitted if not applicable.
 - **Validation:** Must be a 4-digit year (e.g., "2024")
 - **Example:** `"2024"`
 - **Description:** The tax year for which this form is being filed.
+- **Multi-Copy:** This field appears on all four copies of the form (CopyA, Copy1, Copy2, CopyB) to ensure IRS compliance.
+- **Field Flags:** The CopyA calendar year field has a READ-ONLY flag set in the PDF template, which is automatically cleared by the document generator before filling.
+- **Rendering:** Calendar year fields are very small (28.8×10.0 points) and use a minimum font size of 5.0pt for proper rendering.
 
 ### Payer Information
 
@@ -438,7 +441,8 @@ The 1099-DIV form supports reporting state tax information for up to **two state
 ## Notes
 
 - All monetary values should be provided as strings with 2 decimal places
-- The form generates three copies automatically (Copy A, Copy B, Copy C)
+- The form generates four copies automatically (CopyA for IRS, Copy1 for recipient, Copy2 for state, CopyB for payer)
+- The calendar year field appears on all four copies to ensure IRS compliance
 - Field names use camelCase convention for consistency
 - Payer fields are prefixed with "payer"
 - Recipient fields are prefixed with "recipient"
@@ -508,3 +512,114 @@ The 1099-DIV form supports reporting state tax information for up to **two state
 - If only one state is applicable, only use the first set of fields (without the "2" suffix)
 - Both states are optional - you can omit state tax information entirely if not applicable
 - Each state's fields should be provided together (state, ID, and tax withheld)
+
+
+## PDF Field Flags and Rendering
+
+### Field Flags
+
+Some fields in the IRS 1099-DIV PDF template have special flags that affect how they can be modified:
+
+#### READ-ONLY Flag
+
+- **Affected Fields:** CopyA calendar year field (`topmostSubform[0].CopyA[0].CopyHeader[0].CalendarYear[0].f1_1[0]`)
+- **Flag Value:** Bit 0 of the field_flags bitmask
+- **Impact:** Prevents modification of the field value
+- **Solution:** The document generator automatically detects and clears READ-ONLY flags before filling fields
+
+#### HIDDEN Flag
+
+- **Flag Value:** Bit 1 of the field_flags bitmask
+- **Impact:** Makes the field invisible in PDF viewers
+- **Solution:** The document generator automatically detects and clears HIDDEN flags if present
+
+### Small Field Rendering
+
+Some fields in the 1099-DIV form are very small and require special handling:
+
+#### Calendar Year Fields
+
+- **Dimensions:** 28.8×10.0 points (very small)
+- **Font Size:** Minimum 5.0pt, maximum 7.0pt
+- **Rendering Strategy:** Uses SmallField configuration with adaptive font sizing
+- **Fallback:** If text doesn't fit at calculated size, reduces font size in 1pt increments (up to 3 attempts)
+
+### Field Flag Handling Process
+
+The document generator follows this process for all fields:
+
+1. **Flag Detection:** Check field_flags bitmask for READ-ONLY and HIDDEN flags
+2. **Flag Clearing:** Clear problematic flags using bitwise operations
+3. **Widget Update:** Call widget.update() to apply flag changes
+4. **Field Filling:** Proceed with normal field filling process
+5. **Logging:** Log all flag operations for debugging
+
+### Diagnostic Tools
+
+For debugging field flag issues, use the inspection script:
+
+```bash
+python tax_document_generation/inspect_calendar_year_fields.py
+```
+
+This script provides:
+- Field names and dimensions
+- Field flag values and status
+- READ-ONLY and HIDDEN flag detection
+- Actionable diagnostic information
+
+### Technical Details
+
+#### Field Flag Bitmask
+
+```python
+# PyMuPDF field flag bit positions
+FIELD_FLAG_READONLY = 1 << 0   # Bit 0: Read-only
+FIELD_FLAG_HIDDEN = 1 << 1     # Bit 1: Hidden
+FIELD_FLAG_REQUIRED = 1 << 2   # Bit 2: Required
+FIELD_FLAG_NOEXPORT = 1 << 3   # Bit 3: No export
+```
+
+#### Clearing Flags
+
+```python
+# Clear READ-ONLY flag (bit 0)
+widget.field_flags = widget.field_flags & ~(1 << 0)
+widget.update()
+
+# Clear HIDDEN flag (bit 1)
+widget.field_flags = widget.field_flags & ~(1 << 1)
+widget.update()
+```
+
+### Known Issues and Solutions
+
+#### Issue: Calendar Year Not Visible
+
+**Symptoms:**
+- Calendar year field appears empty in generated PDF
+- Field exists in PDF but has no visible value
+
+**Root Cause:**
+- CopyA calendar year field has READ-ONLY flag set
+- Small field dimensions (28.8×10.0 points) require special font sizing
+
+**Solution:**
+- Document generator automatically clears READ-ONLY flag
+- Uses SmallField configuration with 5.0pt minimum font size
+- Applies adaptive font sizing with fallback
+
+**Verification:**
+```bash
+# Generate test PDF
+python tax_document_generation/generate_calendar_year_test_pdf.py
+
+# Verify calendar year appears on all 4 copies
+python tax_document_generation/verify_debug_pdf.py
+```
+
+## Related Documentation
+
+- [Field Mapping Corrections](FIELD_MAPPING_CORRECTIONS.md) - History of field mapping fixes
+- [Field Inspection Findings](FIELD_INSPECTION_FINDINGS.md) - Detailed field analysis
+- [Migration Guide](MIGRATION_GUIDE_FIELD_STANDARDIZATION.md) - Field standardization migration

@@ -18,13 +18,14 @@ class TestFieldNameTransformationUnit:
         """
         **Validates: Requirements 2.1, 2.2, 2.3**
         
-        Verify that a valid Copy1 field name generates three variants.
+        Verify that a valid Copy1 field name generates four variants.
         
         This test verifies that:
-        1. Copy1 field name is preserved
-        2. Copy2 variant is generated correctly
-        3. CopyB variant is generated correctly
-        4. All three variants are returned
+        1. CopyA variant is generated correctly (with f1_ pattern)
+        2. Copy1 field name is preserved
+        3. Copy2 variant is generated correctly
+        4. CopyB variant is generated correctly
+        5. All four variants are returned
         """
         # Initialize the field mapper
         mapper = FieldMapper("1099-DIV")
@@ -35,21 +36,25 @@ class TestFieldNameTransformationUnit:
         # Generate variants
         variants = mapper._generate_copy_variants(copy1_field)
         
-        # Verify we get exactly 3 variants
-        assert len(variants) == 3, \
-            "Should generate exactly 3 variants (Copy1, Copy2, CopyB)"
+        # Verify we get exactly 4 variants
+        assert len(variants) == 4, \
+            "Should generate exactly 4 variants (CopyA, Copy1, Copy2, CopyB)"
+        
+        # Verify CopyA is generated correctly (with f1_ instead of f2_)
+        assert variants[0] == "topmostSubform[0].CopyA[0].LeftCol[0].f1_2[0]", \
+            "First variant should be CopyA with f1_ pattern"
         
         # Verify Copy1 is preserved
-        assert variants[0] == "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]", \
-            "First variant should be the original Copy1 field"
+        assert variants[1] == "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]", \
+            "Second variant should be the original Copy1 field"
         
         # Verify Copy2 is generated correctly
-        assert variants[1] == "topmostSubform[0].Copy2[0].LeftCol[0].f2_2[0]", \
-            "Second variant should have Copy2[0] instead of Copy1[0]"
+        assert variants[2] == "topmostSubform[0].Copy2[0].LeftCol[0].f2_2[0]", \
+            "Third variant should have Copy2[0] instead of Copy1[0]"
         
         # Verify CopyB is generated correctly
-        assert variants[2] == "topmostSubform[0].CopyB[0].LeftCol[0].f2_2[0]", \
-            "Third variant should have CopyB[0] instead of Copy1[0]"
+        assert variants[3] == "topmostSubform[0].CopyB[0].LeftCol[0].f2_2[0]", \
+            "Fourth variant should have CopyB[0] instead of Copy1[0]"
     
     def test_generate_copy_variants_without_copy1_pattern(self):
         """
@@ -133,17 +138,20 @@ class TestFieldNameTransformationUnit:
             # Generate variants
             variants = mapper._generate_copy_variants(malformed_field)
             
-            # For fields with Copy1[0], should generate 3 variants
+            # For fields with Copy1[0], should generate 4 variants
             if "Copy1[0]" in malformed_field:
-                assert len(variants) == 3, \
-                    f"Field '{malformed_field}' contains Copy1[0], should generate 3 variants"
+                assert len(variants) == 4, \
+                    f"Field '{malformed_field}' contains Copy1[0], should generate 4 variants"
                 
                 # Verify transformations occurred
-                assert "Copy2[0]" in variants[1], \
-                    f"Second variant should contain Copy2[0]"
+                assert "CopyA[0]" in variants[0], \
+                    f"First variant should contain CopyA[0]"
                 
-                assert "CopyB[0]" in variants[2], \
-                    f"Third variant should contain CopyB[0]"
+                assert "Copy2[0]" in variants[2], \
+                    f"Third variant should contain Copy2[0]"
+                
+                assert "CopyB[0]" in variants[3], \
+                    f"Fourth variant should contain CopyB[0]"
             else:
                 # For fields without Copy1[0], should return only original
                 assert len(variants) == 1, \
@@ -185,16 +193,21 @@ class TestFieldNameTransformationUnit:
             # All should contain Lines9-11[0]
             assert ".Lines9-11[0]." in variant, \
                 "All variants should contain Lines9-11[0]"
-            
-            # All should end with f2_15[0]
-            assert variant.endswith(".f2_15[0]"), \
-                "All variants should end with f2_15[0]"
         
-        # Verify only the copy prefix differs
-        assert variants[0].replace("Copy1[0]", "Copy2[0]") == variants[1], \
+        # Verify CopyA has f1_ pattern
+        assert "f1_15[0]" in variants[0], \
+            "CopyA variant should use f1_ pattern"
+        
+        # Verify Copy1, Copy2, CopyB have f2_ pattern
+        for i in [1, 2, 3]:
+            assert "f2_15[0]" in variants[i], \
+                f"Variant {i} should use f2_ pattern"
+        
+        # Verify only the copy prefix differs (accounting for f1_/f2_ difference)
+        assert variants[1].replace("Copy1[0]", "Copy2[0]") == variants[2], \
             "Copy2 variant should differ only in copy prefix"
         
-        assert variants[0].replace("Copy1[0]", "CopyB[0]") == variants[2], \
+        assert variants[1].replace("Copy1[0]", "CopyB[0]") == variants[3], \
             "CopyB variant should differ only in copy prefix"
     
     def test_generate_copy_variants_with_multiple_copy1_occurrences(self):
@@ -218,22 +231,29 @@ class TestFieldNameTransformationUnit:
         # Generate variants
         variants = mapper._generate_copy_variants(field_with_multiple)
         
-        # Verify we get 3 variants
-        assert len(variants) == 3, \
-            "Should generate 3 variants even with multiple Copy1[0] occurrences"
+        # Verify we get 4 variants
+        assert len(variants) == 4, \
+            "Should generate 4 variants even with multiple Copy1[0] occurrences"
+        
+        # Verify all Copy1[0] occurrences are replaced in CopyA variant
+        assert "Copy1[0]" not in variants[0], \
+            "CopyA variant should not contain any Copy1[0]"
+        
+        assert variants[0].count("CopyA[0]") == 2, \
+            "CopyA variant should have CopyA[0] in all positions"
         
         # Verify all Copy1[0] occurrences are replaced in Copy2 variant
-        assert "Copy1[0]" not in variants[1], \
+        assert "Copy1[0]" not in variants[2], \
             "Copy2 variant should not contain any Copy1[0]"
         
-        assert variants[1].count("Copy2[0]") == 2, \
+        assert variants[2].count("Copy2[0]") == 2, \
             "Copy2 variant should have Copy2[0] in all positions"
         
         # Verify all Copy1[0] occurrences are replaced in CopyB variant
-        assert "Copy1[0]" not in variants[2], \
+        assert "Copy1[0]" not in variants[3], \
             "CopyB variant should not contain any Copy1[0]"
         
-        assert variants[2].count("CopyB[0]") == 2, \
+        assert variants[3].count("CopyB[0]") == 2, \
             "CopyB variant should have CopyB[0] in all positions"
     
     def test_generate_copy_variants_with_special_characters(self):
@@ -261,8 +281,14 @@ class TestFieldNameTransformationUnit:
             assert "Lines9-11[0]" in variant, \
                 "Hyphen in Lines9-11 should be preserved"
             
-            assert "f2_15[0]" in variant, \
-                "Underscore in f2_15 should be preserved"
-            
             assert "[0]" in variant, \
                 "Array indices should be preserved"
+        
+        # Verify CopyA uses f1_ pattern
+        assert "f1_15[0]" in variants[0], \
+            "CopyA should use f1_ pattern"
+        
+        # Verify Copy1, Copy2, CopyB use f2_ pattern
+        for i in [1, 2, 3]:
+            assert "f2_15[0]" in variants[i], \
+                f"Variant {i} should use f2_ pattern"

@@ -9,7 +9,7 @@ in the complete document generation workflow. It ensures that:
 - Recipient TIN appears in correct location (f2_8), NOT in account number field (f2_39)
 - City field remains empty when no city data provided
 - Account number field remains empty when no account data provided
-- All three copies (Copy1, Copy2, CopyB) are correctly populated
+- All four copies (CopyA, Copy1, Copy2, CopyB) are correctly populated
 """
 
 import pytest
@@ -24,7 +24,7 @@ from tax_document_generation.document_generator import generate_document
 
 def extract_field_values_by_copy(pdf_bytes: bytes) -> Dict[str, Dict[str, str]]:
     """
-    Extract field values grouped by copy (Copy1, Copy2, CopyB).
+    Extract field values grouped by copy (CopyA, Copy1, Copy2, CopyB).
     
     Args:
         pdf_bytes: PDF document as bytes
@@ -35,6 +35,7 @@ def extract_field_values_by_copy(pdf_bytes: bytes) -> Dict[str, Dict[str, str]]:
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
     
     copy_values = {
+        "CopyA": {},
         "Copy1": {},
         "Copy2": {},
         "CopyB": {}
@@ -52,7 +53,9 @@ def extract_field_values_by_copy(pdf_bytes: bytes) -> Dict[str, Dict[str, str]]:
                         field_value = widget.field_value or ""
                         
                         # Determine which copy this field belongs to
-                        if "Copy1[0]" in field_name:
+                        if "CopyA[0]" in field_name:
+                            copy_values["CopyA"][field_name] = field_value
+                        elif "Copy1[0]" in field_name:
                             copy_values["Copy1"][field_name] = field_value
                         elif "Copy2[0]" in field_name:
                             copy_values["Copy2"][field_name] = field_value
@@ -358,9 +361,13 @@ class TestCorrectedTINMappings:
                 assert value == "123456789", \
                     f"Account number field should have correct value in {copy_name}"
     
-    def test_all_three_copies_have_consistent_values(self):
+    def test_all_four_copies_have_consistent_values(self):
         """
-        Test that all three copies have consistent field values.
+        Test that all four copies have consistent field values.
+        
+        Note: This test checks Copy1, Copy2, and CopyB which share the same
+        field name pattern (f2_). CopyA uses a different pattern (f1_) but
+        should also have consistent values.
         
         Requirements: 3.2, 4.2, 5.2, 8.3
         """

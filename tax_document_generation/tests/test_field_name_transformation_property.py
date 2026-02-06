@@ -2,8 +2,9 @@
 Property-based tests for field name transformation in FieldMapper.
 
 These tests verify that the _generate_copy_variants() method correctly transforms
-Copy1 field names to Copy2 and CopyB variants while preserving all other path
-components. Each property test runs with a minimum of 100 iterations.
+Copy1 field names to CopyA, Copy2, and CopyB variants while preserving all other path
+components. CopyA uses f1_ pattern while others use f2_ pattern.
+Each property test runs with a minimum of 100 iterations.
 
 Feature: multi-page-form-filling
 Property 1: Field Name Transformation Correctness
@@ -103,12 +104,12 @@ class TestFieldNameTransformationProperty:
         # Generate variants
         variants = mapper._generate_copy_variants(copy1_field)
         
-        # Verify we get 3 variants
-        assert len(variants) == 3, \
-            f"Should generate 3 variants for Copy1 field, got {len(variants)}"
+        # Verify we get 4 variants
+        assert len(variants) == 4, \
+            f"Should generate 4 variants for Copy1 field, got {len(variants)}"
         
-        # Extract the Copy2 variant
-        copy2_field = variants[1]
+        # Extract the Copy2 variant (index 2)
+        copy2_field = variants[2]
         
         # CRITICAL VERIFICATION: Copy2 field should be identical to Copy1 except for the copy prefix
         expected_copy2 = copy1_field.replace("Copy1[0]", "Copy2[0]")
@@ -151,12 +152,12 @@ class TestFieldNameTransformationProperty:
         # Generate variants
         variants = mapper._generate_copy_variants(copy1_field)
         
-        # Verify we get 3 variants
-        assert len(variants) == 3, \
-            f"Should generate 3 variants for Copy1 field, got {len(variants)}"
+        # Verify we get 4 variants
+        assert len(variants) == 4, \
+            f"Should generate 4 variants for Copy1 field, got {len(variants)}"
         
-        # Extract the CopyB variant
-        copyb_field = variants[2]
+        # Extract the CopyB variant (index 3)
+        copyb_field = variants[3]
         
         # CRITICAL VERIFICATION: CopyB field should be identical to Copy1 except for the copy prefix
         expected_copyb = copy1_field.replace("Copy1[0]", "CopyB[0]")
@@ -178,20 +179,21 @@ class TestFieldNameTransformationProperty:
     
     @settings(max_examples=20)
     @given(copy1_field=copy1_field_name_strategy())
-    def test_all_three_variants_have_same_structure(self, copy1_field):
+    def test_all_four_variants_have_same_structure(self, copy1_field):
         """
         **Validates: Requirements 1.2, 1.4, 2.1, 2.2, 2.3**
         Feature: multi-page-form-filling, Property 1: Field Name Transformation Correctness
         
         For any Copy1 PDF field name containing "Copy1[0]",
-        all three variants (Copy1, Copy2, CopyB) should have identical structure
-        with only the copy prefix differing.
+        all four variants (CopyA, Copy1, Copy2, CopyB) should have identical structure
+        with only the copy prefix differing (and f1_/f2_ pattern for CopyA).
         
         This test verifies that:
-        1. All three variants are generated
+        1. All four variants are generated
         2. All variants have the same path structure
         3. Only the copy prefix differs between variants
-        4. No other transformations occur
+        4. CopyA uses f1_ pattern, others use f2_ pattern
+        5. No other transformations occur
         """
         # Initialize the field mapper
         mapper = FieldMapper("1099-DIV")
@@ -199,23 +201,29 @@ class TestFieldNameTransformationProperty:
         # Generate variants
         variants = mapper._generate_copy_variants(copy1_field)
         
-        # Verify we get exactly 3 variants
-        assert len(variants) == 3, \
-            f"Should generate exactly 3 variants, got {len(variants)}"
+        # Verify we get exactly 4 variants
+        assert len(variants) == 4, \
+            f"Should generate exactly 4 variants, got {len(variants)}"
         
-        copy1_variant = variants[0]
-        copy2_variant = variants[1]
-        copyb_variant = variants[2]
+        copyA_variant = variants[0]
+        copy1_variant = variants[1]
+        copy2_variant = variants[2]
+        copyb_variant = variants[3]
         
         # CRITICAL VERIFICATION: Copy1 variant should be unchanged
         assert copy1_variant == copy1_field, \
             f"Copy1 variant should be unchanged: '{copy1_field}' vs '{copy1_variant}'"
         
         # CRITICAL VERIFICATION: All variants should have the same structure
-        # Remove the copy prefix from each and verify they're identical
-        copy1_without_prefix = copy1_variant.replace("Copy1[0]", "COPY[0]")
-        copy2_without_prefix = copy2_variant.replace("Copy2[0]", "COPY[0]")
-        copyb_without_prefix = copyb_variant.replace("CopyB[0]", "COPY[0]")
+        # Remove the copy prefix from each and normalize f1_/f2_ to verify they're identical
+        copyA_without_prefix = copyA_variant.replace("CopyA[0]", "COPY[0]").replace("f1_", "fX_")
+        copy1_without_prefix = copy1_variant.replace("Copy1[0]", "COPY[0]").replace("f2_", "fX_")
+        copy2_without_prefix = copy2_variant.replace("Copy2[0]", "COPY[0]").replace("f2_", "fX_")
+        copyb_without_prefix = copyb_variant.replace("CopyB[0]", "COPY[0]").replace("f2_", "fX_")
+        
+        assert copyA_without_prefix == copy1_without_prefix, \
+            f"CopyA and Copy1 should have identical structure: " \
+            f"'{copyA_without_prefix}' vs '{copy1_without_prefix}'"
         
         assert copy1_without_prefix == copy2_without_prefix, \
             f"Copy1 and Copy2 should have identical structure: " \
@@ -226,6 +234,9 @@ class TestFieldNameTransformationProperty:
             f"'{copy1_without_prefix}' vs '{copyb_without_prefix}'"
         
         # Verify the copy prefixes are correct
+        assert "CopyA[0]" in copyA_variant, \
+            "CopyA variant should contain 'CopyA[0]'"
+        
         assert "Copy1[0]" in copy1_variant, \
             "Copy1 variant should contain 'Copy1[0]'"
         
@@ -244,7 +255,7 @@ class TestFieldNameTransformationProperty:
         
         For any Copy1 PDF field name with complex nested paths,
         all path components should be preserved exactly in all variants,
-        with only the copy prefix changing.
+        with only the copy prefix changing (and f1_/f2_ pattern for CopyA).
         
         This test verifies that:
         1. Complex nested paths are handled correctly
@@ -258,9 +269,9 @@ class TestFieldNameTransformationProperty:
         # Generate variants
         variants = mapper._generate_copy_variants(copy1_field)
         
-        # Verify we get 3 variants
-        assert len(variants) == 3, \
-            f"Should generate 3 variants for complex Copy1 field, got {len(variants)}"
+        # Verify we get 4 variants
+        assert len(variants) == 4, \
+            f"Should generate 4 variants for complex Copy1 field, got {len(variants)}"
         
         # Extract all path components from Copy1 (excluding the copy prefix)
         copy1_parts = copy1_field.split(".")
@@ -272,14 +283,20 @@ class TestFieldNameTransformationProperty:
                 f"Variant {i} should have {len(copy1_parts)} path components, " \
                 f"got {len(variant_parts)}"
             
-            # Verify all components except the copy prefix are identical
+            # Verify all components except the copy prefix are identical (accounting for f1_/f2_)
             for j, (copy1_part, variant_part) in enumerate(zip(copy1_parts, variant_parts)):
                 # Skip the copy prefix component
-                if "Copy1[0]" in copy1_part or "Copy2[0]" in variant_part or "CopyB[0]" in variant_part:
+                if "Copy1[0]" in copy1_part or "Copy2[0]" in variant_part or "CopyB[0]" in variant_part or "CopyA[0]" in variant_part:
                     continue
                 
-                assert copy1_part == variant_part, \
-                    f"Path component {j} should be identical: '{copy1_part}' vs '{variant_part}'"
+                # For CopyA (variant 0), f2_ becomes f1_
+                if i == 0:
+                    expected_part = copy1_part.replace("f2_", "f1_")
+                    assert variant_part == expected_part, \
+                        f"Path component {j} in CopyA should be '{expected_part}', got '{variant_part}'"
+                else:
+                    assert copy1_part == variant_part, \
+                        f"Path component {j} should be identical: '{copy1_part}' vs '{variant_part}'"
     
     @settings(max_examples=20)
     @given(
@@ -292,7 +309,7 @@ class TestFieldNameTransformationProperty:
         Feature: multi-page-form-filling, Property 1: Field Name Transformation Correctness
         
         For any Copy1 PDF field name,
-        the transformation to Copy2 and CopyB should be independent of any
+        the transformation to CopyA, Copy2, and CopyB should be independent of any
         associated field value.
         
         This test verifies that:
@@ -311,19 +328,22 @@ class TestFieldNameTransformationProperty:
         assert variants1 == variants2, \
             f"Same field name should always produce same variants"
         
-        # Verify we get 3 variants
-        assert len(variants1) == 3, \
-            f"Should generate 3 variants, got {len(variants1)}"
+        # Verify we get 4 variants
+        assert len(variants1) == 4, \
+            f"Should generate 4 variants, got {len(variants1)}"
         
         # Verify the variants are correct
-        assert variants1[0] == copy1_field, \
-            "First variant should be the original Copy1 field"
+        assert variants1[0] == copy1_field.replace("Copy1[0]", "CopyA[0]").replace("f2_", "f1_"), \
+            "First variant should be CopyA with f1_ pattern"
         
-        assert variants1[1] == copy1_field.replace("Copy1[0]", "Copy2[0]"), \
-            "Second variant should have Copy2[0]"
+        assert variants1[1] == copy1_field, \
+            "Second variant should be the original Copy1 field"
         
-        assert variants1[2] == copy1_field.replace("Copy1[0]", "CopyB[0]"), \
-            "Third variant should have CopyB[0]"
+        assert variants1[2] == copy1_field.replace("Copy1[0]", "Copy2[0]"), \
+            "Third variant should have Copy2[0]"
+        
+        assert variants1[3] == copy1_field.replace("Copy1[0]", "CopyB[0]"), \
+            "Fourth variant should have CopyB[0]"
     
     @settings(max_examples=20)
     @given(copy1_field=copy1_field_name_strategy())
@@ -333,8 +353,7 @@ class TestFieldNameTransformationProperty:
         Feature: multi-page-form-filling, Property 1: Field Name Transformation Correctness
         
         For any Copy1 PDF field name,
-        the Copy2 variant should not contain "Copy1[0]" or "CopyB[0]",
-        and the CopyB variant should not contain "Copy1[0]" or "Copy2[0]".
+        each variant should contain only its designated copy prefix.
         
         This test verifies that:
         1. Copy prefixes are completely replaced
@@ -347,13 +366,43 @@ class TestFieldNameTransformationProperty:
         # Generate variants
         variants = mapper._generate_copy_variants(copy1_field)
         
-        copy1_variant = variants[0]
-        copy2_variant = variants[1]
-        copyb_variant = variants[2]
+        copyA_variant = variants[0]
+        copy1_variant = variants[1]
+        copy2_variant = variants[2]
+        copyb_variant = variants[3]
         
-        # CRITICAL VERIFICATION: Copy2 variant should not contain Copy1 or CopyB
+        # CRITICAL VERIFICATION: CopyA variant should only contain CopyA
+        assert "CopyA[0]" in copyA_variant, \
+            f"CopyA variant should contain 'CopyA[0]': {copyA_variant}"
+        
+        assert "Copy1[0]" not in copyA_variant, \
+            f"CopyA variant should not contain 'Copy1[0]': {copyA_variant}"
+        
+        assert "Copy2[0]" not in copyA_variant, \
+            f"CopyA variant should not contain 'Copy2[0]': {copyA_variant}"
+        
+        assert "CopyB[0]" not in copyA_variant, \
+            f"CopyA variant should not contain 'CopyB[0]': {copyA_variant}"
+        
+        # CRITICAL VERIFICATION: Copy1 variant should only contain Copy1
+        assert "Copy1[0]" in copy1_variant, \
+            f"Copy1 variant should contain 'Copy1[0]': {copy1_variant}"
+        
+        assert "CopyA[0]" not in copy1_variant, \
+            f"Copy1 variant should not contain 'CopyA[0]': {copy1_variant}"
+        
+        assert "Copy2[0]" not in copy1_variant, \
+            f"Copy1 variant should not contain 'Copy2[0]': {copy1_variant}"
+        
+        assert "CopyB[0]" not in copy1_variant, \
+            f"Copy1 variant should not contain 'CopyB[0]': {copy1_variant}"
+        
+        # CRITICAL VERIFICATION: Copy2 variant should not contain Copy1, CopyA, or CopyB
         assert "Copy1[0]" not in copy2_variant, \
             f"Copy2 variant should not contain 'Copy1[0]': {copy2_variant}"
+        
+        assert "CopyA[0]" not in copy2_variant, \
+            f"Copy2 variant should not contain 'CopyA[0]': {copy2_variant}"
         
         assert "CopyB[0]" not in copy2_variant, \
             f"Copy2 variant should not contain 'CopyB[0]': {copy2_variant}"
@@ -361,25 +410,18 @@ class TestFieldNameTransformationProperty:
         assert "Copy2[0]" in copy2_variant, \
             f"Copy2 variant should contain 'Copy2[0]': {copy2_variant}"
         
-        # CRITICAL VERIFICATION: CopyB variant should not contain Copy1 or Copy2
+        # CRITICAL VERIFICATION: CopyB variant should not contain Copy1, CopyA, or Copy2
         assert "Copy1[0]" not in copyb_variant, \
             f"CopyB variant should not contain 'Copy1[0]': {copyb_variant}"
+        
+        assert "CopyA[0]" not in copyb_variant, \
+            f"CopyB variant should not contain 'CopyA[0]': {copyb_variant}"
         
         assert "Copy2[0]" not in copyb_variant, \
             f"CopyB variant should not contain 'Copy2[0]': {copyb_variant}"
         
         assert "CopyB[0]" in copyb_variant, \
             f"CopyB variant should contain 'CopyB[0]': {copyb_variant}"
-        
-        # CRITICAL VERIFICATION: Copy1 variant should only contain Copy1
-        assert "Copy1[0]" in copy1_variant, \
-            f"Copy1 variant should contain 'Copy1[0]': {copy1_variant}"
-        
-        assert "Copy2[0]" not in copy1_variant, \
-            f"Copy1 variant should not contain 'Copy2[0]': {copy1_variant}"
-        
-        assert "CopyB[0]" not in copy1_variant, \
-            f"Copy1 variant should not contain 'CopyB[0]': {copy1_variant}"
     
     @settings(max_examples=20)
     @given(
