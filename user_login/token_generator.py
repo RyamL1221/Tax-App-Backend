@@ -61,6 +61,7 @@ def generate_jwt_token(email: str, secret_key: str, session_version: int = 0) ->
     
     # Create payload with required claims
     payload = {
+        "userId": email,  # userId is the user's email address
         "email": email,
         "session_version": session_version,
         "iat": issued_at,

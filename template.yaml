@@ -100,6 +100,63 @@ Resources:
       # - request_id (String, unique identifier for the request)
       # - ttl (Number, Unix timestamp for DynamoDB TTL automatic cleanup)
 
+  TaxDocumentJobs:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: TaxDocumentJobs
+      AttributeDefinitions:
+        - AttributeName: jobId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: jobId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      # Note: DynamoDB is schema-less for non-key attributes.
+      # The TaxDocumentJobs table stores the following attributes (not defined here):
+      # - jobId (String, partition key, unique job identifier)
+      # - userId (String, GSI partition key, user identifier from JWT)
+      # - documentType (String, IRS form type e.g., "1040")
+      # - status (String, job status: PENDING | RUNNING | COMPLETED | FAILED)
+      # - createdAt (String, ISO 8601 timestamp, job creation time)
+      # - updatedAt (String, ISO 8601 timestamp, last update time)
+      # - completedAt (String, ISO 8601 timestamp, completion time, optional)
+      # - templateKey (String, S3 key of input template)
+      # - outputKey (String, S3 key of generated document, optional)
+      # - errorMessage (String, error details if FAILED, optional)
+
+  TaxDocumentsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: tax-app-documents
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldOutputs
+            Status: Enabled
+            Prefix: outputs/
+            ExpirationInDays: 90
+            NoncurrentVersionExpirationInDays: 30
+      Tags:
+        - Key: Purpose
+          Value: TaxDocumentStorage
+        - Key: Environment
+          Value: !Ref Environment
+
   UserRegistrationFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -119,13 +176,13 @@ Resources:
         RegisterUser:
           Type: Api
           Properties:
-            Path: /register
+            Path: /auth/register
             Method: post
             RestApiId: !Ref ServerlessRestApi
         RegisterUserOptions:
           Type: Api
           Properties:
-            Path: /register
+            Path: /auth/register
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -149,13 +206,13 @@ Resources:
         LoginUser:
           Type: Api
           Properties:
-            Path: /login
+            Path: /auth/login
             Method: post
             RestApiId: !Ref ServerlessRestApi
         LoginUserOptions:
           Type: Api
           Properties:
-            Path: /login
+            Path: /auth/login
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -192,13 +249,13 @@ Resources:
         ForgotPassword:
           Type: Api
           Properties:
-            Path: /forgot-password
+            Path: /auth/forgot-password
             Method: post
             RestApiId: !Ref ServerlessRestApi
         ForgotPasswordOptions:
           Type: Api
           Properties:
-            Path: /forgot-password
+            Path: /auth/forgot-password
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -224,13 +281,51 @@ Resources:
         ResetPassword:
           Type: Api
           Properties:
-            Path: /reset-password
+            Path: /auth/reset-password
             Method: post
             RestApiId: !Ref ServerlessRestApi
         ResetPasswordOptions:
           Type: Api
           Properties:
-            Path: /reset-password
+            Path: /auth/reset-password
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  GenerateTaxDocumentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: tax_document_generation/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          TEMPLATES_BUCKET: !Ref TaxDocumentsBucket
+          OUTPUTS_BUCKET: !Ref TaxDocumentsBucket
+          JOB_TABLE_NAME: !Ref TaxDocumentJobs
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TaxDocumentJobs
+        - S3ReadPolicy:
+            BucketName: !Ref TaxDocumentsBucket
+        - S3WritePolicy:
+            BucketName: !Ref TaxDocumentsBucket
+      Events:
+        GenerateTaxDocument:
+          Type: Api
+          Properties:
+            Path: /documents/generate
+            Method: post
+            RestApiId: !Ref ServerlessRestApi
+        GenerateTaxDocumentOptions:
+          Type: Api
+          Properties:
+            Path: /documents/generate
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
@@ -286,7 +381,7 @@ Outputs:
     Value: !GetAtt RateLimits.Arn
   UserRegistrationApi:
     Description: API Gateway endpoint URL for Prod stage for User Registration function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/register/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/register/"
   UserRegistrationFunction:
     Description: User Registration Lambda Function ARN
     Value: !GetAtt UserRegistrationFunction.Arn
@@ -295,7 +390,7 @@ Outputs:
     Value: !GetAtt UserRegistrationFunctionRole.Arn
   UserLoginApi:
     Description: API Gateway endpoint URL for Prod stage for User Login function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/login/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/login/"
   UserLoginFunction:
     Description: User Login Lambda Function ARN
     Value: !GetAtt UserLoginFunction.Arn
@@ -304,7 +399,7 @@ Outputs:
     Value: !GetAtt UserLoginFunctionRole.Arn
   ForgotPasswordApi:
     Description: API Gateway endpoint URL for Prod stage for Forgot Password function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/forgot-password/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/forgot-password/"
   ForgotPasswordFunction:
     Description: Forgot Password Lambda Function ARN
     Value: !GetAtt ForgotPasswordFunction.Arn
@@ -313,7 +408,7 @@ Outputs:
     Value: !GetAtt ForgotPasswordFunctionRole.Arn
   ResetPasswordApi:
     Description: API Gateway endpoint URL for Prod stage for Reset Password function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/reset-password/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/reset-password/"
   ResetPasswordFunction:
     Description: Reset Password Lambda Function ARN
     Value: !GetAtt ResetPasswordFunction.Arn
@@ -330,3 +425,24 @@ Outputs:
   HelloWorldFunctionIamRole:
     Description: Implicit IAM Role created for Hello World function
     Value: !GetAtt HelloWorldFunctionRole.Arn
+  TaxDocumentJobsTableName:
+    Description: DynamoDB table name for storing tax document generation jobs
+    Value: !Ref TaxDocumentJobs
+  TaxDocumentJobsTableArn:
+    Description: DynamoDB table ARN for IAM permissions
+    Value: !GetAtt TaxDocumentJobs.Arn
+  GenerateTaxDocumentApi:
+    Description: API Gateway endpoint URL for Prod stage for Generate Tax Document function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/documents/generate/"
+  GenerateTaxDocumentFunction:
+    Description: Generate Tax Document Lambda Function ARN
+    Value: !GetAtt GenerateTaxDocumentFunction.Arn
+  GenerateTaxDocumentFunctionIamRole:
+    Description: Implicit IAM Role created for Generate Tax Document function
+    Value: !GetAtt GenerateTaxDocumentFunctionRole.Arn
+  TaxDocumentsBucketName:
+    Description: S3 bucket name for tax document templates and outputs
+    Value: !Ref TaxDocumentsBucket
+  TaxDocumentsBucketArn:
+    Description: S3 bucket ARN for IAM permissions
+    Value: !GetAtt TaxDocumentsBucket.Arn

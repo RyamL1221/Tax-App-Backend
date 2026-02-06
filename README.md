@@ -645,6 +645,17 @@ Access-Control-Allow-Methods: GET,POST,OPTIONS
 - Verify the DynamoDB table exists and the Lambda has permissions
 - Ensure the `USER_TABLE_NAME` environment variable is set correctly
 
+## Additional Documentation
+
+For more detailed information, see:
+
+- **Architecture**: `docs/architecture/` - Field references, form inputs, field mappings
+- **Development**: `docs/development/` - Setup guides, import patterns, testing guides
+- **Testing**: `docs/testing/` - Test results, verification summaries
+- **Scripts**: `scripts/` - Shell scripts for testing and deployment
+- **Samples**: `samples/` - Sample PDF files for testing
+- **Steering**: `.kiro/steering/` - Kiro workspace guidelines
+
 ## License
 
 [Add your license information here]

@@ -1,0 +1,11 @@
+{
+  "documentType": "1099-DIV",
+  "formData": {
+    "calendarYear": "2024",
+    "payerName": "Example Investment Corporation",
+    "payerTIN": "12-3456789",
+    "recipientName": "John Doe",
+    "recipientTIN": "123-45-6789",
+    "totalOrdinaryDividends": 1000.00
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "form_type": "1099-DIV",
+  "mappings": {
+    "calendarYear": "topmostSubform[0].Copy1[0].CopyHeader[0].CalendarYear[0].f2_1[0]",
+    "payerName": "topmostSubform[0].Copy1[0].LeftCol[0].f2_2[0]",
+    "payerStreetAddress": "topmostSubform[0].Copy1[0].LeftCol[0].f2_3[0]",
+    "payerCity": "topmostSubform[0].Copy1[0].LeftCol[0].f2_4[0]",
+    "payerTIN": "topmostSubform[0].Copy1[0].LeftCol[0].f2_7[0]",
+    "recipientName": "topmostSubform[0].Copy1[0].LeftCol[0].f2_5[0]",
+    "recipientStreetAddress": "topmostSubform[0].Copy1[0].LeftCol[0].f2_6[0]",
+    "recipientTIN": "topmostSubform[0].Copy1[0].LeftCol[0].f2_8[0]",
+    "totalOrdinaryDividends": "topmostSubform[0].Copy1[0].RghtCol[0].f2_9[0]",
+    "qualifiedDividends": "topmostSubform[0].Copy1[0].RghtCol[0].f2_10[0]",
+    "totalCapitalGainDistributions": "topmostSubform[0].Copy1[0].RghtCol[0].Box2a_ReadOrder[0].f2_11[0]",
+    "unrecapturedSection1250Gain": "topmostSubform[0].Copy1[0].RghtCol[0].f2_12[0]",
+    "section1202Gain": "topmostSubform[0].Copy1[0].RghtCol[0].Box2c_ReadOrder[0].f2_13[0]",
+    "collectibles28Gain": "topmostSubform[0].Copy1[0].RghtCol[0].f2_14[0]",
+    "section897OrdinaryDividends": "topmostSubform[0].Copy1[0].RghtCol[0].Box2e_ReadOrder[0].f2_15[0]",
+    "section897CapitalGain": "topmostSubform[0].Copy1[0].RghtCol[0].f2_16[0]",
+    "nondividendDistributions": "topmostSubform[0].Copy1[0].RghtCol[0].Box3_ReadOrder[0].f2_17[0]",
+    "federalIncomeTaxWithheld": "topmostSubform[0].Copy1[0].RghtCol[0].f2_18[0]",
+    "section199ADividends": "topmostSubform[0].Copy1[0].RghtCol[0].Box5_ReadOrder[0].f2_19[0]",
+    "investmentExpenses": "topmostSubform[0].Copy1[0].RghtCol[0].f2_20[0]",
+    "foreignTaxPaid": "topmostSubform[0].Copy1[0].RghtCol[0].Box7_ReadOrder[0].f2_21[0]",
+    "foreignCountry": "topmostSubform[0].Copy1[0].RghtCol[0].f2_22[0]",
+    "cashLiquidationDistributions": "topmostSubform[0].Copy1[0].RghtCol[0].Box9_ReadOrder[0].f2_23[0]",
+    "noncashLiquidationDistributions": "topmostSubform[0].Copy1[0].RghtCol[0].f2_24[0]",
+    "fatcaFilingRequirement": "topmostSubform[0].Copy1[0].RghtCol[0].TagCorrectingSubform[0].c2_3[0]",
+    "exemptInterestDividends": "topmostSubform[0].Copy1[0].RghtCol[0].Box12_ReadOrder[0].f2_25[0]",
+    "specifiedPrivateActivityBondInterest": "topmostSubform[0].Copy1[0].RghtCol[0].f2_26[0]",
+    "state": "topmostSubform[0].Copy1[0].RghtCol[0].Box14_ReadOrder[0].f2_27[0]",
+    "stateIdentificationNumber": "topmostSubform[0].Copy1[0].RghtCol[0].Box14_ReadOrder[0].f2_28[0]",
+    "stateTaxWithheld": "topmostSubform[0].Copy1[0].RghtCol[0].Box15_ReadOrder[0].f2_29[0]",
+    "accountNumber": "topmostSubform[0].Copy1[0].RghtCol[0].f2_31[0]"
+  },
+  "version": "fixed",
+  "timestamp": "2026-02-03T21:42:00.000000",
+  "metadata": {
+    "source": "canonical_div_1099.py",
+    "created_by": "manual_fix",
+    "changes": "Fixed all invalid field mappings, removed non-existent fields, corrected ReadOrder paths, fixed TIN swap"
+  }
+}
