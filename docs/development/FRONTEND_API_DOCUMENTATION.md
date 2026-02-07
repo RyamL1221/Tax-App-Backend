@@ -63,7 +63,7 @@ The authentication system uses JWT (JSON Web Tokens) for stateless authenticatio
 }
 ```
 
-**Success Response (200 OK):** Upon successful authentication, the API returns a JSON object containing a JWT token, the user's email, and their user ID. The token should be stored securely (such as in localStorage or a secure cookie) and included in the Authorization header for subsequent requests to protected endpoints. The response format is: `{"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", "email": "user@example.com", "userId": "user@example.com"}`. The token is a long string (typically 200+ characters) that encodes the user's information and expiration time.
+**Success Response (200 OK):** Upon successful authentication, the API returns a JSON object containing a success message, the user's email, and a JWT token. The token should be stored securely (such as in localStorage or a secure cookie) and included in the Authorization header for subsequent requests to protected endpoints. The response format is: `{"message": "Login successful", "email": "user@example.com", "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}`. The token is a long string (typically 200+ characters) that encodes the user's information and expiration time.
 
 **Error Responses:** If the email doesn't exist or the password is incorrect, you'll receive a 401 Unauthorized status with `{"error": "Invalid credentials"}`. This generic message prevents user enumeration attacks. For validation errors like missing fields, expect 400 Bad Request with `{"error": "Validation error message"}`. Server errors return 500 with `{"error": "Internal server error"}`.
 
