@@ -329,6 +329,41 @@ Resources:
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
+  DocumentDownloadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: document_download/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          JOB_TABLE_NAME: !Ref TaxDocumentJobs
+          OUTPUTS_BUCKET: !Ref TaxDocumentsBucket
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TaxDocumentJobs
+        - S3ReadPolicy:
+            BucketName: !Ref TaxDocumentsBucket
+      Events:
+        DownloadDocument:
+          Type: Api
+          Properties:
+            Path: /documents/download/{jobId}
+            Method: get
+            RestApiId: !Ref ServerlessRestApi
+        DownloadDocumentOptions:
+          Type: Api
+          Properties:
+            Path: /documents/download/{jobId}
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -446,3 +481,12 @@ Outputs:
   TaxDocumentsBucketArn:
     Description: S3 bucket ARN for IAM permissions
     Value: !GetAtt TaxDocumentsBucket.Arn
+  DocumentDownloadApi:
+    Description: API Gateway endpoint URL for Prod stage for Document Download function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/documents/download/{jobId}"
+  DocumentDownloadFunction:
+    Description: Document Download Lambda Function ARN
+    Value: !GetAtt DocumentDownloadFunction.Arn
+  DocumentDownloadFunctionIamRole:
+    Description: Implicit IAM Role created for Document Download function
+    Value: !GetAtt DocumentDownloadFunctionRole.Arn
