@@ -260,3 +260,16 @@ localstack-data/
 # Patterns added by SAM build diagnostic tool
 # Generated: 2026-02-05 16:30:46
 .DS_Store
+
+# Test output files
+test-output-*.pdf
+test_output_*.pdf
+
+# Debug and inspection output files
+*_output.txt
+*_report.txt
+*_findings.txt
+
+# Temporary verification and test scripts in root directory
+/verify_*.py
+/test_*.py

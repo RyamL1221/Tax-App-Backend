@@ -10,8 +10,12 @@ This script verifies that:
 import sys
 import os
 
+# Add project root to path so we can import from tax_document_generation
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
 # Add tax_document_generation to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'tax_document_generation'))
+sys.path.insert(0, os.path.join(project_root, 'tax_document_generation'))
 
 from input_validator import FORM_1099_DIV_REQUIRED_FIELDS
 

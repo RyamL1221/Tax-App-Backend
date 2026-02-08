@@ -125,7 +125,7 @@ The 1099-DIV tax form had multiple field mapping issues causing data to appear i
 Initialized FieldMapper with 31 mappings
 Mapped 30 API fields to 90 PDF fields
 Filled 90 PDF fields
-✓ Test PDF generated: test_output_fixed.pdf
+✓ Test PDF generated: samples/test_output_fixed.pdf
 ```
 
 ## Impact

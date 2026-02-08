@@ -150,8 +150,17 @@ See [Documentation Guidelines](../.kiro/steering/documentation-guidelines.md) fo
 - **Steering Files**: See `../.kiro/steering/` for Kiro workspace guidelines
 - **Specs**: See `../.kiro/specs/` for active feature specifications
 
-## Changelog
+## Changelogs
 
+Project-wide changelogs documenting major changes:
+
+- [Workspace Organization Changelog](CHANGELOG_WORKSPACE_ORGANIZATION.md) - File relocations and organizational changes
+- [Flexible Input Formatting Changelog](CHANGELOG_FLEXIBLE_INPUT_FORMATTING.md) - Input normalization changes
+- [Field Standardization Changelog](CHANGELOG_FIELD_STANDARDIZATION.md) - Field mapping standardization
+
+### Recent Changes
+
+- **2024**: Workspace organization - Moved scripts and PDFs from root, deleted obsolete text files
 - **2026-02-03**: Reorganized documentation from Lambda directories to `docs/` structure
 - **2026-02-03**: Added comprehensive documentation guidelines
 - **2026-02-03**: Created field standardization documentation

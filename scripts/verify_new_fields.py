@@ -4,6 +4,13 @@ Verification script for Task 4 checkpoint.
 Verifies that all new fields added in Tasks 1-3 are properly mapped and have metadata.
 """
 
+import sys
+import os
+
+# Add project root to path so we can import from tax_document_generation
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
 from tax_document_generation.field_mappings.canonical_div_1099 import CANONICAL_FIELD_MAPPING
 from tax_document_generation.field_mappings.field_metadata import FIELD_METADATA
 
