@@ -53,8 +53,18 @@ class FieldMetadata(TypedDict):
         
         example_value: Example of a valid value for this field.
                       Used in API documentation and testing.
+        
+        normalization_type: Type of normalization to apply. Valid values:
+                           - "decimal": Normalize to two decimal places
+                           - "tin": Normalize TIN format (add hyphens)
+                           - None: No normalization needed
+        
+        tin_format: Format for TIN normalization. Valid values:
+                   - "SSN": Social Security Number (XXX-XX-XXXX)
+                   - "EIN": Employer Identification Number (XX-XXXXXXX)
+                   - None: Not a TIN field
     
-    Requirements: 2.1, 2.2, 2.3
+    Requirements: 2.1, 2.2, 2.3, 5.1, 5.2, 5.3
     """
     required: bool
     irs_box: Optional[str]
@@ -64,6 +74,8 @@ class FieldMetadata(TypedDict):
     max_length: Optional[int]
     validation_pattern: Optional[str]
     example_value: str
+    normalization_type: Optional[str]
+    tin_format: Optional[str]
 
 
 # Comprehensive metadata for all 1099-DIV fields
@@ -79,7 +91,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 4,
         "validation_pattern": r"^\d{4}$",
-        "example_value": "2024"
+        "example_value": "2024",
+        "normalization_type": None,
+        "tin_format": None
     },
     
     # =========================================================================
@@ -93,7 +107,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "boolean",
         "max_length": None,
         "validation_pattern": None,
-        "example_value": "true"
+        "example_value": "true",
+        "normalization_type": None,
+        "tin_format": None
     },
     "corrected": {
         "required": False,
@@ -103,7 +119,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "boolean",
         "max_length": None,
         "validation_pattern": None,
-        "example_value": "true"
+        "example_value": "true",
+        "normalization_type": None,
+        "tin_format": None
     },
     
     # =========================================================================
@@ -117,7 +135,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 100,
         "validation_pattern": None,
-        "example_value": "Example Corporation"
+        "example_value": "Example Corporation",
+        "normalization_type": None,
+        "tin_format": None
     },
     "payerAddressBlock": {
         "required": False,
@@ -127,7 +147,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 500,
         "validation_pattern": None,
-        "example_value": "Example Corporation\n123 Main Street\nNew York, NY 10001\n(555) 123-4567"
+        "example_value": "Example Corporation\n123 Main Street\nNew York, NY 10001\n(555) 123-4567",
+        "normalization_type": None,
+        "tin_format": None
     },
     "payerTIN": {
         "required": True,
@@ -137,7 +159,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 11,
         "validation_pattern": r"^\d{2}-?\d{7}$",
-        "example_value": "12-3456789"
+        "example_value": "12-3456789",
+        "normalization_type": "tin",
+        "tin_format": "EIN"
     },
     "payerStreetAddress": {
         "required": False,
@@ -147,7 +171,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 100,
         "validation_pattern": None,
-        "example_value": "123 Main Street"
+        "example_value": "123 Main Street",
+        "normalization_type": None,
+        "tin_format": None
     },
     "payerCity": {
         "required": False,
@@ -157,7 +183,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 100,
         "validation_pattern": None,
-        "example_value": "New York, NY 10001"
+        "example_value": "New York, NY 10001",
+        "normalization_type": None,
+        "tin_format": None
     },
     "payerState": {
         "required": False,
@@ -167,7 +195,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 2,
         "validation_pattern": r"^[A-Z]{2}$",
-        "example_value": "NY"
+        "example_value": "NY",
+        "normalization_type": None,
+        "tin_format": None
     },
     "payerCountry": {
         "required": False,
@@ -177,7 +207,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 50,
         "validation_pattern": None,
-        "example_value": "Canada"
+        "example_value": "Canada",
+        "normalization_type": None,
+        "tin_format": None
     },
     "payerZip": {
         "required": False,
@@ -187,7 +219,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 10,
         "validation_pattern": r"^\d{5}(-\d{4})?$",
-        "example_value": "10001"
+        "example_value": "10001",
+        "normalization_type": None,
+        "tin_format": None
     },
     "payerTelephoneNumber": {
         "required": False,
@@ -197,7 +231,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 20,
         "validation_pattern": r"^\+?[\d\s\-\(\)]+$",
-        "example_value": "(555) 123-4567"
+        "example_value": "(555) 123-4567",
+        "normalization_type": None,
+        "tin_format": None
     },
     
     # =========================================================================
@@ -211,7 +247,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 100,
         "validation_pattern": None,
-        "example_value": "John Doe"
+        "example_value": "John Doe",
+        "normalization_type": None,
+        "tin_format": None
     },
     "recipientTIN": {
         "required": True,
@@ -221,7 +259,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 11,
         "validation_pattern": r"^\d{3}-?\d{2}-?\d{4}$",
-        "example_value": "123-45-6789"
+        "example_value": "123-45-6789",
+        "normalization_type": "tin",
+        "tin_format": "SSN"
     },
     "recipientStreetAddress": {
         "required": False,
@@ -231,7 +271,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 100,
         "validation_pattern": None,
-        "example_value": "456 Oak Avenue"
+        "example_value": "456 Oak Avenue",
+        "normalization_type": None,
+        "tin_format": None
     },
     "recipientCityStateZip": {
         "required": False,
@@ -241,7 +283,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 100,
         "validation_pattern": None,
-        "example_value": "Los Angeles, CA 90001"
+        "example_value": "Los Angeles, CA 90001",
+        "normalization_type": None,
+        "tin_format": None
     },
     "recipientCity": {
         "required": False,
@@ -251,7 +295,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 50,
         "validation_pattern": None,
-        "example_value": "Los Angeles"
+        "example_value": "Los Angeles",
+        "normalization_type": None,
+        "tin_format": None
     },
     "recipientState": {
         "required": False,
@@ -261,7 +307,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 2,
         "validation_pattern": r"^[A-Z]{2}$",
-        "example_value": "CA"
+        "example_value": "CA",
+        "normalization_type": None,
+        "tin_format": None
     },
     "recipientCountry": {
         "required": False,
@@ -271,7 +319,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 50,
         "validation_pattern": None,
-        "example_value": "Canada"
+        "example_value": "Canada",
+        "normalization_type": None,
+        "tin_format": None
     },
     "recipientZip": {
         "required": False,
@@ -281,7 +331,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 10,
         "validation_pattern": r"^\d{5}(-\d{4})?$",
-        "example_value": "90001"
+        "example_value": "90001",
+        "normalization_type": None,
+        "tin_format": None
     },
     
     # =========================================================================
@@ -295,7 +347,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "1000.00"
+        "example_value": "1000.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "qualifiedDividends": {
         "required": False,
@@ -305,7 +359,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "800.00"
+        "example_value": "800.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     
     # =========================================================================
@@ -319,7 +375,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "500.00"
+        "example_value": "500.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "unrecapturedSection1250Gain": {
         "required": False,
@@ -329,7 +387,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "100.00"
+        "example_value": "100.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "section1202Gain": {
         "required": False,
@@ -339,7 +399,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "50.00"
+        "example_value": "50.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "collectibles28Gain": {
         "required": False,
@@ -349,7 +411,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "25.00"
+        "example_value": "25.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "section897OrdinaryDividends": {
         "required": False,
@@ -359,7 +423,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "75.00"
+        "example_value": "75.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "section897CapitalGain": {
         "required": False,
@@ -369,7 +435,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "60.00"
+        "example_value": "60.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     
     # =========================================================================
@@ -383,7 +451,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "200.00"
+        "example_value": "200.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "federalIncomeTaxWithheld": {
         "required": False,
@@ -393,7 +463,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "150.00"
+        "example_value": "150.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "section199ADividends": {
         "required": False,
@@ -403,7 +475,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "300.00"
+        "example_value": "300.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "investmentExpenses": {
         "required": False,
@@ -413,7 +487,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "50.00"
+        "example_value": "50.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "foreignTaxPaid": {
         "required": False,
@@ -423,7 +499,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "75.00"
+        "example_value": "75.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     
     # =========================================================================
@@ -437,7 +515,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 50,
         "validation_pattern": None,
-        "example_value": "United Kingdom"
+        "example_value": "United Kingdom",
+        "normalization_type": None,
+        "tin_format": None
     },
     "cashLiquidationDistributions": {
         "required": False,
@@ -447,7 +527,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "1000.00"
+        "example_value": "1000.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "noncashLiquidationDistributions": {
         "required": False,
@@ -457,7 +539,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "500.00"
+        "example_value": "500.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "fatcaFilingRequirement": {
         "required": False,
@@ -467,7 +551,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "boolean",
         "max_length": None,
         "validation_pattern": None,
-        "example_value": "true"
+        "example_value": "true",
+        "normalization_type": None,
+        "tin_format": None
     },
     "secondTinNotification": {
         "required": False,
@@ -477,7 +563,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "boolean",
         "max_length": None,
         "validation_pattern": None,
-        "example_value": "true"
+        "example_value": "true",
+        "normalization_type": None,
+        "tin_format": None
     },
     "exemptInterestDividends": {
         "required": False,
@@ -487,7 +575,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "250.00"
+        "example_value": "250.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     "specifiedPrivateActivityBondInterest": {
         "required": False,
@@ -497,7 +587,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "100.00"
+        "example_value": "100.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     
     # =========================================================================
@@ -511,7 +603,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 2,
         "validation_pattern": r"^[A-Z]{2}$",
-        "example_value": "NY"
+        "example_value": "NY",
+        "normalization_type": None,
+        "tin_format": None
     },
     "stateIdentificationNumber": {
         "required": False,
@@ -521,7 +615,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 20,
         "validation_pattern": None,
-        "example_value": "12-3456789"
+        "example_value": "12-3456789",
+        "normalization_type": None,
+        "tin_format": None
     },
     "stateTaxWithheld": {
         "required": False,
@@ -531,7 +627,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "50.00"
+        "example_value": "50.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     
     # =========================================================================
@@ -545,7 +643,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 2,
         "validation_pattern": r"^[A-Z]{2}$",
-        "example_value": "CA"
+        "example_value": "CA",
+        "normalization_type": None,
+        "tin_format": None
     },
     "stateIdentificationNumber2": {
         "required": False,
@@ -555,7 +655,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 20,
         "validation_pattern": None,
-        "example_value": "98-7654321"
+        "example_value": "98-7654321",
+        "normalization_type": None,
+        "tin_format": None
     },
     "stateTaxWithheld2": {
         "required": False,
@@ -565,7 +667,9 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "decimal",
         "max_length": None,
         "validation_pattern": r"^\d+(\.\d{2})?$",
-        "example_value": "25.00"
+        "example_value": "25.00",
+        "normalization_type": "decimal",
+        "tin_format": None
     },
     
     # =========================================================================
@@ -579,6 +683,8 @@ FIELD_METADATA: Dict[str, FieldMetadata] = {
         "data_type": "string",
         "max_length": 20,
         "validation_pattern": None,
-        "example_value": "1234567890"
+        "example_value": "1234567890",
+        "normalization_type": None,
+        "tin_format": None
     },
 }
