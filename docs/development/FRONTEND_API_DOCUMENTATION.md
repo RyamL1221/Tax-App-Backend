@@ -298,3 +298,123 @@ If you encounter issues while integrating with the API, first check that you're 
 
 This documentation provides everything you need to integrate your frontend application with the Tax App Backend API. The API follows RESTful conventions, uses standard HTTP status codes, and provides clear error messages to help you build a robust integration. All endpoints support CORS for cross-origin requests, making it easy to develop and test your frontend locally. The JWT-based authentication system is stateless and secure, requiring only that you store and transmit the token properly. For tax document generation, the API handles all the complexity of PDF form filling, multi-copy generation, and IRS compliance, allowing you to focus on building a great user experience. Start with the minimal examples provided and gradually add optional fields as needed for your use case.
 
+
+
+### Document Download
+
+**Endpoint:** `GET /documents/download/{jobId}`
+
+**Purpose:** Download a generated tax document PDF. Users can only download documents they have generated.
+
+**Authentication Required:** Yes - JWT token required in Authorization header
+
+**Path Parameters:** `jobId` (required) - The UUID of the document generation job returned from the `/documents/generate` endpoint.
+
+**Request Headers:** The Authorization header must include a valid JWT token as a Bearer token: `Authorization: Bearer YOUR_JWT_TOKEN_HERE`.
+
+**Example Request:**
+```bash
+curl -X GET http://localhost:3000/documents/download/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+**Success Response (200 OK):** When the download is successful, the API returns the PDF document as binary data with appropriate headers. The response includes:
+- `Content-Type: application/pdf` - Indicates the response is a PDF file
+- `Content-Disposition: attachment; filename="form-1099-DIV.pdf"` - Triggers browser download with the correct filename
+- Binary PDF content in the response body
+
+The filename follows the format `form-{documentType}.pdf` (e.g., `form-1099-DIV.pdf`, `form-1099-INT.pdf`).
+
+**Authorization:** The endpoint enforces strict authorization - users can only download documents they generated. The system verifies that the job's userId matches the authenticated user's userId from the JWT token. Attempting to download another user's document returns a 403 Forbidden error.
+
+**Error Responses:**
+
+**401 Unauthorized** - Missing or invalid JWT token:
+```json
+{
+  "error": "AuthenticationError",
+  "message": "Missing or invalid Authorization header"
+}
+```
+
+**403 Forbidden** - User doesn't have permission to access this document:
+```json
+{
+  "error": "AuthorizationError",
+  "message": "You do not have permission to access this document"
+}
+```
+
+**404 Not Found** - Job doesn't exist, document not ready, or document doesn't exist:
+```json
+{
+  "error": "NotFoundError",
+  "message": "Document not found"
+}
+```
+
+Note: The API returns the same 404 error for non-existent jobs, pending jobs, and missing documents to prevent information leakage.
+
+**400 Bad Request** - Document generation failed:
+```json
+{
+  "error": "DocumentGenerationFailed",
+  "message": "Document generation failed. Please try generating the document again."
+}
+```
+
+**500 Internal Server Error** - Server error:
+```json
+{
+  "error": "InternalError",
+  "message": "An unexpected error occurred"
+}
+```
+
+**Job Status Handling:**
+- **COMPLETED**: Document is downloaded successfully
+- **FAILED**: Returns 400 error with message to retry generation
+- **PENDING/RUNNING**: Returns 404 error (document not ready yet)
+
+**Security Notes:** 
+- All authorization failures are logged for security monitoring
+- The API uses the same error message for missing jobs and missing documents to prevent user enumeration
+- Users cannot enumerate other users' documents
+- All download attempts are logged with userId and jobId
+
+**Frontend Integration Example:**
+```javascript
+async function downloadDocument(jobId, token) {
+  const response = await fetch(`http://localhost:3000/documents/download/${jobId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  
+  if (response.ok) {
+    // Create a blob from the response
+    const blob = await response.blob();
+    
+    // Extract filename from Content-Disposition header
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filename = contentDisposition.match(/filename="(.+)"/)[1];
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } else {
+    const error = await response.json();
+    console.error('Download failed:', error);
+  }
+}
+```
+
+**Workflow:** After generating a document with `/documents/generate`, poll the job status or wait for completion, then use the returned jobId to download the PDF with this endpoint.
+
