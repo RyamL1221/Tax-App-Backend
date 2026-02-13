@@ -58,6 +58,21 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         - Invalidates all existing JWTs via session version increment
         - Never logs sensitive data (tokens, passwords)
     """
+    # Handle OPTIONS requests for CORS preflight
+    http_method = event.get('httpMethod', '')
+    if http_method == 'OPTIONS':
+        logger.info("OPTIONS request received for CORS preflight")
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'POST,OPTIONS'
+            },
+            'body': ''
+        }
+    
     # Log request initiation (without sensitive data)
     logger.info("Reset password request initiated")
     

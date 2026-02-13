@@ -39,6 +39,7 @@ docs/
 - [Tax Document Generation Guide](development/TAX_DOCUMENT_GENERATION_POSTMAN_GUIDE.md) - API testing
 - [Manual Token Retrieval](development/MANUAL_TOKEN_RETRIEVAL.md) - JWT token retrieval
 - [Iterative Field Mapping Guide](development/ITERATIVE_FIELD_MAPPING_GUIDE.md) - Systematic field mapping fixes
+- [Docker Path Fix](development/DOCKER_PATH_FIX.md) - Fix Docker mount failures caused by spaces in path (iCloud Drive)
 
 ### Examples
 - [1099-DIV Minimal Example](examples/1099-DIV-minimal-example.json) - Required fields only
@@ -107,6 +108,7 @@ docs/
 **Development**:
 - [Environment Setup](development/ENVIRONMENT_SETUP.md)
 - [LocalStack & SAM Setup](development/LOCALSTACK_SAM_SETUP.md)
+- [Docker Path Fix](development/DOCKER_PATH_FIX.md) - Fix Docker mount failures with spaces in path
 - [Quick Reference](development/QUICK_REFERENCE.md)
 
 ### API Testing

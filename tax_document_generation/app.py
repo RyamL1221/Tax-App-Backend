@@ -44,6 +44,20 @@ def lambda_handler(event: Dict, context) -> Dict:
     Returns:
         dict: API Gateway response
     """
+    # Handle OPTIONS requests for CORS preflight
+    http_method = event.get('httpMethod', '')
+    if http_method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'POST,OPTIONS'
+            },
+            'body': ''
+        }
+    
     start_time = time.time()
     job_id = None
     
