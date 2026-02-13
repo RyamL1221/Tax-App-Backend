@@ -5,10 +5,16 @@ Tests that all responses include CORS headers.
 **Validates: Requirements 1.1**
 """
 
+import os
 import pytest
 from hypothesis import given, strategies as st
 
 from document_download.response_formatter import pdf_response, error_response
+
+
+def get_expected_cors_origin():
+    """Get the expected CORS origin from environment or default."""
+    return os.environ.get('CORS_ALLOWED_ORIGIN', '*')
 
 
 class TestCORSHeadersProperty:
@@ -37,7 +43,8 @@ class TestCORSHeadersProperty:
         assert 'Access-Control-Allow-Methods' in response['headers']
         
         # Verify CORS header values
-        assert response['headers']['Access-Control-Allow-Origin'] == '*'
+        expected_origin = get_expected_cors_origin()
+        assert response['headers']['Access-Control-Allow-Origin'] == expected_origin
         assert 'Authorization' in response['headers']['Access-Control-Allow-Headers']
         assert 'GET' in response['headers']['Access-Control-Allow-Methods']
     
@@ -83,7 +90,8 @@ class TestCORSHeadersProperty:
         response = pdf_response(b'test', filename)
         
         # Verify standard CORS configuration
-        assert response['headers']['Access-Control-Allow-Origin'] == '*'
+        expected_origin = get_expected_cors_origin()
+        assert response['headers']['Access-Control-Allow-Origin'] == expected_origin
         assert 'Content-Type' in response['headers']['Access-Control-Allow-Headers']
         assert 'Authorization' in response['headers']['Access-Control-Allow-Headers']
         assert 'GET' in response['headers']['Access-Control-Allow-Methods']
@@ -101,7 +109,8 @@ class TestCORSHeadersProperty:
         response = error_response(status_code, 'TestError', 'Test message')
         
         # Verify standard CORS configuration
-        assert response['headers']['Access-Control-Allow-Origin'] == '*'
+        expected_origin = get_expected_cors_origin()
+        assert response['headers']['Access-Control-Allow-Origin'] == expected_origin
         assert 'Content-Type' in response['headers']['Access-Control-Allow-Headers']
         assert 'Authorization' in response['headers']['Access-Control-Allow-Headers']
         assert 'GET' in response['headers']['Access-Control-Allow-Methods']

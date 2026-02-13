@@ -6,6 +6,7 @@ appropriate status codes, CORS headers, and JSON content type for the Lambda fun
 """
 
 import json
+import os
 from typing import Dict, Any
 
 
@@ -13,12 +14,16 @@ def _get_cors_headers() -> Dict[str, str]:
     """
     Returns standard CORS headers for all responses.
     
+    The allowed origin is configurable via CORS_ALLOWED_ORIGIN environment variable.
+    Defaults to '*' if not set.
+    
     Returns:
         Dictionary of CORS headers
     """
+    allowed_origin = os.environ.get('CORS_ALLOWED_ORIGIN', '*')
     return {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': allowed_origin,
         'Access-Control-Allow-Headers': 'Content-Type,Authorization',
         'Access-Control-Allow-Methods': 'POST,OPTIONS'
     }

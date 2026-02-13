@@ -65,7 +65,8 @@ def test_successful_registration(dynamodb_table):
     assert 'password_hash' not in body
     
     # Verify CORS headers
-    assert response['headers']['Access-Control-Allow-Origin'] == '*'
+    expected_origin = os.environ.get('CORS_ALLOWED_ORIGIN', '*')
+    assert response['headers']['Access-Control-Allow-Origin'] == expected_origin
     assert response['headers']['Content-Type'] == 'application/json'
 
 

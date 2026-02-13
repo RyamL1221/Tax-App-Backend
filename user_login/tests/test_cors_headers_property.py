@@ -10,6 +10,7 @@ Access-Control-Allow-Methods).
 """
 
 import json
+import os
 import pytest
 from hypothesis import given, settings, strategies as st
 from hypothesis.strategies import emails
@@ -20,6 +21,11 @@ from user_login.response_formatter import (
     internal_error_response,
     error_response
 )
+
+
+def get_expected_cors_origin():
+    """Get the expected CORS origin from environment or default."""
+    return os.environ.get('CORS_ALLOWED_ORIGIN', '*')
 
 
 @settings(max_examples=20)
@@ -127,8 +133,9 @@ def _assert_cors_headers_present(response):
         "Response should contain Content-Type header"
     
     # Verify header values are appropriate
-    assert headers["Access-Control-Allow-Origin"] == "*", \
-        "Access-Control-Allow-Origin should be '*' for public API"
+    expected_origin = get_expected_cors_origin()
+    assert headers["Access-Control-Allow-Origin"] == expected_origin, \
+        f"Access-Control-Allow-Origin should be '{expected_origin}'"
     
     assert "Content-Type" in headers["Access-Control-Allow-Headers"], \
         "Access-Control-Allow-Headers should include Content-Type"

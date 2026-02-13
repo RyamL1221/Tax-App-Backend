@@ -11,11 +11,17 @@ include CORS headers consistent with existing endpoints (Access-Control-Allow-Or
 Access-Control-Allow-Methods, Access-Control-Allow-Headers).
 """
 
+import os
 import pytest
 import json
 from unittest.mock import Mock, patch
 from hypothesis import given, strategies as st, settings
 from password_recovery.forgot_password_handler import lambda_handler
+
+
+def get_expected_cors_origin():
+    """Get the expected CORS origin from environment or default."""
+    return os.environ.get('CORS_ALLOWED_ORIGIN', '*')
 
 
 # Strategy for generating valid email addresses
@@ -222,8 +228,9 @@ class TestCORSHeadersProperty:
             
             response = lambda_handler(event, None)
             
-            # Check CORS origin is "*"
-            assert response['headers']['Access-Control-Allow-Origin'] == '*'
+            # Check CORS origin matches expected value
+            expected_origin = get_expected_cors_origin()
+            assert response['headers']['Access-Control-Allow-Origin'] == expected_origin
     
     @given(valid_emails())
     @settings(max_examples=100)

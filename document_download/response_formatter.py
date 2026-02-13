@@ -6,7 +6,18 @@ This module formats API Gateway responses for document downloads.
 
 import json
 import base64
+import os
 from typing import Dict, Any
+
+
+def _get_allowed_origin() -> str:
+    """
+    Get the allowed CORS origin from environment variable.
+    
+    Returns:
+        str: Allowed origin, defaults to '*' if not set
+    """
+    return os.environ.get('CORS_ALLOWED_ORIGIN', '*')
 
 
 def pdf_response(pdf_bytes: bytes, filename: str) -> Dict[str, Any]:
@@ -20,12 +31,13 @@ def pdf_response(pdf_bytes: bytes, filename: str) -> Dict[str, Any]:
     Returns:
         dict: API Gateway response with binary PDF
     """
+    allowed_origin = _get_allowed_origin()
     return {
         'statusCode': 200,
         'headers': {
             'Content-Type': 'application/pdf',
             'Content-Disposition': f'attachment; filename="{filename}"',
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': allowed_origin,
             'Access-Control-Allow-Headers': 'Content-Type,Authorization',
             'Access-Control-Allow-Methods': 'GET,OPTIONS'
         },
@@ -46,11 +58,12 @@ def error_response(status_code: int, error_type: str, message: str) -> Dict[str,
     Returns:
         dict: API Gateway response with error JSON
     """
+    allowed_origin = _get_allowed_origin()
     return {
         'statusCode': status_code,
         'headers': {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': allowed_origin,
             'Access-Control-Allow-Headers': 'Content-Type,Authorization',
             'Access-Control-Allow-Methods': 'GET,OPTIONS'
         },

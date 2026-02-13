@@ -6,6 +6,7 @@ Each property test runs with a minimum of 100 iterations.
 """
 
 import json
+import os
 import pytest
 from hypothesis import given, settings, strategies as st
 from hypothesis.strategies import emails
@@ -15,6 +16,11 @@ from user_registration.response_formatter import (
     duplicate_user_response,
     internal_error_response,
 )
+
+
+def get_expected_cors_origin():
+    """Get the expected CORS origin from environment or default."""
+    return os.environ.get('CORS_ALLOWED_ORIGIN', '*')
 
 
 class TestSuccessResponseFormatProperty:
@@ -169,7 +175,8 @@ class TestCORSHeadersProperty:
         assert "Access-Control-Allow-Methods" in headers
         
         # Verify CORS header values
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        expected_origin = get_expected_cors_origin()
+        assert headers["Access-Control-Allow-Origin"] == expected_origin
         assert "Content-Type" in headers["Access-Control-Allow-Headers"]
         assert "POST" in headers["Access-Control-Allow-Methods"]
         assert "OPTIONS" in headers["Access-Control-Allow-Methods"]
@@ -193,7 +200,8 @@ class TestCORSHeadersProperty:
         assert "Access-Control-Allow-Methods" in headers
         
         # Verify CORS header values
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        expected_origin = get_expected_cors_origin()
+        assert headers["Access-Control-Allow-Origin"] == expected_origin
         assert "Content-Type" in headers["Access-Control-Allow-Headers"]
         assert "POST" in headers["Access-Control-Allow-Methods"]
         assert "OPTIONS" in headers["Access-Control-Allow-Methods"]
@@ -215,7 +223,8 @@ class TestCORSHeadersProperty:
         assert "Access-Control-Allow-Methods" in headers
         
         # Verify CORS header values
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        expected_origin = get_expected_cors_origin()
+        assert headers["Access-Control-Allow-Origin"] == expected_origin
         assert "Content-Type" in headers["Access-Control-Allow-Headers"]
         assert "POST" in headers["Access-Control-Allow-Methods"]
         assert "OPTIONS" in headers["Access-Control-Allow-Methods"]
@@ -237,7 +246,8 @@ class TestCORSHeadersProperty:
         assert "Access-Control-Allow-Methods" in headers
         
         # Verify CORS header values
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        expected_origin = get_expected_cors_origin()
+        assert headers["Access-Control-Allow-Origin"] == expected_origin
         assert "Content-Type" in headers["Access-Control-Allow-Headers"]
         assert "POST" in headers["Access-Control-Allow-Methods"]
         assert "OPTIONS" in headers["Access-Control-Allow-Methods"]
