@@ -30,7 +30,7 @@ class TestSuccessResponse:
         assert "Access-Control-Allow-Origin" in headers
         assert headers["Access-Control-Allow-Origin"] == "*"
         assert "Access-Control-Allow-Headers" in headers
-        assert headers["Access-Control-Allow-Headers"] == "Content-Type"
+        assert headers["Access-Control-Allow-Headers"] == "Content-Type,Authorization"
         assert "Access-Control-Allow-Methods" in headers
         assert headers["Access-Control-Allow-Methods"] == "POST,OPTIONS"
     

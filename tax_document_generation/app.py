@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from models import GenerationRequest
 from jwt_validator import validate_jwt
 from input_validator import validate_form_data
+from input_normalizer import normalize_form_data
 from template_retriever import get_template
 from document_generator import generate_document
 from output_persister import store_output
@@ -43,6 +44,20 @@ def lambda_handler(event: Dict, context) -> Dict:
     Returns:
         dict: API Gateway response
     """
+    # Handle OPTIONS requests for CORS preflight
+    http_method = event.get('httpMethod', '')
+    if http_method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'POST,OPTIONS'
+            },
+            'body': ''
+        }
+    
     start_time = time.time()
     job_id = None
     
@@ -89,12 +104,34 @@ def lambda_handler(event: Dict, context) -> Dict:
         validate_form_data(document_type, form_data)
         log_info(f"Validated form data for job {job_id}")
         
+        # Normalize form data (flexible input formatting)
+        try:
+            normalization_result = normalize_form_data(form_data, document_type)
+            normalized_form_data = normalization_result.normalized_data
+            
+            # Log normalization changes
+            if normalization_result.changes:
+                log_info(f"Normalized {len(normalization_result.changes)} fields for job {job_id}")
+                for field_name, original, normalized in normalization_result.changes:
+                    # Mask sensitive data (TINs) in logs
+                    if 'tin' in field_name.lower() or 'TIN' in field_name:
+                        log_info(f"  {field_name}: ***-**-{original[-4:]} -> ***-**-{normalized[-4:]}")
+                    else:
+                        log_info(f"  {field_name}: {original} -> {normalized}")
+            else:
+                log_info(f"No normalization needed for job {job_id}, using payload as-is")
+        except ValueError as e:
+            # Normalization failed - treat as validation error since it's an input format issue
+            error_msg = f"Input normalization failed: {str(e)}"
+            log_error(job_id, e)
+            raise ValidationError(error_msg)
+        
         # Retrieve template from S3
         template = get_template(templates_bucket, document_type)
         log_info(f"Retrieved template for document type {document_type}")
         
-        # Generate document
-        generated_document = generate_document(template, form_data, document_type)
+        # Generate document with normalized data
+        generated_document = generate_document(template, normalized_form_data, document_type)
         log_info(f"Generated document for job {job_id}")
         
         # Store output to S3

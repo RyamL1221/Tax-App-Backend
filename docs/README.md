@@ -27,6 +27,8 @@ docs/
 - [1099-DIV Field Reference](architecture/1099-DIV_FIELD_REFERENCE.md) - Complete field documentation
 - [Field Mapping Corrections](architecture/FIELD_MAPPING_CORRECTIONS.md) - Field mapping fixes
 - [Field Inspection Findings](architecture/FIELD_INSPECTION_FINDINGS.md) - PDF field analysis
+- [Checkbox Appearance Research](architecture/CHECKBOX_APPEARANCE_RESEARCH_FINDINGS.md) - Checkbox rendering research
+- [Full Field Inspection](architecture/FULL_FIELD_INSPECTION.txt) - Complete PDF field inspection output
 - [Migration Guide](architecture/MIGRATION_GUIDE_FIELD_STANDARDIZATION.md) - Field standardization migration
 - [Position Validation Guide](architecture/POSITION_VALIDATION_GUIDE.md) - Field position validation
 - [Form Inputs Reference](architecture/FORM_INPUTS_REFERENCE.md) - Form input specifications
@@ -39,6 +41,7 @@ docs/
 - [Tax Document Generation Guide](development/TAX_DOCUMENT_GENERATION_POSTMAN_GUIDE.md) - API testing
 - [Manual Token Retrieval](development/MANUAL_TOKEN_RETRIEVAL.md) - JWT token retrieval
 - [Iterative Field Mapping Guide](development/ITERATIVE_FIELD_MAPPING_GUIDE.md) - Systematic field mapping fixes
+- [Docker Path Fix](development/DOCKER_PATH_FIX.md) - Fix Docker mount failures caused by spaces in path (iCloud Drive)
 
 ### Examples
 - [1099-DIV Minimal Example](examples/1099-DIV-minimal-example.json) - Required fields only
@@ -54,6 +57,7 @@ docs/
 - [Validation Results](testing/VALIDATION_RESULTS.md) - Field validation test results
 - [Integration Test Results](testing/INTEGRATION_TEST_RESULTS.md) - Integration test outcomes
 - [Multi-Copy Test Results](testing/MULTI_COPY_INTEGRATION_TEST_RESULTS.md) - Multi-copy tests
+- [Task 5.5 Verification](testing/TASK_5_5_VERIFICATION.md) - Deprecation warning verification
 - [Task Summaries](testing/) - Individual task verification reports
 
 ## Documentation by Topic
@@ -107,6 +111,7 @@ docs/
 **Development**:
 - [Environment Setup](development/ENVIRONMENT_SETUP.md)
 - [LocalStack & SAM Setup](development/LOCALSTACK_SAM_SETUP.md)
+- [Docker Path Fix](development/DOCKER_PATH_FIX.md) - Fix Docker mount failures with spaces in path
 - [Quick Reference](development/QUICK_REFERENCE.md)
 
 ### API Testing
@@ -150,8 +155,17 @@ See [Documentation Guidelines](../.kiro/steering/documentation-guidelines.md) fo
 - **Steering Files**: See `../.kiro/steering/` for Kiro workspace guidelines
 - **Specs**: See `../.kiro/specs/` for active feature specifications
 
-## Changelog
+## Changelogs
 
+Project-wide changelogs documenting major changes:
+
+- [Workspace Organization Changelog](CHANGELOG_WORKSPACE_ORGANIZATION.md) - File relocations and organizational changes
+- [Flexible Input Formatting Changelog](CHANGELOG_FLEXIBLE_INPUT_FORMATTING.md) - Input normalization changes
+- [Field Standardization Changelog](CHANGELOG_FIELD_STANDARDIZATION.md) - Field mapping standardization
+
+### Recent Changes
+
+- **2024**: Workspace organization - Moved scripts and PDFs from root, deleted obsolete text files
 - **2026-02-03**: Reorganized documentation from Lambda directories to `docs/` structure
 - **2026-02-03**: Added comprehensive documentation guidelines
 - **2026-02-03**: Created field standardization documentation

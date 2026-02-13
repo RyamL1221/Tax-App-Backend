@@ -71,20 +71,18 @@ class TestValidateFormData:
         assert 'filingStatus' in error_msg
         assert 'income' in error_msg
     
-    def test_invalid_ssn_format_no_dashes(self):
-        """Test that SSN without dashes raises ValidationError."""
+    def test_ssn_without_dashes_accepted(self):
+        """Test that SSN without dashes is now accepted (flexible input)."""
         form_data = {
             'firstName': 'John',
             'lastName': 'Doe',
-            'ssn': '123456789',  # Missing dashes
+            'ssn': '123456789',  # No dashes - should be accepted
             'filingStatus': 'single',
             'income': 75000
         }
         
-        with pytest.raises(ValidationError) as exc_info:
-            validate_form_data('1040', form_data)
-        
-        assert 'SSN must be in format XXX-XX-XXXX' in str(exc_info.value)
+        # Should not raise - flexible input formatting accepts both formats
+        validate_form_data('1040', form_data)
     
     def test_invalid_ssn_format_wrong_pattern(self):
         """Test that SSN with wrong pattern raises ValidationError."""

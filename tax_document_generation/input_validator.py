@@ -19,9 +19,11 @@ from address_normalizer import normalize_address_fields
 logger = logging.getLogger(__name__)
 
 
-# SSN/TIN pattern: XXX-XX-XXXX or XX-XXXXXXX
-SSN_PATTERN = re.compile(r'^\d{3}-\d{2}-\d{4}$')
-TIN_PATTERN = re.compile(r'^\d{2}-\d{7}$')
+# SSN/TIN pattern: Accepts both hyphenated and non-hyphenated formats
+# SSN: XXX-XX-XXXX or XXXXXXXXX (9 digits)
+# TIN/EIN: XX-XXXXXXX or XXXXXXXXX (9 digits)
+SSN_PATTERN = re.compile(r'^(\d{3}-\d{2}-\d{4}|\d{9})$')
+TIN_PATTERN = re.compile(r'^(\d{2}-\d{7}|\d{9})$')
 
 # Date pattern: YYYY-MM-DD
 DATE_PATTERN = re.compile(r'^\d{4}-\d{2}-\d{2}$')
@@ -53,8 +55,8 @@ FORM_1099_DIV_REQUIRED_FIELDS = {
     'recipientTIN': str,
     'recipientName': str,
     
-    # At least one dividend amount must be present
-    'totalOrdinaryDividends': (int, float),
+    # At least one dividend amount must be present (accepts int, float, or string for flexible formatting)
+    'totalOrdinaryDividends': (int, float, str),
 }
 
 # Optional fields for Form 1099-DIV
@@ -83,42 +85,42 @@ FORM_1099_DIV_OPTIONAL_FIELDS = {
     'voided': bool,
     'corrected': bool,
     
-    # Box 1: Dividends
-    'qualifiedDividends': (int, float),
+    # Box 1: Dividends (accepts int, float, or string for flexible formatting)
+    'qualifiedDividends': (int, float, str),
     
-    # Box 2: Capital gains
-    'totalCapitalGainDistributions': (int, float),
-    'unrecapturedSection1250Gain': (int, float),
-    'section1202Gain': (int, float),
-    'collectibles28Gain': (int, float),
-    'section897OrdinaryDividends': (int, float),
-    'section897CapitalGain': (int, float),
+    # Box 2: Capital gains (accepts int, float, or string for flexible formatting)
+    'totalCapitalGainDistributions': (int, float, str),
+    'unrecapturedSection1250Gain': (int, float, str),
+    'section1202Gain': (int, float, str),
+    'collectibles28Gain': (int, float, str),
+    'section897OrdinaryDividends': (int, float, str),
+    'section897CapitalGain': (int, float, str),
     
-    # Box 3-7
-    'nondividendDistributions': (int, float),
-    'federalIncomeTaxWithheld': (int, float),
-    'section199ADividends': (int, float),
-    'investmentExpenses': (int, float),
-    'foreignTaxPaid': (int, float),
+    # Box 3-7 (accepts int, float, or string for flexible formatting)
+    'nondividendDistributions': (int, float, str),
+    'federalIncomeTaxWithheld': (int, float, str),
+    'section199ADividends': (int, float, str),
+    'investmentExpenses': (int, float, str),
+    'foreignTaxPaid': (int, float, str),
     
     # Box 8-13
     'foreignCountry': str,
-    'cashLiquidationDistributions': (int, float),
-    'noncashLiquidationDistributions': (int, float),
+    'cashLiquidationDistributions': (int, float, str),
+    'noncashLiquidationDistributions': (int, float, str),
     'fatcaFilingRequirement': bool,
     'secondTinNotification': bool,  # 2nd TIN not. checkbox (CopyA only)
-    'exemptInterestDividends': (int, float),
-    'specifiedPrivateActivityBondInterest': (int, float),
+    'exemptInterestDividends': (int, float, str),
+    'specifiedPrivateActivityBondInterest': (int, float, str),
     
     # Box 14-16: State information (first state)
     'state': str,
     'stateIdentificationNumber': str,
-    'stateTaxWithheld': (int, float),
+    'stateTaxWithheld': (int, float, str),
     
     # Box 14-16: State information (second state)
     'state2': str,
     'stateIdentificationNumber2': str,
-    'stateTaxWithheld2': (int, float),
+    'stateTaxWithheld2': (int, float, str),
 }
 
 # Required fields for Form 1099 (generic)
@@ -325,7 +327,10 @@ def _validate_field_types_and_formats(document_type: str, form_data: Dict[str, A
 
 def _validate_ssn_format(ssn: str) -> None:
     """
-    Validates SSN format (XXX-XX-XXXX).
+    Validates SSN format (XXX-XX-XXXX or XXXXXXXXX).
+    
+    Accepts both hyphenated (XXX-XX-XXXX) and non-hyphenated (XXXXXXXXX) formats.
+    The normalizer will convert non-hyphenated format to hyphenated format.
     
     Args:
         ssn: Social Security Number string
@@ -334,14 +339,17 @@ def _validate_ssn_format(ssn: str) -> None:
         ValidationError: If SSN format is invalid
     """
     if not SSN_PATTERN.match(ssn):
-        error_msg = "SSN must be in format XXX-XX-XXXX"
+        error_msg = "SSN must be in format XXX-XX-XXXX or 9 digits (XXXXXXXXX)"
         logger.info(error_msg)
         raise ValidationError(error_msg)
 
 
 def _validate_tin_format(tin: str) -> None:
     """
-    Validates TIN format (XX-XXXXXXX for EIN).
+    Validates TIN format (XX-XXXXXXX or XXXXXXXXX for EIN).
+    
+    Accepts both hyphenated (XX-XXXXXXX) and non-hyphenated (XXXXXXXXX) formats.
+    The normalizer will convert non-hyphenated format to hyphenated format.
     
     Args:
         tin: Taxpayer Identification Number string
@@ -350,7 +358,7 @@ def _validate_tin_format(tin: str) -> None:
         ValidationError: If TIN format is invalid
     """
     if not TIN_PATTERN.match(tin):
-        error_msg = "TIN must be in format XX-XXXXXXX"
+        error_msg = "TIN must be in format XX-XXXXXXX or 9 digits (XXXXXXXXX)"
         logger.info(error_msg)
         raise ValidationError(error_msg)
 
@@ -480,18 +488,35 @@ def _validate_income(income: float) -> None:
         raise ValidationError(error_msg)
 
 
-def _validate_amount(field_name: str, amount: float) -> None:
+def _validate_amount(field_name: str, amount: Any) -> None:
     """
     Validates monetary amount is a non-negative number.
     
+    Accepts int, float, or string representations of numbers.
+    String values must be numeric (e.g., "1000", "1000.50").
+    The normalizer will convert all formats to standardized decimal strings.
+    
     Args:
         field_name: Name of the field (for error messages)
-        amount: Amount value (int or float)
+        amount: Amount value (int, float, or str)
         
     Raises:
-        ValidationError: If amount is negative
+        ValidationError: If amount is negative or invalid format
     """
-    if amount < 0:
+    # Convert to float for validation
+    try:
+        if isinstance(amount, str):
+            # Validate string is numeric
+            amount_float = float(amount)
+        else:
+            amount_float = float(amount)
+    except (ValueError, TypeError):
+        error_msg = f"Field '{field_name}' must be a valid number (int, float, or numeric string)"
+        logger.info(error_msg)
+        raise ValidationError(error_msg)
+    
+    # Check non-negative
+    if amount_float < 0:
         error_msg = f"Field '{field_name}' must be a non-negative number"
         logger.info(error_msg)
         raise ValidationError(error_msg)

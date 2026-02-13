@@ -115,6 +115,18 @@ echo "Listing tables to verify creation"
 # List tables to verify
 aws dynamodb list-tables --region us-east-1 --endpoint-url http://localhost:4566
 
+# Upload 1099-DIV template to S3
+echo "Uploading 1099-DIV template to S3"
+
+aws s3 cp ./samples/1099-DIV.pdf s3://tax-app-documents/templates/irs/1099-DIV.pdf \
+    --endpoint-url http://localhost:4566
+
+echo "1099-DIV template uploaded successfully"
+
 # List S3 buckets to verify
 echo "Listing S3 buckets to verify creation"
 aws s3 ls --endpoint-url http://localhost:4566
+
+# Verify template upload
+echo "Verifying template upload"
+aws s3 ls s3://tax-app-documents/templates/irs/ --endpoint-url http://localhost:4566

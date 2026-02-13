@@ -176,3 +176,63 @@ class FixReport:
         if total == 0:
             return 0.0
         return (self.fixes_applied / total) * 100.0
+
+
+@dataclass
+class BuildStatus:
+    """
+    Status of SAM build artifacts for a Lambda function.
+    
+    Attributes:
+        exists: Whether .aws-sam/build/<LambdaName> directory exists
+        up_to_date: Whether build artifacts are newer than source files
+        handler_present: Whether handler module exists in build directory
+        lambda_name: Lambda function name from template (e.g., 'UserLoginFunction')
+        lambda_dir: Lambda source directory (e.g., 'user_login')
+        handler_file: Handler filename (e.g., 'app.py')
+        source_mtime: Most recent modification time of source files
+        build_mtime: Modification time of build directory, None if not exists
+        error_message: Error message if verification failed
+        cache_dirs_present: Whether cache directories exist in Lambda directory
+        cache_dirs_found: List of cache directories found
+    """
+    exists: bool
+    up_to_date: bool
+    handler_present: bool
+    lambda_name: str
+    lambda_dir: str
+    handler_file: str
+    source_mtime: float
+    build_mtime: Optional[float]
+    error_message: Optional[str] = None
+    cache_dirs_present: bool = False
+    cache_dirs_found: List[str] = field(default_factory=list)
+    
+    @property
+    def is_valid(self) -> bool:
+        """Return True if build is valid (exists, up-to-date, handler present)."""
+        return self.exists and self.up_to_date and self.handler_present
+    
+    @property
+    def needs_build(self) -> bool:
+        """Return True if build is needed."""
+        return not self.exists or not self.up_to_date or not self.handler_present
+
+
+@dataclass
+class LambdaConfig:
+    """
+    Configuration for a Lambda function from SAM template.
+    
+    Attributes:
+        name: Function name (e.g., 'UserLoginFunction')
+        code_uri: CodeUri from template (e.g., 'user_login/')
+        handler: Full handler string (e.g., 'app.lambda_handler')
+        handler_file: Handler filename (e.g., 'app.py')
+        handler_function: Handler function name (e.g., 'lambda_handler')
+    """
+    name: str
+    code_uri: str
+    handler: str
+    handler_file: str
+    handler_function: str

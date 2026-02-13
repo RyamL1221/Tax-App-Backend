@@ -117,7 +117,7 @@ class TestCalendarYearPDFIntegration:
             "Result should be a valid PDF"
         
         # Save the output for manual inspection if needed
-        output_path = "test-output-calendar-year-integration.pdf"
+        output_path = "samples/test-output-calendar-year-integration.pdf"
         with open(output_path, "wb") as f:
             f.write(result_bytes)
         

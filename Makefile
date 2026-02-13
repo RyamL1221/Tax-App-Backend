@@ -1,4 +1,4 @@
-.PHONY: help localstack-start localstack-stop localstack-logs localstack-init test test-local deploy-local clean
+.PHONY: help localstack-start localstack-stop localstack-logs localstack-init test test-local deploy-local clean check-path fix-path validate-docker-mount
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -66,6 +66,16 @@ sam-build-local: ## Build SAM for local development
 sam-build-prod: ## Build SAM for production deployment
 	@echo "Building SAM for production deployment..."
 	sam build --parameter-overrides Environment=production
+
+# Docker Path Fix
+check-path: ## Check if current project path is Docker-compatible
+	@bash scripts/check_docker_path.sh
+
+fix-path: ## Create symlink to a space-free path for Docker compatibility
+	@bash scripts/fix_docker_path.sh
+
+validate-docker-mount: ## Test Docker bind mount with build artifacts
+	@bash scripts/validate_docker_mount.sh
 
 invoke-local: ## Invoke Lambda function locally against LocalStack
 	@echo "Invoking Lambda function..."
