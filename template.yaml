@@ -385,22 +385,6 @@ Resources:
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: hello_world/
-      Handler: app.lambda_handler
-      Runtime: python3.14
-      Architectures:
-      - x86_64
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
-            RestApiId: !Ref ServerlessRestApi
-
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:

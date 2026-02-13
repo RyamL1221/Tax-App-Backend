@@ -27,6 +27,8 @@ docs/
 - [1099-DIV Field Reference](architecture/1099-DIV_FIELD_REFERENCE.md) - Complete field documentation
 - [Field Mapping Corrections](architecture/FIELD_MAPPING_CORRECTIONS.md) - Field mapping fixes
 - [Field Inspection Findings](architecture/FIELD_INSPECTION_FINDINGS.md) - PDF field analysis
+- [Checkbox Appearance Research](architecture/CHECKBOX_APPEARANCE_RESEARCH_FINDINGS.md) - Checkbox rendering research
+- [Full Field Inspection](architecture/FULL_FIELD_INSPECTION.txt) - Complete PDF field inspection output
 - [Migration Guide](architecture/MIGRATION_GUIDE_FIELD_STANDARDIZATION.md) - Field standardization migration
 - [Position Validation Guide](architecture/POSITION_VALIDATION_GUIDE.md) - Field position validation
 - [Form Inputs Reference](architecture/FORM_INPUTS_REFERENCE.md) - Form input specifications
@@ -55,6 +57,7 @@ docs/
 - [Validation Results](testing/VALIDATION_RESULTS.md) - Field validation test results
 - [Integration Test Results](testing/INTEGRATION_TEST_RESULTS.md) - Integration test outcomes
 - [Multi-Copy Test Results](testing/MULTI_COPY_INTEGRATION_TEST_RESULTS.md) - Multi-copy tests
+- [Task 5.5 Verification](testing/TASK_5_5_VERIFICATION.md) - Deprecation warning verification
 - [Task Summaries](testing/) - Individual task verification reports
 
 ## Documentation by Topic

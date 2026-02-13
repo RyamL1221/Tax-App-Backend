@@ -9,11 +9,16 @@ Tax-App-Backend/
 ├── docs/                           # Documentation
 │   ├── architecture/              # Architecture and design docs
 │   ├── development/               # Development guides
+│   ├── examples/                  # JSON example payloads
+│   ├── specs/                     # Implementation summaries
 │   ├── testing/                   # Test results and verification
 │   └── README.md                  # Documentation index
-├── scripts/                        # Shell scripts
+├── scripts/                        # Shell scripts and utilities
 │   ├── utils/                     # Python utility scripts
 │   └── README.md                  # Scripts documentation
+├── debug_tools/                    # Diagnostic and debugging utilities
+│   ├── tests/                     # Tests for debug tools
+│   └── README.md                  # Debug tools documentation
 ├── samples/                        # Sample PDF files
 │   └── README.md                  # Samples documentation
 ├── tests/                          # Project-wide tests
@@ -30,12 +35,14 @@ Tax-App-Backend/
 ├── user_login/                     # User login Lambda
 ├── password_recovery/              # Password recovery Lambda
 ├── tax_document_generation/        # Tax document generation Lambda
+├── document_download/              # Document download Lambda
 ├── README.md                       # Main project documentation
+├── ORGANIZATION.md                 # This file
 ├── Makefile                        # Build and development commands
 ├── template.yaml                   # SAM template
 ├── docker-compose.yml              # LocalStack configuration
+├── samconfig.toml                  # SAM CLI configuration
 └── env.json                        # Environment variables for SAM
-
 ```
 
 ## Documentation (`docs/`)
@@ -84,6 +91,22 @@ PDF files for testing:
 - Template PDFs (blank forms)
 - Generated PDFs (test outputs)
 - Test PDFs (specific scenarios)
+
+## Debug Tools (`debug_tools/`)
+
+Diagnostic and debugging utilities:
+- `diagnose_build_hang.py` - Diagnose SAM build issues
+- `apply_fixes.py` - Apply automated fixes
+- `validate_dependencies.py` - Validate Lambda dependencies
+- `validate_sam_config.py` - Validate SAM configuration
+- `verify_sam_build.py` - Verify SAM build artifacts
+- `inspect_*.py` - PDF field inspection tools
+- `analyze_*.py` - PDF analysis tools
+- `validate_*.py` - Validation scripts
+- `test_*.py` - Debug test scripts (not pytest tests)
+
+### Tests (`debug_tools/tests/`)
+Unit tests for debug tools
 
 ## Tests (`tests/`)
 

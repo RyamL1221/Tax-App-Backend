@@ -1,18 +1,28 @@
 # Debug Tools
 
-Diagnostic and fix tools for identifying and resolving SAM build issues, including build hangs, stale artifacts, and runtime import errors.
+Diagnostic and debugging tools for SAM build issues and PDF tax form generation.
 
 ## Overview
 
-This package provides standalone Python scripts to diagnose root causes of SAM build problems and verify build artifacts are up-to-date. The tools can be run independently to analyze the project structure, validate configurations, verify builds, and apply automated fixes.
+This package provides standalone Python scripts for two main purposes:
 
-**Key Features:**
+1. **SAM Build Diagnostics**: Diagnose root causes of SAM build problems, verify build artifacts, and apply automated fixes.
+
+2. **PDF Form Inspection**: Inspect, validate, and verify PDF tax form fields and generation output.
+
+**SAM Build Features:**
 - **Build Verification**: Check if build artifacts exist and are up-to-date
 - **Build Diagnostics**: Identify root causes of build hangs
 - **Dependency Validation**: Verify Lambda dependencies are correct
 - **Configuration Validation**: Check SAM template configuration
 - **Automated Fixes**: Apply fixes for common issues
 - **Hook Integration**: Automatic verification on file save
+
+**PDF Tools Features:**
+- **Field Inspection**: List and analyze PDF form fields
+- **Field Validation**: Validate field mappings and positions
+- **Output Verification**: Verify generated PDF output
+- **Generation Testing**: Test specific PDF generation features
 
 ## Structure
 
@@ -21,26 +31,71 @@ debug_tools/
 ├── __init__.py                      # Package initialization
 ├── models.py                        # Data models for reports and issues
 ├── utils.py                         # Shared utility functions
-├── verify_sam_build.py              # Build artifact verification (NEW)
-├── build_feedback_generator.py     # Feedback message generation (NEW)
-├── sam_template_parser.py          # SAM template parsing (NEW)
-├── diagnose_build_hang.py          # Build hang diagnostics
-├── validate_dependencies.py        # Dependency validation
-├── validate_sam_config.py          # SAM configuration validation
-├── apply_fixes.py                  # Automated fix application
-├── README.md                       # This file
-└── tests/                          # Unit tests
+├── README.md                        # This file
+│
+│   # SAM Build Tools
+├── verify_sam_build.py              # Build artifact verification
+├── build_feedback_generator.py      # Feedback message generation
+├── sam_template_parser.py           # SAM template parsing
+├── diagnose_build_hang.py           # Build hang diagnostics
+├── validate_dependencies.py         # Dependency validation
+├── validate_sam_config.py           # SAM configuration validation
+├── apply_fixes.py                   # Automated fix application
+├── scan_file_system.py              # File system scanning utilities
+│
+│   # PDF Field Inspection Tools
+├── inspect_pdf_fields.py            # List all PDF form fields
+├── inspect_generated_pdf_fields.py  # Inspect generated PDF output
+├── inspect_leftcol_fields.py        # Inspect left column fields
+├── inspect_calendar_year_fields.py  # Inspect calendar year fields
+├── inspect_voided_corrected_checkboxes.py  # Inspect checkbox fields
+├── check_pdf_structure.py           # Analyze PDF structure
+├── analyze_field_dimensions.py      # Analyze field dimensions
+├── analyze_recipient_name_field.py  # Analyze recipient name field
+├── analyze_checkbox_structure.py    # Analyze checkbox structure
+├── research_checkbox_appearance.py  # Research checkbox appearance streams
+│
+│   # PDF Validation Tools
+├── validate_field_mappings.py       # Validate field mappings
+├── validate_field_positions.py      # Validate field positions
+├── validate_comprehensive_schema.py # Validate comprehensive schema
+├── validate_standardization.py      # Validate field standardization
+│
+│   # PDF Verification Tools
+├── verify_checkbox_visibility.py    # Verify checkbox visibility
+├── verify_calendar_year_in_pdf.py   # Verify calendar year rendering
+├── verify_debug_pdf.py              # Verify debug PDF output
+├── final_verification_test.py       # Final verification test suite
+│
+│   # PDF Generation Test Tools
+├── generate_calendar_year_test_pdf.py  # Generate test PDF for calendar year
+├── debug_calendar_year_generation.py   # Debug calendar year generation
+├── test_calendar_year_fix.py           # Test calendar year fix
+├── test_calendar_year_mapping.py       # Test calendar year mapping
+├── test_field_positions.py             # Test field positions
+├── test_checkbox_flattening_approach.py # Test checkbox flattening
+├── test_flatten_checkbox_function.py   # Test flatten checkbox function
+├── test_voided_corrected_visibility.py # Test voided/corrected visibility
+│
+│   # Build Verification Tests
+├── test_timestamp_comparison.py     # Timestamp comparison tests
+├── test_cache_detection.py          # Cache detection tests
+├── test_cli_verification.py         # CLI verification tests
+│
+└── tests/                           # Unit tests
     ├── __init__.py
     ├── test_models_unit.py
     ├── test_utils_unit.py
-    ├── test_timestamp_comparison.py
-    ├── test_cache_detection.py
-    └── test_cli_verification.py
+    ├── test_apply_fixes_unit.py
+    ├── test_validate_dependencies_unit.py
+    └── test_validate_sam_config_unit.py
 ```
 
 ## Command-Line Tools
 
-### 1. Build Verification (verify_sam_build.py)
+### SAM Build Tools
+
+#### 1. Build Verification (verify_sam_build.py)
 
 **Purpose**: Verify that SAM build artifacts exist, are up-to-date, and contain required handler modules.
 
@@ -88,7 +143,7 @@ python debug_tools/verify_sam_build.py user_login --verbose
 - `1`: Build issues found
 - `2`: Verification error (template parsing failed, etc.)
 
-### 2. Build Hang Diagnostics (diagnose_build_hang.py)
+#### 2. Build Hang Diagnostics (diagnose_build_hang.py)
 
 **Purpose**: Diagnose root causes of SAM build hangs.
 
@@ -104,7 +159,7 @@ python debug_tools/diagnose_build_hang.py
 - Dependency problems
 - SAM configuration issues
 
-### 3. Dependency Validation (validate_dependencies.py)
+#### 3. Dependency Validation (validate_dependencies.py)
 
 **Purpose**: Validate Lambda function dependencies.
 
@@ -119,7 +174,7 @@ python debug_tools/validate_dependencies.py
 - No version conflicts
 - Compatible with Python 3.14
 
-### 4. SAM Configuration Validation (validate_sam_config.py)
+#### 4. SAM Configuration Validation (validate_sam_config.py)
 
 **Purpose**: Validate SAM template configuration.
 
@@ -134,7 +189,7 @@ python debug_tools/validate_sam_config.py
 - CodeUri paths exist
 - Parameter consistency
 
-### 5. Apply Automated Fixes (apply_fixes.py)
+#### 5. Apply Automated Fixes (apply_fixes.py)
 
 **Purpose**: Apply automated fixes for common issues.
 
@@ -148,6 +203,185 @@ python debug_tools/apply_fixes.py --all
 
 # Dry run (show what would be fixed)
 python debug_tools/apply_fixes.py --all --dry-run
+```
+
+### PDF Field Inspection Tools
+
+These tools help inspect and analyze PDF form fields in tax documents (1099-DIV, etc.).
+
+#### 1. Inspect PDF Fields (inspect_pdf_fields.py)
+
+**Purpose**: List all form fields in a PDF template.
+
+**Usage:**
+```bash
+python debug_tools/inspect_pdf_fields.py samples/1099-DIV.pdf
+```
+
+**What it shows:**
+- Field names and types
+- Field positions and dimensions
+- Field values (if any)
+
+#### 2. Inspect Generated PDF Fields (inspect_generated_pdf_fields.py)
+
+**Purpose**: Inspect fields in a generated PDF output.
+
+**Usage:**
+```bash
+python debug_tools/inspect_generated_pdf_fields.py samples/test-output.pdf
+```
+
+#### 3. Inspect Calendar Year Fields (inspect_calendar_year_fields.py)
+
+**Purpose**: Inspect calendar year field positions across all form copies.
+
+**Usage:**
+```bash
+python debug_tools/inspect_calendar_year_fields.py
+```
+
+#### 4. Inspect Voided/Corrected Checkboxes (inspect_voided_corrected_checkboxes.py)
+
+**Purpose**: Inspect VOID and CORRECTED checkbox fields.
+
+**Usage:**
+```bash
+python debug_tools/inspect_voided_corrected_checkboxes.py
+```
+
+#### 5. Analyze Field Dimensions (analyze_field_dimensions.py)
+
+**Purpose**: Analyze field dimensions for font size calculations.
+
+**Usage:**
+```bash
+python debug_tools/analyze_field_dimensions.py samples/1099-DIV.pdf
+```
+
+#### 6. Analyze Checkbox Structure (analyze_checkbox_structure.py)
+
+**Purpose**: Analyze checkbox field structure and appearance streams.
+
+**Usage:**
+```bash
+python debug_tools/analyze_checkbox_structure.py
+```
+
+#### 7. Check PDF Structure (check_pdf_structure.py)
+
+**Purpose**: Analyze overall PDF structure and form hierarchy.
+
+**Usage:**
+```bash
+python debug_tools/check_pdf_structure.py samples/1099-DIV.pdf
+```
+
+### PDF Validation Tools
+
+These tools validate field mappings and configurations.
+
+#### 1. Validate Field Mappings (validate_field_mappings.py)
+
+**Purpose**: Validate that field mappings match actual PDF fields.
+
+**Usage:**
+```bash
+python debug_tools/validate_field_mappings.py
+```
+
+**What it checks:**
+- All mapped fields exist in PDF
+- No duplicate mappings
+- Field names are correct
+
+#### 2. Validate Field Positions (validate_field_positions.py)
+
+**Purpose**: Validate field positions are correct.
+
+**Usage:**
+```bash
+python debug_tools/validate_field_positions.py
+```
+
+#### 3. Validate Comprehensive Schema (validate_comprehensive_schema.py)
+
+**Purpose**: Validate the comprehensive 1099-DIV schema.
+
+**Usage:**
+```bash
+python debug_tools/validate_comprehensive_schema.py
+```
+
+#### 4. Validate Standardization (validate_standardization.py)
+
+**Purpose**: Validate field name standardization.
+
+**Usage:**
+```bash
+python debug_tools/validate_standardization.py
+```
+
+### PDF Verification Tools
+
+These tools verify PDF generation output.
+
+#### 1. Verify Checkbox Visibility (verify_checkbox_visibility.py)
+
+**Purpose**: Verify checkboxes are visible in generated PDFs.
+
+**Usage:**
+```bash
+python debug_tools/verify_checkbox_visibility.py samples/test-output.pdf
+```
+
+#### 2. Verify Calendar Year in PDF (verify_calendar_year_in_pdf.py)
+
+**Purpose**: Verify calendar year renders correctly in all copies.
+
+**Usage:**
+```bash
+python debug_tools/verify_calendar_year_in_pdf.py samples/test-output.pdf
+```
+
+#### 3. Final Verification Test (final_verification_test.py)
+
+**Purpose**: Run comprehensive verification tests on generated PDFs.
+
+**Usage:**
+```bash
+python debug_tools/final_verification_test.py
+```
+
+### PDF Generation Test Tools
+
+These tools test specific PDF generation features.
+
+#### 1. Generate Calendar Year Test PDF (generate_calendar_year_test_pdf.py)
+
+**Purpose**: Generate a test PDF to verify calendar year rendering.
+
+**Usage:**
+```bash
+python debug_tools/generate_calendar_year_test_pdf.py
+```
+
+#### 2. Debug Calendar Year Generation (debug_calendar_year_generation.py)
+
+**Purpose**: Debug calendar year field generation issues.
+
+**Usage:**
+```bash
+python debug_tools/debug_calendar_year_generation.py
+```
+
+#### 3. Test Checkbox Flattening (test_checkbox_flattening_approach.py)
+
+**Purpose**: Test checkbox flattening approach for Adobe compatibility.
+
+**Usage:**
+```bash
+python debug_tools/test_checkbox_flattening_approach.py
 ```
 
 ## Data Models
@@ -1022,20 +1256,28 @@ All tools follow consistent error handling:
 - pytest (for testing)
 - hypothesis (for property-based testing)
 - PyYAML (for template parsing)
+- PyMuPDF/fitz (for PDF inspection tools)
 
 ## Related Documentation
 
-- [SAM Build Guidelines](../.kiro/steering/sam-build-guidelines.md) - **Comprehensive build guide**
+### SAM Build Documentation
+- [SAM Build Guidelines](../.kiro/steering/sam-build-guidelines.md) - Comprehensive build guide
 - [Lambda Import Patterns](../.kiro/steering/lambda-import-patterns.md) - Import pattern rules
 - [Local Development](../.kiro/steering/local-development.md) - LocalStack setup
 - [Quick Reference](../.kiro/steering/quick-reference.md) - Command quick reference
 - [Code Style Guidelines](../.kiro/steering/code-style.md) - Code style rules
 
+### PDF Generation Documentation
+- [PDF Generation Guide](../.kiro/steering/pdf-generation.md) - PDF tax form generation overview
+- [1099-DIV Field Reference](../docs/architecture/1099-DIV_FIELD_REFERENCE.md) - Complete field reference
+- [Checkbox Appearance Research](../docs/architecture/CHECKBOX_APPEARANCE_RESEARCH_FINDINGS.md) - Checkbox research findings
+- [Full Field Inspection](../docs/architecture/FULL_FIELD_INSPECTION.txt) - Complete field inspection output
+
 ## Summary
 
-The debug_tools package provides comprehensive build verification and diagnostics:
+The debug_tools package provides comprehensive build verification, diagnostics, and PDF inspection tools:
 
-**Key Features:**
+**SAM Build Features:**
 - ✅ Verify build artifacts are up-to-date
 - ✅ Check handler modules are present
 - ✅ Detect cache directories
@@ -1043,7 +1285,14 @@ The debug_tools package provides comprehensive build verification and diagnostic
 - ✅ Integrate with development workflow via hooks
 - ✅ Support both CLI and programmatic usage
 
-**Quick Start:**
+**PDF Tools Features:**
+- ✅ Inspect PDF form fields and structure
+- ✅ Validate field mappings and positions
+- ✅ Verify generated PDF output
+- ✅ Test specific PDF generation features
+- ✅ Debug checkbox and calendar year issues
+
+**Quick Start - SAM Build:**
 ```bash
 # Check specific Lambda
 python debug_tools/verify_sam_build.py user_login
@@ -1053,6 +1302,18 @@ python debug_tools/verify_sam_build.py --all
 
 # If issues found, rebuild
 sam build --parameter-overrides Environment=local
+```
+
+**Quick Start - PDF Inspection:**
+```bash
+# List all PDF fields
+python debug_tools/inspect_pdf_fields.py samples/1099-DIV.pdf
+
+# Validate field mappings
+python debug_tools/validate_field_mappings.py
+
+# Verify generated output
+python debug_tools/verify_checkbox_visibility.py samples/test-output.pdf
 ```
 
 **Hook Integration:**
