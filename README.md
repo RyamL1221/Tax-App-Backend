@@ -26,15 +26,8 @@ source venv/bin/activate  # macOS/Linux
 # 1. Start LocalStack
 docker-compose up -d
 
-# 2. Create DynamoDB table (first time only)
-AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
-aws dynamodb create-table \
-  --table-name Users \
-  --attribute-definitions AttributeName=email,AttributeType=S \
-  --key-schema AttributeName=email,KeyType=HASH \
-  --billing-mode PAY_PER_REQUEST \
-  --endpoint-url http://localhost:4566 \
-  --region us-east-1
+# 2. Initialize LocalStack (creates tables and uploads templates - first time only)
+bash scripts/init-localstack.sh
 
 # 3. Build and start SAM
 sam build
@@ -206,14 +199,16 @@ LocalStack allows you to develop and test AWS applications locally without conne
 #### Quick Start with LocalStack
 
 ```bash
-# Complete setup (install dependencies + start LocalStack)
+# Complete setup (install dependencies + start LocalStack + initialize)
 make setup
 
 # Or step by step:
 make install              # Install Python dependencies
 make localstack-start     # Start LocalStack in Docker
-make localstack-init      # Initialize DynamoDB table
+bash scripts/init-localstack.sh  # Initialize DynamoDB tables and upload S3 templates
 ```
+
+**Note:** The `init-localstack.sh` script creates all required DynamoDB tables, S3 buckets, and uploads the 1099-DIV PDF template needed for tax document generation.
 
 #### Daily Development Workflow
 
@@ -265,6 +260,15 @@ awslocal dynamodb list-tables --region us-east-1
 
 # Scan the users table
 awslocal dynamodb scan --table-name Users --region us-east-1
+
+# List S3 buckets and contents
+awslocal s3 ls
+awslocal s3 ls s3://tax-app-documents/templates/irs/
+
+# Upload 1099-DIV template (if not already uploaded by init script)
+AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 \
+  aws s3 cp ./samples/1099-DIV.pdf s3://tax-app-documents/templates/irs/1099-DIV.pdf \
+  --endpoint-url=http://localhost:4566
 
 # Test the endpoint (after deploying)
 curl -X POST http://localhost:4566/restapis/*/Prod/register \
