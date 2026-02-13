@@ -5,6 +5,7 @@ These tests verify specific examples and edge cases for response formatting.
 """
 
 import json
+import os
 import pytest
 from user_login.response_formatter import (
     success_response,
@@ -13,6 +14,11 @@ from user_login.response_formatter import (
     internal_error_response,
     error_response
 )
+
+
+def get_expected_cors_origin():
+    """Get the expected CORS origin from environment or default."""
+    return os.environ.get('CORS_ALLOWED_ORIGIN', '*')
 
 
 class TestSuccessResponse:
@@ -47,7 +53,7 @@ class TestSuccessResponse:
         response = success_response("user@example.com", "a" * 64)
         headers = response["headers"]
         
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert "Content-Type" in headers["Access-Control-Allow-Headers"]
         assert "POST" in headers["Access-Control-Allow-Methods"]
         assert headers["Content-Type"] == "application/json"
@@ -95,7 +101,7 @@ class TestValidationErrorResponse:
         response = validation_error_response("Test error")
         headers = response["headers"]
         
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert headers["Content-Type"] == "application/json"
 
 
@@ -145,7 +151,7 @@ class TestAuthenticationErrorResponse:
         response = authentication_error_response()
         headers = response["headers"]
         
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert headers["Content-Type"] == "application/json"
 
 
@@ -176,7 +182,7 @@ class TestInternalErrorResponse:
         response = internal_error_response()
         headers = response["headers"]
         
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert headers["Content-Type"] == "application/json"
 
 
@@ -204,7 +210,7 @@ class TestGenericErrorResponse:
         response = error_response(404, "Not found")
         headers = response["headers"]
         
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert headers["Content-Type"] == "application/json"
 
 

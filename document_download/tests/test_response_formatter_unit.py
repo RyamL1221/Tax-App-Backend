@@ -6,9 +6,15 @@ Tests response formatting for API Gateway.
 
 import pytest
 import json
+import os
 import base64
 
 from document_download.response_formatter import pdf_response, error_response
+
+
+def get_expected_cors_origin():
+    """Get the expected CORS origin from environment or default."""
+    return os.environ.get('CORS_ALLOWED_ORIGIN', '*')
 
 
 class TestResponseFormatter:
@@ -24,7 +30,7 @@ class TestResponseFormatter:
         assert response['headers']['Content-Type'] == 'application/pdf'
         assert 'attachment' in response['headers']['Content-Disposition']
         assert filename in response['headers']['Content-Disposition']
-        assert response['headers']['Access-Control-Allow-Origin'] == '*'
+        assert response['headers']['Access-Control-Allow-Origin'] == get_expected_cors_origin()
         assert 'Authorization' in response['headers']['Access-Control-Allow-Headers']
         assert 'GET' in response['headers']['Access-Control-Allow-Methods']
     
@@ -66,7 +72,7 @@ class TestResponseFormatter:
         """Test that error response includes CORS headers."""
         response = error_response(500, 'InternalError', 'Server error')
         
-        assert response['headers']['Access-Control-Allow-Origin'] == '*'
+        assert response['headers']['Access-Control-Allow-Origin'] == get_expected_cors_origin()
         assert 'Authorization' in response['headers']['Access-Control-Allow-Headers']
         assert 'GET' in response['headers']['Access-Control-Allow-Methods']
     

@@ -13,6 +13,10 @@ Parameters:
       - local
       - production
     Description: Environment type (local for LocalStack, production for AWS)
+  CorsAllowedOrigin:
+    Type: String
+    Default: "*"
+    Description: Allowed origin for CORS headers (e.g., https://your-frontend-domain.com)
 
 Conditions:
   IsLocal: !Equals [!Ref Environment, local]
@@ -34,7 +38,7 @@ Resources:
       StageName: Prod
       TracingEnabled: true
       Cors:
-        AllowOrigin: "'*'"
+        AllowOrigin: !Sub "'${CorsAllowedOrigin}'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowMethods: "'GET,POST,OPTIONS'"
       GatewayResponses:
@@ -42,7 +46,7 @@ Resources:
           StatusCode: 404
           ResponseParameters:
             Headers:
-              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Origin: !Sub "'${CorsAllowedOrigin}'"
               Access-Control-Allow-Headers: "'Content-Type,Authorization'"
               Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
           ResponseTemplates:
@@ -50,7 +54,7 @@ Resources:
         DEFAULT_4XX:
           ResponseParameters:
             Headers:
-              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Origin: !Sub "'${CorsAllowedOrigin}'"
               Access-Control-Allow-Headers: "'Content-Type,Authorization'"
               Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
 
@@ -189,6 +193,7 @@ Resources:
       Environment:
         Variables:
           USER_TABLE_NAME: !Ref Users
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
       Policies:
         - DynamoDBCrudPolicy:
@@ -219,6 +224,7 @@ Resources:
         Variables:
           USER_TABLE_NAME: !Ref Users
           JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
       Policies:
         - DynamoDBReadPolicy:
@@ -252,6 +258,7 @@ Resources:
           RATE_LIMITS_TABLE: !Ref RateLimits
           FROM_EMAIL: "noreply@example.com"
           BASE_URL: "http://localhost:3000"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
       Policies:
         - DynamoDBReadPolicy:
@@ -292,6 +299,7 @@ Resources:
         Variables:
           USER_TABLE_NAME: !Ref Users
           RESET_TOKENS_TABLE_NAME: !Ref ResetTokens
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
       Policies:
         - DynamoDBCrudPolicy:
@@ -328,6 +336,7 @@ Resources:
           OUTPUTS_BUCKET: !Ref TaxDocumentsBucket
           JOB_TABLE_NAME: !Ref TaxDocumentJobs
           JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
       Policies:
         - DynamoDBCrudPolicy:
@@ -365,6 +374,7 @@ Resources:
           JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
           JOB_TABLE_NAME: !Ref TaxDocumentJobs
           OUTPUTS_BUCKET: !Ref TaxDocumentsBucket
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
       Policies:
         - DynamoDBReadPolicy:
@@ -456,16 +466,6 @@ Outputs:
   ResetPasswordFunctionIamRole:
     Description: Implicit IAM Role created for Reset Password function
     Value: !GetAtt ResetPasswordFunctionRole.Arn
-  HelloWorldApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World 
-      function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/hello/"
-  HelloWorldFunction:
-    Description: Hello World Lambda Function ARN
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value: !GetAtt HelloWorldFunctionRole.Arn
   TaxDocumentJobsTableName:
     Description: DynamoDB table name for storing tax document generation jobs
     Value: !Ref TaxDocumentJobs

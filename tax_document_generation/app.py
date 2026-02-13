@@ -47,11 +47,12 @@ def lambda_handler(event: Dict, context) -> Dict:
     # Handle OPTIONS requests for CORS preflight
     http_method = event.get('httpMethod', '')
     if http_method == 'OPTIONS':
+        cors_origin = os.environ.get('CORS_ALLOWED_ORIGIN', '*')
         return {
             'statusCode': 200,
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Origin': cors_origin,
                 'Access-Control-Allow-Headers': 'Content-Type,Authorization',
                 'Access-Control-Allow-Methods': 'POST,OPTIONS'
             },

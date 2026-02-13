@@ -5,6 +5,7 @@ These tests verify specific examples and edge cases for response formatting func
 """
 
 import json
+import os
 import pytest
 from user_registration.response_formatter import (
     success_response,
@@ -12,6 +13,11 @@ from user_registration.response_formatter import (
     duplicate_user_response,
     internal_error_response,
 )
+
+
+def get_expected_cors_origin():
+    """Get the expected CORS origin from environment or default."""
+    return os.environ.get('CORS_ALLOWED_ORIGIN', '*')
 
 
 class TestSuccessResponse:
@@ -28,7 +34,7 @@ class TestSuccessResponse:
         headers = response["headers"]
         
         assert "Access-Control-Allow-Origin" in headers
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert "Access-Control-Allow-Headers" in headers
         assert headers["Access-Control-Allow-Headers"] == "Content-Type,Authorization"
         assert "Access-Control-Allow-Methods" in headers
@@ -86,7 +92,7 @@ class TestValidationErrorResponse:
         headers = response["headers"]
         
         assert "Access-Control-Allow-Origin" in headers
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert "Access-Control-Allow-Headers" in headers
         assert "Access-Control-Allow-Methods" in headers
     
@@ -141,7 +147,7 @@ class TestDuplicateUserResponse:
         headers = response["headers"]
         
         assert "Access-Control-Allow-Origin" in headers
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert "Access-Control-Allow-Headers" in headers
         assert "Access-Control-Allow-Methods" in headers
     
@@ -180,7 +186,7 @@ class TestInternalErrorResponse:
         headers = response["headers"]
         
         assert "Access-Control-Allow-Origin" in headers
-        assert headers["Access-Control-Allow-Origin"] == "*"
+        assert headers["Access-Control-Allow-Origin"] == get_expected_cors_origin()
         assert "Access-Control-Allow-Headers" in headers
         assert "Access-Control-Allow-Methods" in headers
     
