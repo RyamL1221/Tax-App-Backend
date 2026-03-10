@@ -38,6 +38,7 @@ docs/
 - [Lambda Import Patterns](development/LAMBDA_IMPORT_PATTERNS.md) - **Critical import guidelines**
 - [Environment Variables](development/ENV_VARS_EXPLAINED.md) - Environment configuration
 - [Password Recovery Testing](development/PASSWORD_RECOVERY_TESTING.md) - Testing password flows
+- [SES Setup Guide](development/SES_SETUP_GUIDE.md) - AWS SES configuration for email sending
 - [Tax Document Generation Guide](development/TAX_DOCUMENT_GENERATION_POSTMAN_GUIDE.md) - API testing
 - [Manual Token Retrieval](development/MANUAL_TOKEN_RETRIEVAL.md) - JWT token retrieval
 - [Iterative Field Mapping Guide](development/ITERATIVE_FIELD_MAPPING_GUIDE.md) - Systematic field mapping fixes
@@ -102,6 +103,7 @@ docs/
 ### Password Recovery
 **Development**:
 - [Password Recovery Testing](development/PASSWORD_RECOVERY_TESTING.md)
+- [SES Setup Guide](development/SES_SETUP_GUIDE.md) - AWS SES configuration for email sending
 - [Manual Token Retrieval](development/MANUAL_TOKEN_RETRIEVAL.md)
 
 **Testing**:

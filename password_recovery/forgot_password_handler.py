@@ -148,12 +148,14 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 # Send reset email
                 email_service = EmailService()
-                email_sent = email_service.send_reset_email(email, plaintext_token, expiration)
+                email_sent, message_id = email_service.send_reset_email(email, plaintext_token, expiration)
                 
                 if email_sent:
-                    logger.info(f"Reset email sent successfully to: {email}")
+                    # Log success with MessageId for monitoring and debugging
+                    logger.info(f"Reset email sent successfully to: {email}. MessageId: {message_id}")
                 else:
-                    # Email delivery failed - log but don't expose to client
+                    # Email delivery failed - log error without exposing to client
+                    # This maintains non-enumeration security (always return success response)
                     logger.error(f"Failed to send reset email to: {email}")
                     # Still return success for non-enumeration
                 

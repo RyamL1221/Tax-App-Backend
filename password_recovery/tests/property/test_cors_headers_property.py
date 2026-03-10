@@ -78,7 +78,7 @@ class TestCORSHeadersProperty:
             mock_token_gen_class.return_value = mock_token_gen
             
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = True
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
             mock_email_class.return_value = mock_email
             
             event = {
@@ -218,7 +218,7 @@ class TestCORSHeadersProperty:
             mock_token_gen_class.return_value = mock_token_gen
             
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = True
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
             mock_email_class.return_value = mock_email
             
             event = {
@@ -260,7 +260,7 @@ class TestCORSHeadersProperty:
             mock_token_gen_class.return_value = mock_token_gen
             
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = True
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
             mock_email_class.return_value = mock_email
             
             event = {
@@ -302,7 +302,7 @@ class TestCORSHeadersProperty:
             mock_token_gen_class.return_value = mock_token_gen
             
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = True
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
             mock_email_class.return_value = mock_email
             
             event = {
@@ -343,7 +343,7 @@ class TestCORSHeadersProperty:
             mock_token_gen_class.return_value = mock_token_gen
             
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = True
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
             mock_email_class.return_value = mock_email
             
             # Get success response
