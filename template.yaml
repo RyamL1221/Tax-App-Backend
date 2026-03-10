@@ -258,6 +258,8 @@ Resources:
           RATE_LIMITS_TABLE: !Ref RateLimits
           FROM_EMAIL: "noreply@example.com"
           BASE_URL: "http://localhost:3000"
+          SES_REGION: "us-east-1"
+          CONFIGURATION_SET_NAME: ""
           CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
       Policies:

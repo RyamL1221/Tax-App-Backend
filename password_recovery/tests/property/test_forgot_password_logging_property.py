@@ -171,7 +171,7 @@ class TestForgotPasswordLoggingProperty:
             
             # Setup email service
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = True
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
             mock_email_class.return_value = mock_email
             
             event = {
@@ -352,7 +352,7 @@ class TestForgotPasswordLoggingProperty:
             
             # Setup email service to fail
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = False
+            mock_email.send_reset_email.return_value = (False, None)
             mock_email_class.return_value = mock_email
             
             event = {

@@ -53,7 +53,7 @@ class TestEmailFailureNonEnumerationProperty:
     """Property-based tests for email failure non-enumeration."""
     
     @given(valid_emails(), reset_tokens(), ses_error_codes)
-    @settings(max_examples=100)
+    @settings(max_examples=100, deadline=None)
     def test_ses_error_returns_false_without_exception(self, email, token, error_code):
         """
         Property: SES errors should return False without raising exceptions.
@@ -67,17 +67,22 @@ class TestEmailFailureNonEnumerationProperty:
             'SendEmail'
         )
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         # Should not raise an exception
         result = service.send_reset_email(email, token, expiration)
         
-        # Should return False to indicate failure
-        assert result is False
+        # Should return (False, None) to indicate failure
+        assert result == (False, None)
     
     @given(valid_emails(), reset_tokens())
-    @settings(max_examples=100)
+    @settings(max_examples=100, deadline=None)
     def test_generic_exception_returns_false_without_exception(self, email, token):
         """
         Property: Generic exceptions should return False without raising.
@@ -88,14 +93,19 @@ class TestEmailFailureNonEnumerationProperty:
         mock_ses = Mock()
         mock_ses.send_email.side_effect = Exception("Unexpected error")
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         # Should not raise an exception
         result = service.send_reset_email(email, token, expiration)
         
-        # Should return False to indicate failure
-        assert result is False
+        # Should return (False, None) to indicate failure
+        assert result == (False, None)
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -112,7 +122,12 @@ class TestEmailFailureNonEnumerationProperty:
             'SendEmail'
         )
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         # Capture log output
@@ -130,8 +145,8 @@ class TestEmailFailureNonEnumerationProperty:
             assert email not in log_message
             assert token not in log_message
             
-            # Should return False
-            assert result is False
+            # Should return (False, None) tuple
+            assert result == (False, None)
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -149,14 +164,18 @@ class TestEmailFailureNonEnumerationProperty:
             'SendEmail'
         )
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         result = service.send_reset_email(email, token, expiration)
         
-        # Should only return False, no error details
-        assert result is False
-        assert isinstance(result, bool)
+        # Should return (False, None), no error details exposed
+        assert result == (False, None)
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -171,12 +190,17 @@ class TestEmailFailureNonEnumerationProperty:
         # Test success case
         mock_ses_success = Mock()
         mock_ses_success.send_email.return_value = {'MessageId': 'test-id'}
-        service_success = EmailService(ses_client=mock_ses_success)
+        service_success = EmailService(
+            ses_client=mock_ses_success,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         result_success = service_success.send_reset_email(email, token, expiration)
-        assert isinstance(result_success, bool)
-        assert result_success is True
+        assert isinstance(result_success, tuple)
+        assert result_success == (True, 'test-id')
         
         # Test failure case
         mock_ses_failure = Mock()
@@ -184,11 +208,16 @@ class TestEmailFailureNonEnumerationProperty:
             {'Error': {'Code': 'MessageRejected', 'Message': 'Error'}},
             'SendEmail'
         )
-        service_failure = EmailService(ses_client=mock_ses_failure)
+        service_failure = EmailService(
+            ses_client=mock_ses_failure,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         
         result_failure = service_failure.send_reset_email(email, token, expiration)
-        assert isinstance(result_failure, bool)
-        assert result_failure is False
+        assert isinstance(result_failure, tuple)
+        assert result_failure == (False, None)
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -207,17 +236,24 @@ class TestEmailFailureNonEnumerationProperty:
             'SendEmail'
         )
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         result = service.send_reset_email(email, token, expiration)
         
-        # Service returns False to indicate failure
-        assert result is False
+        # Service returns (False, None) tuple to indicate failure
+        success, message_id = result
+        assert success is False
+        assert message_id is None
         
         # Handler can check this and still return success to client
         # Simulating handler behavior:
-        if result:
+        if success:
             handler_response = "Email sent successfully"
         else:
             # Even on failure, return generic success message

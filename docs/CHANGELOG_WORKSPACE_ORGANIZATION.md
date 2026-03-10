@@ -4,6 +4,123 @@
 
 This changelog documents all file relocations, deletions, and organizational changes made to maintain a clean and well-organized workspace structure.
 
+## 2026 - Test Folder Reorganization
+
+### Test Folder Reorganization Initiative
+
+**Date**: March 10, 2026  
+**Task**: Reorganize test files from flat structure to hierarchical subdirectory structure  
+**Spec**: `.kiro/specs/test-folder-organization/`
+
+#### Overview
+
+Successfully reorganized all test files from a flat naming-convention-based structure to a hierarchical subdirectory-based structure. Tests are now organized by type (unit, property, integration, regression) in dedicated subdirectories.
+
+#### Migration Statistics
+
+**Total Files Migrated**: 230 test files
+
+**By Lambda Function**:
+- user_login: 27 files (4 unit, 22 property, 1 integration)
+- user_registration: 13 files (3 unit, 8 property, 2 integration)
+- password_recovery: 40 files (9 unit, 25 property, 6 integration)
+- tax_document_generation: 130 files (37 unit, 68 property, 24 integration, 1 regression)
+- document_download: 8 files (4 unit, 3 property, 1 integration)
+- debug_tools: 5 files (5 unit)
+- tests (root): 7 files (1 unit, 5 property, 1 integration)
+
+**By Test Type**:
+- Unit Tests: 63 files (27.4%)
+- Property Tests: 131 files (56.9%)
+- Integration Tests: 35 files (15.2%)
+- Regression Tests: 1 file (0.4%)
+
+#### Structure Changes
+
+**Before (Flat Structure)**:
+```
+<lambda_function>/tests/
+├── test_validator_unit.py
+├── test_cors_headers_property.py
+├── test_lambda_handler_integration.py
+└── ... (all tests in one directory)
+```
+
+**After (Hierarchical Structure)**:
+```
+<lambda_function>/tests/
+├── __init__.py
+├── unit/
+│   ├── __init__.py
+│   └── test_*_unit.py
+├── property/
+│   ├── __init__.py
+│   └── test_*_property.py
+├── integration/
+│   ├── __init__.py
+│   └── test_*_integration.py
+└── regression/
+    ├── __init__.py
+    └── test_*_regression.py
+```
+
+#### Migration Method
+
+- Used `git mv` to preserve file history
+- Created subdirectories: unit/, property/, integration/, regression/
+- Created `__init__.py` files in all subdirectories
+- All imports automatically updated during relocation
+
+#### Verification Results
+
+✅ All tests discovered correctly (230 tests)  
+✅ All tests pass with same results as before migration  
+✅ All imports resolve correctly  
+✅ Git history preserved for all files  
+✅ Pytest discovery works for all tests  
+✅ Category-specific test execution works
+
+#### Documentation Updates
+
+**Updated Files**:
+- `.kiro/steering/testing-guidelines.md` - Updated directory structure and test commands
+- `.kiro/steering/quick-reference.md` - Updated project structure and test commands
+- `.kiro/steering/workspace-organization.md` - Updated Lambda function structure examples
+
+**New Documentation**:
+- `docs/testing/TEST_FOLDER_REORGANIZATION.md` - Migration guide and summary
+- `docs/testing/TEST_FOLDER_REORGANIZATION_REPORT.md` - Comprehensive migration report
+
+#### Benefits
+
+1. **Improved Organization**: Tests visually organized by type
+2. **Faster Test Execution**: Run only unit tests for quick feedback
+3. **Better Developer Experience**: Clearer test structure at a glance
+4. **Enhanced Test Discovery**: Category-specific test execution
+
+#### Running Tests After Migration
+
+```bash
+# Run all tests
+pytest
+
+# Run tests by category
+pytest */tests/unit/              # All unit tests
+pytest */tests/property/          # All property tests
+pytest */tests/integration/       # All integration tests
+
+# Run tests for specific Lambda
+pytest user_login/tests/unit/    # Unit tests for user_login
+```
+
+#### Related Documentation
+
+- Spec: `.kiro/specs/test-folder-organization/`
+- Migration Guide: `docs/testing/TEST_FOLDER_REORGANIZATION.md`
+- Migration Report: `docs/testing/TEST_FOLDER_REORGANIZATION_REPORT.md`
+
+---
+
 ## 2024 - Workspace Organization Initiative
 
 ### Task 1.3: Text File Evaluation and Cleanup

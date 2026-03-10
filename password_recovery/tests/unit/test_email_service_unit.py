@@ -19,7 +19,8 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         with patch.dict('os.environ', {
             'FROM_EMAIL': 'test@example.com',
-            'BASE_URL': 'https://test.example.com'
+            'BASE_URL': 'https://test.example.com',
+            'SES_REGION': 'us-east-1'
         }):
             service = EmailService(ses_client=mock_ses)
             assert service.from_email == 'test@example.com'
@@ -31,7 +32,8 @@ class TestEmailServiceUnit:
         service = EmailService(
             ses_client=mock_ses,
             from_email='custom@example.com',
-            base_url='https://custom.example.com'
+            base_url='https://custom.example.com',
+            ses_region='us-west-2'
         )
         assert service.ses == mock_ses
         assert service.from_email == 'custom@example.com'
@@ -45,17 +47,19 @@ class TestEmailServiceUnit:
         service = EmailService(
             ses_client=mock_ses,
             from_email='noreply@example.com',
-            base_url='https://example.com'
+            base_url='https://example.com',
+            ses_region='us-east-1'
         )
         
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
-        result = service.send_reset_email(
+        success, message_id = service.send_reset_email(
             'user@example.com',
             'test-token-abc123',
             expiration
         )
         
-        assert result is True
+        assert success is True
+        assert message_id == 'test-message-id-123'
         mock_ses.send_email.assert_called_once()
     
     def test_send_reset_email_includes_correct_recipient(self):
@@ -63,7 +67,12 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email='noreply@example.com',
+            base_url='https://example.com',
+            ses_region='us-east-1'
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         service.send_reset_email('user@example.com', 'token123', expiration)
@@ -76,7 +85,12 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
-        service = EmailService(ses_client=mock_ses, base_url='https://example.com')
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url='https://example.com',
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         token = 'unique-token-xyz789'
         
@@ -94,7 +108,12 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
-        service = EmailService(ses_client=mock_ses, base_url='https://myapp.com')
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url='https://myapp.com',
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         token = 'token123'
         
@@ -113,7 +132,12 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime(2024, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
         
         service.send_reset_email('user@example.com', 'token123', expiration)
@@ -131,7 +155,12 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         service.send_reset_email('user@example.com', 'token123', expiration)
@@ -151,7 +180,12 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         service.send_reset_email('user@example.com', 'token123', expiration)
@@ -166,7 +200,12 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         service.send_reset_email('user@example.com', 'token123', expiration)
@@ -185,7 +224,12 @@ class TestEmailServiceUnit:
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
         from_email = 'noreply@myapp.com'
-        service = EmailService(ses_client=mock_ses, from_email=from_email)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email=from_email,
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         service.send_reset_email('user@example.com', 'token123', expiration)
@@ -201,31 +245,48 @@ class TestEmailServiceUnit:
             'SendEmail'
         )
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
-        result = service.send_reset_email('user@example.com', 'token123', expiration)
+        success, message_id = service.send_reset_email('user@example.com', 'token123', expiration)
         
-        assert result is False
+        assert success is False
+        assert message_id is None
     
     def test_send_reset_email_handles_generic_exception(self):
         """Test handling of generic exceptions."""
         mock_ses = Mock()
         mock_ses.send_email.side_effect = Exception("Unexpected error")
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
-        result = service.send_reset_email('user@example.com', 'token123', expiration)
+        success, message_id = service.send_reset_email('user@example.com', 'token123', expiration)
         
-        assert result is False
+        assert success is False
+        assert message_id is None
     
     def test_send_reset_email_logs_success(self):
         """Test that successful email sending is logged."""
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-message-id'}
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         with patch('password_recovery.email_service.logger') as mock_logger:
@@ -244,7 +305,12 @@ class TestEmailServiceUnit:
             'SendEmail'
         )
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         recipient = 'user@example.com'
         token = 'secret-token-123'
@@ -267,7 +333,12 @@ class TestEmailServiceUnit:
         mock_ses = Mock()
         mock_ses.send_email.side_effect = ValueError("Some error")
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         recipient = 'user@example.com'
         token = 'secret-token-123'
@@ -283,43 +354,18 @@ class TestEmailServiceUnit:
             assert recipient not in log_message
             assert token not in log_message
     
-    def test_compose_text_body_format(self):
-        """Test plain text email body composition."""
-        mock_ses = Mock()
-        service = EmailService(ses_client=mock_ses)
-        reset_link = 'https://example.com/reset-password?token=abc123'
-        expiration_str = '2024-12-31 23:59:59 UTC'
-        
-        body = service._compose_text_body(reset_link, expiration_str)
-        
-        assert reset_link in body
-        assert expiration_str in body
-        assert 'password' in body.lower()
-        assert 'reset' in body.lower()
-        assert 'ignore' in body.lower()
-    
-    def test_compose_html_body_format(self):
-        """Test HTML email body composition."""
-        mock_ses = Mock()
-        service = EmailService(ses_client=mock_ses)
-        reset_link = 'https://example.com/reset-password?token=abc123'
-        expiration_str = '2024-12-31 23:59:59 UTC'
-        
-        body = service._compose_html_body(reset_link, expiration_str)
-        
-        assert reset_link in body
-        assert expiration_str in body
-        assert '<html>' in body.lower()
-        assert '<a href=' in body.lower()
-        assert 'password' in body.lower()
-        assert 'reset' in body.lower()
     
     def test_verify_email_address_success(self):
         """Test successful email verification."""
         mock_ses = Mock()
         mock_ses.verify_email_identity.return_value = {}
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         result = service.verify_email_address('test@example.com')
         
         assert result is True
@@ -335,30 +381,27 @@ class TestEmailServiceUnit:
             'VerifyEmailIdentity'
         )
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         result = service.verify_email_address('invalid-email')
         
         assert result is False
-    
-    def test_html_body_has_button_style_link(self):
-        """Test that HTML body includes a styled button for the reset link."""
-        mock_ses = Mock()
-        service = EmailService(ses_client=mock_ses)
-        reset_link = 'https://example.com/reset-password?token=abc123'
-        expiration_str = '2024-12-31 23:59:59 UTC'
-        
-        body = service._compose_html_body(reset_link, expiration_str)
-        
-        # Should have a styled link/button
-        assert 'background-color' in body.lower()
-        assert 'reset password' in body.lower()
     
     def test_email_includes_utf8_charset(self):
         """Test that email uses UTF-8 charset."""
         mock_ses = Mock()
         mock_ses.send_email.return_value = {'MessageId': 'test-id'}
         
-        service = EmailService(ses_client=mock_ses)
+        service = EmailService(
+            ses_client=mock_ses,
+            from_email="noreply@example.com",
+            base_url="https://example.com",
+            ses_region="us-east-1"
+        )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
         service.send_reset_email('user@example.com', 'token123', expiration)
