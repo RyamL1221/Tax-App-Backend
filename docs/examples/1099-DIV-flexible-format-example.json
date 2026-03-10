@@ -1,0 +1,13 @@
+{
+  "documentType": "1099-DIV",
+  "formData": {
+    "calendarYear": "2024",
+    "payerName": "Example Investment Corporation",
+    "payerTIN": "123456789",
+    "recipientName": "John Doe",
+    "recipientTIN": "987654321",
+    "totalOrdinaryDividends": 1000,
+    "qualifiedDividends": "800.5",
+    "federalIncomeTaxWithheld": 150
+  }
+}

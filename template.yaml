@@ -1,0 +1,500 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  tax-app-backend
+
+  Sample SAM Template for tax-app-backend
+
+Parameters:
+  Environment:
+    Type: String
+    Default: local
+    AllowedValues:
+      - local
+      - production
+    Description: Environment type (local for LocalStack, production for AWS)
+  CorsAllowedOrigin:
+    Type: String
+    Default: "*"
+    Description: Allowed origin for CORS headers (e.g., https://your-frontend-domain.com)
+
+Conditions:
+  IsLocal: !Equals [!Ref Environment, local]
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 30
+
+    Tracing: Active
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+
+Resources:
+  ServerlessRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      TracingEnabled: true
+      Cors:
+        AllowOrigin: !Sub "'${CorsAllowedOrigin}'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowMethods: "'GET,POST,OPTIONS'"
+      GatewayResponses:
+        MISSING_AUTHENTICATION_TOKEN:
+          StatusCode: 404
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: !Sub "'${CorsAllowedOrigin}'"
+              Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+          ResponseTemplates:
+            application/json: '{"error": "Endpoint not found", "message": "The requested endpoint does not exist. Please check the API documentation for available endpoints."}'
+        DEFAULT_4XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: !Sub "'${CorsAllowedOrigin}'"
+              Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+
+  Users:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Users
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      # Note: DynamoDB is schema-less for non-key attributes.
+      # The Users table stores the following attributes (not defined here):
+      # - email (String, partition key)
+      # - name (String)
+      # - password_hash (String, bcrypt hash)
+      # - session_version (Number, default: 0, used for JWT invalidation)
+      # - created_at (String, ISO 8601 timestamp)
+
+  ResetTokens:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ResetTokens
+      AttributeDefinitions:
+        - AttributeName: token_hash
+          AttributeType: S
+      KeySchema:
+        - AttributeName: token_hash
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      # Note: DynamoDB is schema-less for non-key attributes.
+      # The ResetTokens table stores the following attributes (not defined here):
+      # - token_hash (String, partition key, SHA-256 hash of reset token)
+      # - email (String, user's email address)
+      # - expiration (String, ISO 8601 timestamp, token expiration time)
+      # - used_at (String, ISO 8601 timestamp or null, when token was used)
+      # - created_at (String, ISO 8601 timestamp, token creation time)
+      # - ttl (Number, Unix timestamp for DynamoDB TTL automatic cleanup)
+
+  RateLimits:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: RateLimits
+      AttributeDefinitions:
+        - AttributeName: identifier
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: identifier
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      # Note: DynamoDB is schema-less for non-key attributes.
+      # The RateLimits table stores the following attributes (not defined here):
+      # - identifier (String, partition key, typically IP address)
+      # - timestamp (Number, sort key, Unix timestamp of the request)
+      # - request_id (String, unique identifier for the request)
+      # - ttl (Number, Unix timestamp for DynamoDB TTL automatic cleanup)
+
+  TaxDocumentJobs:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: TaxDocumentJobs
+      AttributeDefinitions:
+        - AttributeName: jobId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: jobId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      # Note: DynamoDB is schema-less for non-key attributes.
+      # The TaxDocumentJobs table stores the following attributes (not defined here):
+      # - jobId (String, partition key, unique job identifier)
+      # - userId (String, GSI partition key, user identifier from JWT)
+      # - documentType (String, IRS form type e.g., "1040")
+      # - status (String, job status: PENDING | RUNNING | COMPLETED | FAILED)
+      # - createdAt (String, ISO 8601 timestamp, job creation time)
+      # - updatedAt (String, ISO 8601 timestamp, last update time)
+      # - completedAt (String, ISO 8601 timestamp, completion time, optional)
+      # - templateKey (String, S3 key of input template)
+      # - outputKey (String, S3 key of generated document, optional)
+      # - errorMessage (String, error details if FAILED, optional)
+
+  TaxDocumentsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: tax-app-documents
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldOutputs
+            Status: Enabled
+            Prefix: outputs/
+            ExpirationInDays: 90
+            NoncurrentVersionExpirationInDays: 30
+      Tags:
+        - Key: Purpose
+          Value: TaxDocumentStorage
+        - Key: Environment
+          Value: !Ref Environment
+
+  UserRegistrationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: user_registration/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          USER_TABLE_NAME: !Ref Users
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Users
+      Events:
+        RegisterUser:
+          Type: Api
+          Properties:
+            Path: /auth/register
+            Method: post
+            RestApiId: !Ref ServerlessRestApi
+        RegisterUserOptions:
+          Type: Api
+          Properties:
+            Path: /auth/register
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  UserLoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: user_login/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          USER_TABLE_NAME: !Ref Users
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref Users
+      Events:
+        LoginUser:
+          Type: Api
+          Properties:
+            Path: /auth/login
+            Method: post
+            RestApiId: !Ref ServerlessRestApi
+        LoginUserOptions:
+          Type: Api
+          Properties:
+            Path: /auth/login
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  ForgotPasswordFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: password_recovery/
+      Handler: forgot_password_handler.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          USER_TABLE_NAME: !Ref Users
+          RESET_TOKENS_TABLE_NAME: !Ref ResetTokens
+          RATE_LIMITS_TABLE: !Ref RateLimits
+          FROM_EMAIL: "noreply@example.com"
+          BASE_URL: "http://localhost:3000"
+          SES_REGION: "us-east-1"
+          CONFIGURATION_SET_NAME: ""
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref Users
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ResetTokens
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RateLimits
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: "*"
+      Events:
+        ForgotPassword:
+          Type: Api
+          Properties:
+            Path: /auth/forgot-password
+            Method: post
+            RestApiId: !Ref ServerlessRestApi
+        ForgotPasswordOptions:
+          Type: Api
+          Properties:
+            Path: /auth/forgot-password
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  ResetPasswordFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: password_recovery/
+      Handler: reset_password_handler.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          USER_TABLE_NAME: !Ref Users
+          RESET_TOKENS_TABLE_NAME: !Ref ResetTokens
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Users
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ResetTokens
+      Events:
+        ResetPassword:
+          Type: Api
+          Properties:
+            Path: /auth/reset-password
+            Method: post
+            RestApiId: !Ref ServerlessRestApi
+        ResetPasswordOptions:
+          Type: Api
+          Properties:
+            Path: /auth/reset-password
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  GenerateTaxDocumentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: tax_document_generation/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          TEMPLATES_BUCKET: !Ref TaxDocumentsBucket
+          OUTPUTS_BUCKET: !Ref TaxDocumentsBucket
+          JOB_TABLE_NAME: !Ref TaxDocumentJobs
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TaxDocumentJobs
+        - S3ReadPolicy:
+            BucketName: !Ref TaxDocumentsBucket
+        - S3WritePolicy:
+            BucketName: !Ref TaxDocumentsBucket
+      Events:
+        GenerateTaxDocument:
+          Type: Api
+          Properties:
+            Path: /documents/generate
+            Method: post
+            RestApiId: !Ref ServerlessRestApi
+        GenerateTaxDocumentOptions:
+          Type: Api
+          Properties:
+            Path: /documents/generate
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  DocumentDownloadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: document_download/
+      Handler: app.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          JOB_TABLE_NAME: !Ref TaxDocumentJobs
+          OUTPUTS_BUCKET: !Ref TaxDocumentsBucket
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TaxDocumentJobs
+        - S3ReadPolicy:
+            BucketName: !Ref TaxDocumentsBucket
+      Events:
+        DownloadDocument:
+          Type: Api
+          Properties:
+            Path: /documents/download/{jobId}
+            Method: get
+            RestApiId: !Ref ServerlessRestApi
+        DownloadDocumentOptions:
+          Type: Api
+          Properties:
+            Path: /documents/download/{jobId}
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  UsersTableName:
+    Description: DynamoDB table name for storing user information
+    Value: !Ref Users
+  UsersTableArn:
+    Description: DynamoDB table ARN for IAM permissions
+    Value: !GetAtt Users.Arn
+  ResetTokensTableName:
+    Description: DynamoDB table name for storing password reset tokens
+    Value: !Ref ResetTokens
+  ResetTokensTableArn:
+    Description: DynamoDB table ARN for IAM permissions
+    Value: !GetAtt ResetTokens.Arn
+  RateLimitsTableName:
+    Description: DynamoDB table name for rate limiting
+    Value: !Ref RateLimits
+  RateLimitsTableArn:
+    Description: DynamoDB table ARN for IAM permissions
+    Value: !GetAtt RateLimits.Arn
+  UserRegistrationApi:
+    Description: API Gateway endpoint URL for Prod stage for User Registration function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/register/"
+  UserRegistrationFunction:
+    Description: User Registration Lambda Function ARN
+    Value: !GetAtt UserRegistrationFunction.Arn
+  UserRegistrationFunctionIamRole:
+    Description: Implicit IAM Role created for User Registration function
+    Value: !GetAtt UserRegistrationFunctionRole.Arn
+  UserLoginApi:
+    Description: API Gateway endpoint URL for Prod stage for User Login function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/login/"
+  UserLoginFunction:
+    Description: User Login Lambda Function ARN
+    Value: !GetAtt UserLoginFunction.Arn
+  UserLoginFunctionIamRole:
+    Description: Implicit IAM Role created for User Login function
+    Value: !GetAtt UserLoginFunctionRole.Arn
+  ForgotPasswordApi:
+    Description: API Gateway endpoint URL for Prod stage for Forgot Password function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/forgot-password/"
+  ForgotPasswordFunction:
+    Description: Forgot Password Lambda Function ARN
+    Value: !GetAtt ForgotPasswordFunction.Arn
+  ForgotPasswordFunctionIamRole:
+    Description: Implicit IAM Role created for Forgot Password function
+    Value: !GetAtt ForgotPasswordFunctionRole.Arn
+  ResetPasswordApi:
+    Description: API Gateway endpoint URL for Prod stage for Reset Password function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/auth/reset-password/"
+  ResetPasswordFunction:
+    Description: Reset Password Lambda Function ARN
+    Value: !GetAtt ResetPasswordFunction.Arn
+  ResetPasswordFunctionIamRole:
+    Description: Implicit IAM Role created for Reset Password function
+    Value: !GetAtt ResetPasswordFunctionRole.Arn
+  TaxDocumentJobsTableName:
+    Description: DynamoDB table name for storing tax document generation jobs
+    Value: !Ref TaxDocumentJobs
+  TaxDocumentJobsTableArn:
+    Description: DynamoDB table ARN for IAM permissions
+    Value: !GetAtt TaxDocumentJobs.Arn
+  GenerateTaxDocumentApi:
+    Description: API Gateway endpoint URL for Prod stage for Generate Tax Document function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/documents/generate/"
+  GenerateTaxDocumentFunction:
+    Description: Generate Tax Document Lambda Function ARN
+    Value: !GetAtt GenerateTaxDocumentFunction.Arn
+  GenerateTaxDocumentFunctionIamRole:
+    Description: Implicit IAM Role created for Generate Tax Document function
+    Value: !GetAtt GenerateTaxDocumentFunctionRole.Arn
+  TaxDocumentsBucketName:
+    Description: S3 bucket name for tax document templates and outputs
+    Value: !Ref TaxDocumentsBucket
+  TaxDocumentsBucketArn:
+    Description: S3 bucket ARN for IAM permissions
+    Value: !GetAtt TaxDocumentsBucket.Arn
+  DocumentDownloadApi:
+    Description: API Gateway endpoint URL for Prod stage for Document Download function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/documents/download/{jobId}"
+  DocumentDownloadFunction:
+    Description: Document Download Lambda Function ARN
+    Value: !GetAtt DocumentDownloadFunction.Arn
+  DocumentDownloadFunctionIamRole:
+    Description: Implicit IAM Role created for Document Download function
+    Value: !GetAtt DocumentDownloadFunctionRole.Arn
