@@ -15,7 +15,7 @@ Parameters:
     Description: Environment type (local for LocalStack, production for AWS)
   CorsAllowedOrigin:
     Type: String
-    Default: "*"
+    Default: "https://the-tax-app.vercel.app/"
     Description: Allowed origin for CORS headers (e.g., https://your-frontend-domain.com)
 
 Conditions:
