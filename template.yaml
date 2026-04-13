@@ -20,6 +20,7 @@ Parameters:
 
 Conditions:
   IsLocal: !Equals [!Ref Environment, local]
+  IsProduction: !Equals [!Ref Environment, production]
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -181,6 +182,63 @@ Resources:
           Value: TaxDocumentStorage
         - Key: Environment
           Value: !Ref Environment
+
+  TemplateDistributionOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Condition: IsProduction
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-template-oac"
+        Description: OAC for TaxDocumentsBucket template assets
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  TemplateDistribution:
+    Type: AWS::CloudFront::Distribution
+    Condition: IsProduction
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub "${AWS::StackName} template asset distribution"
+        DefaultCacheBehavior:
+          TargetOriginId: TemplateBucketOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          Compress: true
+        Origins:
+          - Id: TemplateBucketOrigin
+            DomainName: !GetAtt TaxDocumentsBucket.RegionalDomainName
+            OriginPath: /templates
+            OriginAccessControlId: !GetAtt TemplateDistributionOAC.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        HttpVersion: http2
+        PriceClass: PriceClass_100
+
+  TemplateBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: IsProduction
+    Properties:
+      Bucket: !Ref TaxDocumentsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipal
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${TaxDocumentsBucket.Arn}/templates/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${TemplateDistribution}"
 
   UserRegistrationFunction:
     Type: AWS::Serverless::Function
@@ -498,3 +556,11 @@ Outputs:
   DocumentDownloadFunctionIamRole:
     Description: Implicit IAM Role created for Document Download function
     Value: !GetAtt DocumentDownloadFunctionRole.Arn
+  TemplateDistributionDomainName:
+    Condition: IsProduction
+    Description: CloudFront domain name for downloading template assets
+    Value: !GetAtt TemplateDistribution.DomainName
+  TemplateDistributionId:
+    Condition: IsProduction
+    Description: CloudFront distribution ID for template assets
+    Value: !Ref TemplateDistribution
