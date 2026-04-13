@@ -18,9 +18,18 @@ capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
 s3_prefix = "tax-app-backend-dev"
-parameter_overrides = "Environment=\"production\" CorsAllowedOrigin=\"https://the-tax-app.vercel.app\""
+parameter_overrides = "Environment=\"production\" CorsAllowedOrigin=\"http://localhost:3000\""
 image_repositories = []
 stack_name = "tax-app-backend-dev"
+
+[production.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+s3_prefix = "tax-app-backend-prod"
+parameter_overrides = "Environment=\"production\" CorsAllowedOrigin=\"https://the-tax-app.vercel.app\""
+image_repositories = []
+stack_name = "tax-app-backend"
 
 [default.package.parameters]
 resolve_s3 = true
