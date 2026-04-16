@@ -2,13 +2,11 @@
 Main Lambda Handler for Tax Document Generation
 
 This module implements the main Lambda handler that orchestrates the entire
-document generation workflow.
+document generation workflow by delegating to generation_service.py.
 """
 
 import os
 import sys
-import uuid
-import time
 from typing import Dict
 
 # Add the current directory to the path for imports
@@ -16,20 +14,13 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from models import GenerationRequest
 from jwt_validator import validate_jwt
-from input_validator import validate_form_data
-from input_normalizer import normalize_form_data
-from template_retriever import get_template
-from document_generator import generate_document
-from output_persister import store_output
-from job_repository import create_job, update_job_completed, update_job_failed
+from generation_service import generate_single_document, GenerationResult
+from job_repository import get_job
 from response_formatter import success_response, error_response
-from logger import log_error, log_success, log_info
+from logger import log_info
 from exceptions import (
     AuthenticationError,
     ValidationError,
-    TemplateNotFoundError,
-    GenerationError,
-    S3Error
 )
 
 
@@ -58,9 +49,6 @@ def lambda_handler(event: Dict, context) -> Dict:
             },
             'body': ''
         }
-    
-    start_time = time.time()
-    job_id = None
     
     try:
         # Get environment variables
@@ -91,108 +79,59 @@ def lambda_handler(event: Dict, context) -> Dict:
         document_type = request.document_type
         form_data = request.form_data
         
-        # Generate unique job ID
-        job_id = str(uuid.uuid4())
+        # Delegate to generation service
+        result = generate_single_document(
+            user_id=user_id,
+            document_type=document_type,
+            form_data=form_data,
+            templates_bucket=templates_bucket,
+            outputs_bucket=outputs_bucket,
+            job_table_name=job_table_name,
+        )
         
-        # Construct template key
-        template_key = f"templates/irs/{document_type}.pdf"
-        
-        # Create PENDING job record
-        create_job(job_table_name, job_id, user_id, document_type, template_key)
-        log_info(f"Created job {job_id} with PENDING status")
-        
-        # Validate form data
-        validate_form_data(document_type, form_data)
-        log_info(f"Validated form data for job {job_id}")
-        
-        # Normalize form data (flexible input formatting)
-        try:
-            normalization_result = normalize_form_data(form_data, document_type)
-            normalized_form_data = normalization_result.normalized_data
-            
-            # Log normalization changes
-            if normalization_result.changes:
-                log_info(f"Normalized {len(normalization_result.changes)} fields for job {job_id}")
-                for field_name, original, normalized in normalization_result.changes:
-                    # Mask sensitive data (TINs) in logs
-                    if 'tin' in field_name.lower() or 'TIN' in field_name:
-                        log_info(f"  {field_name}: ***-**-{original[-4:]} -> ***-**-{normalized[-4:]}")
-                    else:
-                        log_info(f"  {field_name}: {original} -> {normalized}")
-            else:
-                log_info(f"No normalization needed for job {job_id}, using payload as-is")
-        except ValueError as e:
-            # Normalization failed - treat as validation error since it's an input format issue
-            error_msg = f"Input normalization failed: {str(e)}"
-            log_error(job_id, e)
-            raise ValidationError(error_msg)
-        
-        # Retrieve template from S3
-        template = get_template(templates_bucket, document_type)
-        log_info(f"Retrieved template for document type {document_type}")
-        
-        # Generate document with normalized data
-        generated_document = generate_document(template, normalized_form_data, document_type)
-        log_info(f"Generated document for job {job_id}")
-        
-        # Store output to S3
-        output_key = store_output(outputs_bucket, user_id, job_id, generated_document, document_type)
-        log_info(f"Stored output to {output_key}")
-        
-        # Update job to COMPLETED
-        completed_job = update_job_completed(job_table_name, job_id, output_key)
-        
-        # Calculate duration
-        duration_ms = (time.time() - start_time) * 1000
-        log_success(job_id, duration_ms, {
-            'documentType': document_type,
-            'userId': user_id
-        })
-        
-        # Return success response
-        return success_response(completed_job)
+        # Map GenerationResult back to HTTP response
+        if result.status == "COMPLETED":
+            # Fetch the full job record for the success response
+            completed_job = get_job(job_table_name, result.job_id)
+            return success_response(completed_job)
+        else:
+            # Map error_type to HTTP status code and response
+            return _error_result_to_response(result)
         
     except AuthenticationError as e:
-        error_msg = str(e)
-        if job_id:
-            update_job_failed(job_table_name, job_id, error_msg)
-            log_error(job_id, e)
-        return error_response(401, "AuthenticationError", error_msg)
+        return error_response(401, "AuthenticationError", str(e))
         
     except ValidationError as e:
-        error_msg = str(e)
-        if job_id:
-            update_job_failed(job_table_name, job_id, error_msg)
-            log_error(job_id, e)
-        return error_response(400, "ValidationError", error_msg)
-        
-    except TemplateNotFoundError as e:
-        error_msg = str(e)
-        if job_id:
-            update_job_failed(job_table_name, job_id, error_msg)
-            log_error(job_id, e)
-        return error_response(404, "TemplateNotFoundError", error_msg)
-        
-    except GenerationError as e:
-        error_msg = "An error occurred during document generation"
-        if job_id:
-            update_job_failed(job_table_name, job_id, str(e))
-            log_error(job_id, e)
-        return error_response(500, "GenerationError", error_msg)
-        
-    except S3Error as e:
-        error_msg = "An error occurred while storing the document"
-        if job_id:
-            update_job_failed(job_table_name, job_id, str(e))
-            log_error(job_id, e)
-        return error_response(500, "InternalError", error_msg)
+        return error_response(400, "ValidationError", str(e))
         
     except Exception as e:
-        error_msg = "An unexpected error occurred"
-        if job_id:
-            try:
-                update_job_failed(job_table_name, job_id, str(e))
-            except:
-                pass  # Don't fail if we can't update the job
-            log_error(job_id, e)
-        return error_response(500, "InternalError", error_msg)
+        return error_response(500, "InternalError", "An unexpected error occurred")
+
+
+def _error_result_to_response(result: GenerationResult) -> Dict:
+    """
+    Map a failed GenerationResult to the appropriate HTTP error response.
+    
+    Preserves the same HTTP status codes and error messages as the
+    pre-refactor handler.
+    
+    Args:
+        result: GenerationResult with status="FAILED"
+        
+    Returns:
+        dict: API Gateway error response
+    """
+    error_type = result.error_type
+    error_message = result.error_message
+    
+    if error_type == "ValidationError":
+        return error_response(400, "ValidationError", error_message)
+    elif error_type == "TemplateNotFoundError":
+        return error_response(404, "TemplateNotFoundError", error_message)
+    elif error_type == "GenerationError":
+        return error_response(500, "GenerationError", error_message)
+    elif error_type == "S3Error":
+        return error_response(500, "InternalError", error_message)
+    else:
+        # InternalError or unknown
+        return error_response(500, "InternalError", error_message)

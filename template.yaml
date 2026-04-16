@@ -419,6 +419,45 @@ Resources:
             Method: options
             RestApiId: !Ref ServerlessRestApi
 
+  CsvImport1099DivFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: tax_document_generation/
+      Handler: csv_import_handler.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          TEMPLATES_BUCKET: !Ref TaxDocumentsBucket
+          OUTPUTS_BUCKET: !Ref TaxDocumentsBucket
+          JOB_TABLE_NAME: !Ref TaxDocumentJobs
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TaxDocumentJobs
+        - S3ReadPolicy:
+            BucketName: !Ref TaxDocumentsBucket
+        - S3WritePolicy:
+            BucketName: !Ref TaxDocumentsBucket
+      Events:
+        CsvImport1099Div:
+          Type: Api
+          Properties:
+            Path: /documents/import/1099-div
+            Method: post
+            RestApiId: !Ref ServerlessRestApi
+        CsvImport1099DivOptions:
+          Type: Api
+          Properties:
+            Path: /documents/import/1099-div
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
   DocumentDownloadFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -547,6 +586,15 @@ Outputs:
   TaxDocumentsBucketArn:
     Description: S3 bucket ARN for IAM permissions
     Value: !GetAtt TaxDocumentsBucket.Arn
+  CsvImport1099DivApi:
+    Description: API Gateway endpoint URL for Prod stage for CSV Import 1099-DIV function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/documents/import/1099-div"
+  CsvImport1099DivFunction:
+    Description: CSV Import 1099-DIV Lambda Function ARN
+    Value: !GetAtt CsvImport1099DivFunction.Arn
+  CsvImport1099DivFunctionIamRole:
+    Description: Implicit IAM Role created for CSV Import 1099-DIV function
+    Value: !GetAtt CsvImport1099DivFunctionRole.Arn
   DocumentDownloadApi:
     Description: API Gateway endpoint URL for Prod stage for Document Download function
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/documents/download/{jobId}"
