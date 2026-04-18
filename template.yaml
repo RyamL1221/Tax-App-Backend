@@ -22,6 +22,7 @@ Parameters:
     Default: "noreply@example.com"
     Description: Verified SES sender email address for password reset emails. Set to a verified SES identity at deploy time via samconfig.toml parameter_overrides.
 
+
 Conditions:
   IsLocal: !Equals [!Ref Environment, local]
   IsProduction: !Equals [!Ref Environment, production]
