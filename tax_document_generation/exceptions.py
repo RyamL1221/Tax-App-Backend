@@ -82,3 +82,19 @@ class S3Error(Exception):
     Requirements: 9.3
     """
     pass
+
+
+class NotFoundError(Exception):
+    """
+    Raised when a requested resource is not found.
+    
+    This exception is raised when:
+    - An importJobId does not exist in the Import_Jobs_Table
+    - An import job belongs to a different user (returns 404 to prevent enumeration)
+    
+    Used by import job status and row retrieval endpoints to signal
+    missing or unauthorized import job lookups.
+    
+    Requirements: 4.5, 4.6, 5.7, 5.8, 6.3
+    """
+    pass
