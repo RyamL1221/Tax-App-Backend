@@ -2,7 +2,7 @@
 """
 Upload PDF template to LocalStack S3 bucket.
 
-This script uploads the 1099-DIV template to the tax-app-documents bucket
+This script uploads the 1099-DIV template to the documents bucket
 in LocalStack, bypassing the awslocal shebang issue.
 """
 
@@ -13,8 +13,9 @@ import os
 def upload_template():
     """Upload 1099-DIV template to LocalStack S3."""
     
-    # Configuration
-    bucket_name = 'tax-app-documents'
+    # Configuration - uses STACK_NAME env var to match deployed bucket name
+    stack_name = os.environ.get('STACK_NAME', 'tax-app-backend-dev')
+    bucket_name = f'{stack_name}-documents'
     local_file = 'samples/1099-DIV.pdf'
     s3_key = 'templates/irs/1099-DIV.pdf'
     endpoint_url = 'http://localhost:4566'

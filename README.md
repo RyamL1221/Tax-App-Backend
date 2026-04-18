@@ -263,11 +263,11 @@ awslocal dynamodb scan --table-name Users --region us-east-1
 
 # List S3 buckets and contents
 awslocal s3 ls
-awslocal s3 ls s3://tax-app-documents/templates/irs/
+awslocal s3 ls s3://tax-app-backend-dev-documents/templates/irs/
 
 # Upload 1099-DIV template (if not already uploaded by init script)
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 \
-  aws s3 cp ./samples/1099-DIV.pdf s3://tax-app-documents/templates/irs/1099-DIV.pdf \
+  aws s3 cp ./samples/1099-DIV.pdf s3://tax-app-backend-dev-documents/templates/irs/1099-DIV.pdf \
   --endpoint-url=http://localhost:4566
 
 # Test the endpoint (after deploying)
