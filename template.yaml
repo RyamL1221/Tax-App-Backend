@@ -64,7 +64,7 @@ Resources:
   Users:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Users
+      TableName: !Sub "${AWS::StackName}-Users"
       AttributeDefinitions:
         - AttributeName: email
           AttributeType: S
@@ -83,7 +83,7 @@ Resources:
   ResetTokens:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ResetTokens
+      TableName: !Sub "${AWS::StackName}-ResetTokens"
       AttributeDefinitions:
         - AttributeName: token_hash
           AttributeType: S
@@ -106,7 +106,7 @@ Resources:
   RateLimits:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: RateLimits
+      TableName: !Sub "${AWS::StackName}-RateLimits"
       AttributeDefinitions:
         - AttributeName: identifier
           AttributeType: S
@@ -131,7 +131,7 @@ Resources:
   TaxDocumentJobs:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: TaxDocumentJobs
+      TableName: !Sub "${AWS::StackName}-TaxDocumentJobs"
       AttributeDefinitions:
         - AttributeName: jobId
           AttributeType: S
@@ -164,7 +164,7 @@ Resources:
   ImportJobsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ImportJobs
+      TableName: !Sub "${AWS::StackName}-ImportJobs"
       AttributeDefinitions:
         - AttributeName: importJobId
           AttributeType: S
@@ -185,7 +185,7 @@ Resources:
   ImportJobRowsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ImportJobRows
+      TableName: !Sub "${AWS::StackName}-ImportJobRows"
       AttributeDefinitions:
         - AttributeName: importJobId
           AttributeType: S
@@ -201,7 +201,7 @@ Resources:
   TaxDocumentsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: tax-app-documents
+      BucketName: !Sub "${AWS::StackName}-documents"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
