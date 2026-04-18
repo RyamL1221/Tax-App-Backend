@@ -21,6 +21,10 @@ Parameters:
     Type: String
     Default: "noreply@example.com"
     Description: Verified SES sender email address for password reset emails. Set to a verified SES identity at deploy time via samconfig.toml parameter_overrides.
+  BaseUrl:
+    Type: String
+    Default: "http://localhost:3001"
+    Description: Frontend base URL for password reset links in emails. Set per environment (e.g., https://your-frontend.vercel.app).
 
 
 Conditions:
@@ -386,7 +390,7 @@ Resources:
           RESET_TOKENS_TABLE_NAME: !Ref ResetTokens
           RATE_LIMITS_TABLE: !Ref RateLimits
           FROM_EMAIL: !Ref FromEmail
-          BASE_URL: "http://localhost:3000"
+          BASE_URL: !Ref BaseUrl
           SES_REGION: "us-east-1"
           CONFIGURATION_SET_NAME: ""
           CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
