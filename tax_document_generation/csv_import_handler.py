@@ -1,10 +1,18 @@
 """Lambda handler for CSV import of 1099-DIV records.
 
-Accepts a base64-encoded CSV file, parses and validates it, maps each row
-to canonical formData, and delegates to the import orchestrator for
-sequential generation through the shared Generation_Service.
+Accepts CSV files via either multipart/form-data file upload or a
+base64-encoded CSV inside a JSON body. Detects the incoming content type,
+extracts the CSV content and file name from either format, then delegates
+to the shared parsing/mapping/orchestration pipeline.
 
-Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 6.1, 6.5, 6.6
+Creates and updates Import Job tracking records in DynamoDB throughout
+processing. For large imports (row count exceeding SYNC_ROW_THRESHOLD),
+delegates processing to AsyncImportProcessorFunction via asynchronous
+Lambda invocation and returns HTTP 202 immediately.
+
+Requirements: 1.1, 1.6, 1.7, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8,
+              3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 4.1, 4.2, 4.3, 4.4, 4.5,
+              6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 7.1, 7.2, 10.1, 10.2, 10.3, 10.4
 """
 
 import os
@@ -13,12 +21,23 @@ import json
 import base64
 from typing import Dict
 
+import boto3
+
 sys.path.insert(0, os.path.dirname(__file__))
 
 from jwt_validator import validate_jwt
 from csv_parser import parse_csv
 from row_mapper import map_row_to_form_data
 from import_orchestrator import process_import, RowResult, ImportSummary
+from import_job_service import (
+    create_import_job,
+    create_import_job_rows,
+    update_import_job_status,
+    update_import_job_row,
+    increment_row_result,
+    determine_terminal_status,
+)
+from multipart_parser import parse_multipart_body, MultipartResult
 from response_formatter import error_response, get_cors_headers
 from logger import log_info, log_error
 from exceptions import AuthenticationError, ValidationError
@@ -68,6 +87,9 @@ def lambda_handler(event: Dict, context) -> Dict:
         outputs_bucket = os.environ.get("OUTPUTS_BUCKET")
         job_table_name = os.environ.get("JOB_TABLE_NAME")
         jwt_secret = os.environ.get("JWT_SECRET_KEY")
+        import_jobs_table = os.environ.get("IMPORT_JOBS_TABLE_NAME")
+        import_job_rows_table = os.environ.get("IMPORT_JOB_ROWS_TABLE_NAME")
+        sync_row_threshold = int(os.environ.get("SYNC_ROW_THRESHOLD", "10"))
 
         if not all([templates_bucket, outputs_bucket, job_table_name, jwt_secret]):
             raise Exception("Missing required environment variables")
@@ -86,30 +108,118 @@ def lambda_handler(event: Dict, context) -> Dict:
 
         log_info(f"CSV import request from user {user_id}")
 
-        # Parse request body
-        body = event.get("body", "{}")
-        if isinstance(body, str):
-            body = json.loads(body)
+        # --- Base64 body decoding (API Gateway binary media types) ---
+        raw_body = event.get("body", "")
+        is_base64 = event.get("isBase64Encoded", False)
 
-        # Extract csvFile
-        csv_file_b64 = body.get("csvFile")
-        if not csv_file_b64:
-            raise ValidationError("Missing required field: csvFile")
+        if is_base64:
+            try:
+                raw_body = base64.b64decode(raw_body)
+            except Exception:
+                raise ValidationError("Invalid request encoding")
+        elif isinstance(raw_body, str):
+            raw_body = raw_body.encode("utf-8")
 
-        # Decode base64
-        try:
-            csv_bytes = base64.b64decode(csv_file_b64)
-        except Exception:
-            raise ValidationError("Invalid base64 encoding in csvFile")
+        # --- Content-Type detection (case-insensitive header lookup) ---
+        headers = event.get("headers", {}) or {}
+        content_type = ""
+        for key, value in headers.items():
+            if key.lower() == "content-type":
+                content_type = value
+                break
 
-        # Enforce size limit
-        if len(csv_bytes) > MAX_CSV_SIZE_BYTES:
+        # --- Route based on content type ---
+        if content_type.lower().startswith("multipart/form-data"):
+            # Multipart path
+            result = parse_multipart_body(raw_body, content_type)
+            try:
+                csv_content = result.file_content.decode("utf-8")
+            except UnicodeDecodeError:
+                raise ValidationError("Invalid file encoding: file must be UTF-8")
+            file_name = result.file_name
+        else:
+            # Existing JSON/base64 path (unchanged)
+            if isinstance(raw_body, bytes):
+                body = json.loads(raw_body.decode("utf-8"))
+            else:
+                body = json.loads(raw_body)
+
+            csv_file_b64 = body.get("csvFile")
+            if not csv_file_b64:
+                raise ValidationError("Missing required field: csvFile")
+
+            file_name = body.get("fileName", "import.csv")
+
+            try:
+                csv_bytes = base64.b64decode(csv_file_b64)
+            except Exception:
+                raise ValidationError("Invalid base64 encoding in csvFile")
+
+            csv_content = csv_bytes.decode("utf-8")
+
+        # Enforce size limit (same for both paths)
+        if len(csv_content.encode("utf-8")) > MAX_CSV_SIZE_BYTES:
             raise ValidationError("CSV file exceeds maximum size of 5 MB")
-
-        csv_content = csv_bytes.decode("utf-8")
 
         # Parse CSV (validates headers, filters blank rows)
         parsed_rows = parse_csv(csv_content)
+        total_rows = len(parsed_rows)
+
+        # Create ImportJob and ImportJobRow records before processing
+        import_job = None
+        if import_jobs_table and import_job_rows_table:
+            import_job = create_import_job(
+                import_jobs_table, user_id, file_name, "1099-DIV", total_rows
+            )
+            create_import_job_rows(
+                import_job_rows_table, import_job.import_job_id, total_rows
+            )
+            log_info(f"Import job {import_job.import_job_id} created with PENDING status")
+
+        # Async path: delegate to AsyncImportProcessorFunction for large imports
+        async_processor_function = os.environ.get("ASYNC_PROCESSOR_FUNCTION_NAME")
+        if import_job and total_rows > sync_row_threshold and async_processor_function:
+            log_info(
+                f"Row count {total_rows} exceeds threshold {sync_row_threshold}, "
+                f"invoking async processor for job {import_job.import_job_id}"
+            )
+            endpoint_url = os.environ.get("AWS_ENDPOINT_URL")
+            lambda_client_kwargs = {"service_name": "lambda"}
+            if endpoint_url:
+                lambda_client_kwargs["endpoint_url"] = endpoint_url
+            lambda_client = boto3.client(**lambda_client_kwargs)
+
+            payload = json.dumps({
+                "importJobId": import_job.import_job_id,
+                "csvContent": csv_content,
+                "userId": user_id,
+                "fileName": file_name,
+            })
+
+            lambda_client.invoke(
+                FunctionName=async_processor_function,
+                InvocationType="Event",
+                Payload=payload.encode("utf-8"),
+            )
+
+            log_info(f"Async processor invoked for job {import_job.import_job_id}")
+
+            return {
+                "statusCode": 202,
+                "headers": get_cors_headers(),
+                "body": json.dumps({
+                    "importJobId": import_job.import_job_id,
+                    "status": "PENDING",
+                    "message": f"Import job created. Poll GET /documents/import/jobs/{import_job.import_job_id} for status.",
+                }),
+            }
+
+        # Sync path: transition to PROCESSING and process rows inline
+        if import_job and import_jobs_table:
+            update_import_job_status(
+                import_jobs_table, import_job.import_job_id, "PROCESSING"
+            )
+            log_info(f"Import job {import_job.import_job_id} transitioned to PROCESSING")
 
         # Map each row to formData, catching ValueError per-row
         mapped_rows = []
@@ -128,6 +238,18 @@ def lambda_handler(event: Dict, context) -> Dict:
                         error=str(e),
                     )
                 )
+                # Update import job row for pre-mapping failures
+                if import_job and import_job_rows_table and import_jobs_table:
+                    update_import_job_row(
+                        import_job_rows_table,
+                        import_job.import_job_id,
+                        row_number,
+                        "FAILED",
+                        errors=str(e),
+                    )
+                    increment_row_result(
+                        import_jobs_table, import_job.import_job_id, succeeded=False
+                    )
 
         # Process mapped rows through the orchestrator
         if mapped_rows:
@@ -147,6 +269,32 @@ def lambda_handler(event: Dict, context) -> Dict:
             original_row_numbers = [rn for rn, _ in mapped_rows]
             for i, result_dict in enumerate(orchestrator_result.results):
                 result_dict["row"] = original_row_numbers[i]
+
+                # Update import job row tracking for each orchestrator result
+                if import_job and import_job_rows_table and import_jobs_table:
+                    csv_row_num = original_row_numbers[i]
+                    if result_dict.get("status") == "succeeded":
+                        update_import_job_row(
+                            import_job_rows_table,
+                            import_job.import_job_id,
+                            csv_row_num,
+                            "SUCCEEDED",
+                            output_key=result_dict.get("outputKey", ""),
+                        )
+                        increment_row_result(
+                            import_jobs_table, import_job.import_job_id, succeeded=True
+                        )
+                    else:
+                        update_import_job_row(
+                            import_job_rows_table,
+                            import_job.import_job_id,
+                            csv_row_num,
+                            "FAILED",
+                            errors=result_dict.get("error", ""),
+                        )
+                        increment_row_result(
+                            import_jobs_table, import_job.import_job_id, succeeded=False
+                        )
 
             # Merge pre-mapping failures with orchestrator results
             all_results = []
@@ -181,12 +329,24 @@ def lambda_handler(event: Dict, context) -> Dict:
             succeeded = 0
             failed = len(pre_mapping_failures)
 
+        # Determine and set terminal status on the import job
+        if import_job and import_jobs_table:
+            terminal_status = determine_terminal_status(succeeded, failed, total)
+            update_import_job_status(
+                import_jobs_table, import_job.import_job_id, terminal_status
+            )
+            log_info(f"Import job {import_job.import_job_id} completed with status {terminal_status}")
+
         summary = {
             "total": total,
             "succeeded": succeeded,
             "failed": failed,
             "results": all_results,
         }
+
+        # Add importJobId to response for backward-compatible enhancement
+        if import_job:
+            summary["importJobId"] = import_job.import_job_id
 
         return {
             "statusCode": 200,

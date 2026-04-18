@@ -38,6 +38,8 @@ Resources:
     Properties:
       StageName: Prod
       TracingEnabled: true
+      BinaryMediaTypes:
+        - "multipart/form-data"
       Cors:
         AllowOrigin: !Sub "'${CorsAllowedOrigin}'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
@@ -158,6 +160,43 @@ Resources:
       # - templateKey (String, S3 key of input template)
       # - outputKey (String, S3 key of generated document, optional)
       # - errorMessage (String, error details if FAILED, optional)
+
+  ImportJobsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ImportJobs
+      AttributeDefinitions:
+        - AttributeName: importJobId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: importJobId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  ImportJobRowsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ImportJobRows
+      AttributeDefinitions:
+        - AttributeName: importJobId
+          AttributeType: S
+        - AttributeName: rowNumber
+          AttributeType: N
+      KeySchema:
+        - AttributeName: importJobId
+          KeyType: HASH
+        - AttributeName: rowNumber
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
 
   TaxDocumentsBucket:
     Type: AWS::S3::Bucket
@@ -437,6 +476,10 @@ Resources:
           JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
           CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
           AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+          IMPORT_JOBS_TABLE_NAME: !Ref ImportJobsTable
+          IMPORT_JOB_ROWS_TABLE_NAME: !Ref ImportJobRowsTable
+          ASYNC_PROCESSOR_FUNCTION_NAME: !Ref AsyncImportProcessorFunction
+          SYNC_ROW_THRESHOLD: "10"
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref TaxDocumentJobs
@@ -444,6 +487,12 @@ Resources:
             BucketName: !Ref TaxDocumentsBucket
         - S3WritePolicy:
             BucketName: !Ref TaxDocumentsBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ImportJobsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ImportJobRowsTable
+        - LambdaInvokePolicy:
+            FunctionName: !Ref AsyncImportProcessorFunction
       Events:
         CsvImport1099Div:
           Type: Api
@@ -457,6 +506,110 @@ Resources:
             Path: /documents/import/1099-div
             Method: options
             RestApiId: !Ref ServerlessRestApi
+
+  ImportJobStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: tax_document_generation/
+      Handler: import_job_status_handler.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          IMPORT_JOBS_TABLE_NAME: !Ref ImportJobsTable
+          IMPORT_JOB_ROWS_TABLE_NAME: !Ref ImportJobRowsTable
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ImportJobsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ImportJobRowsTable
+      Events:
+        GetImportJobStatus:
+          Type: Api
+          Properties:
+            Path: /documents/import/jobs/{importJobId}
+            Method: get
+            RestApiId: !Ref ServerlessRestApi
+        GetImportJobStatusOptions:
+          Type: Api
+          Properties:
+            Path: /documents/import/jobs/{importJobId}
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  ImportJobRowsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: tax_document_generation/
+      Handler: import_job_rows_handler.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          IMPORT_JOBS_TABLE_NAME: !Ref ImportJobsTable
+          IMPORT_JOB_ROWS_TABLE_NAME: !Ref ImportJobRowsTable
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ImportJobsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ImportJobRowsTable
+      Events:
+        GetImportJobRows:
+          Type: Api
+          Properties:
+            Path: /documents/import/jobs/{importJobId}/rows
+            Method: get
+            RestApiId: !Ref ServerlessRestApi
+        GetImportJobRowsOptions:
+          Type: Api
+          Properties:
+            Path: /documents/import/jobs/{importJobId}/rows
+            Method: options
+            RestApiId: !Ref ServerlessRestApi
+
+  AsyncImportProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: tax_document_generation/
+      Handler: async_import_processor.lambda_handler
+      Runtime: python3.14
+      Architectures:
+        - x86_64
+      Timeout: 900
+      MemorySize: 512
+      Environment:
+        Variables:
+          IMPORT_JOBS_TABLE_NAME: !Ref ImportJobsTable
+          IMPORT_JOB_ROWS_TABLE_NAME: !Ref ImportJobRowsTable
+          TEMPLATES_BUCKET: !Ref TaxDocumentsBucket
+          OUTPUTS_BUCKET: !Ref TaxDocumentsBucket
+          JOB_TABLE_NAME: !Ref TaxDocumentJobs
+          JWT_SECRET_KEY: "local-dev-secret-key-min-32-chars-long-for-security"
+          CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin
+          AWS_ENDPOINT_URL: !If [IsLocal, "http://172.18.0.1:4566", !Ref "AWS::NoValue"]
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ImportJobsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ImportJobRowsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TaxDocumentJobs
+        - S3ReadPolicy:
+            BucketName: !Ref TaxDocumentsBucket
+        - S3WritePolicy:
+            BucketName: !Ref TaxDocumentsBucket
 
   DocumentDownloadFunction:
     Type: AWS::Serverless::Function
