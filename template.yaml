@@ -237,6 +237,31 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
+  TemplateCorsHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Condition: IsProduction
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub "${AWS::StackName}-template-cors-policy"
+        CorsConfig:
+          AccessControlAllowCredentials: false
+          AccessControlAllowOrigins:
+            Items:
+              - https://the-tax-app.vercel.app
+              - https://tax-app-git-dev-ryaml1221-ryan.vercel.app
+          AccessControlAllowMethods:
+            Items:
+              - GET
+              - HEAD
+              - OPTIONS
+          AccessControlAllowHeaders:
+            Items:
+              - Origin
+              - Accept
+              - Content-Type
+          AccessControlMaxAgeSec: 86400
+          OriginOverride: true
+
   TemplateDistribution:
     Type: AWS::CloudFront::Distribution
     Condition: IsProduction
@@ -250,10 +275,12 @@ Resources:
           AllowedMethods:
             - GET
             - HEAD
+            - OPTIONS
           CachedMethods:
             - GET
             - HEAD
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          ResponseHeadersPolicyId: !GetAtt TemplateCorsHeadersPolicy.Id
           Compress: true
         Origins:
           - Id: TemplateBucketOrigin
