@@ -66,7 +66,7 @@ class TestEmailServiceLocalStackIntegration:
             expiration = datetime.utcnow() + timedelta(hours=1)
             
             # Send email via mocked SES
-            success, message_id = service.send_reset_email(
+            success, message_id, error_code = service.send_reset_email(
                 recipient_email=recipient_email,
                 reset_token=reset_token,
                 expiration=expiration
@@ -122,7 +122,7 @@ class TestEmailServiceLocalStackIntegration:
                 reset_token = f'test-token-{i}'
                 expiration = datetime.utcnow() + timedelta(hours=1)
                 
-                success, message_id = service.send_reset_email(
+                success, message_id, error_code = service.send_reset_email(
                     recipient_email=recipient_email,
                     reset_token=reset_token,
                     expiration=expiration
@@ -179,7 +179,7 @@ class TestEmailServiceLocalStackIntegration:
             expiration = datetime(2024, 12, 31, 23, 59, 59)
             
             # Send email
-            success, message_id = service.send_reset_email(
+            success, message_id, error_code = service.send_reset_email(
                 recipient_email=recipient_email,
                 reset_token=reset_token,
                 expiration=expiration
@@ -234,7 +234,7 @@ class TestEmailServiceLocalStackIntegration:
             reset_token = 'test-token-unverified'
             expiration = datetime.utcnow() + timedelta(hours=1)
             
-            success, message_id = service.send_reset_email(
+            success, message_id, error_code = service.send_reset_email(
                 recipient_email=recipient_email,
                 reset_token=reset_token,
                 expiration=expiration
@@ -290,7 +290,7 @@ class TestEmailServiceLocalStackIntegration:
             reset_token = 'test-token-config-set'
             expiration = datetime.utcnow() + timedelta(hours=1)
             
-            success, message_id = service.send_reset_email(
+            success, message_id, error_code = service.send_reset_email(
                 recipient_email=recipient_email,
                 reset_token=reset_token,
                 expiration=expiration

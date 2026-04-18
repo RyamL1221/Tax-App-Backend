@@ -155,7 +155,7 @@ class TestEmailServiceAWSIntegration:
         expiration = datetime.utcnow() + timedelta(hours=1)
         
         # Send email via real AWS SES
-        success, message_id = service.send_reset_email(
+        success, message_id, error_code = service.send_reset_email(
             recipient_email=recipient_email,
             reset_token=reset_token,
             expiration=expiration
@@ -209,7 +209,7 @@ class TestEmailServiceAWSIntegration:
         expiration = datetime.utcnow() + timedelta(hours=1)
         
         # Attempt to send email (should fail)
-        success, message_id = service.send_reset_email(
+        success, message_id, error_code = service.send_reset_email(
             recipient_email=recipient_email,
             reset_token=reset_token,
             expiration=expiration
@@ -252,7 +252,7 @@ class TestEmailServiceAWSIntegration:
         expiration = datetime.utcnow() + timedelta(hours=1)
         
         # Attempt to send email (should fail validation)
-        success, message_id = service.send_reset_email(
+        success, message_id, error_code = service.send_reset_email(
             recipient_email=invalid_recipient,
             reset_token=reset_token,
             expiration=expiration
@@ -295,7 +295,7 @@ class TestEmailServiceAWSIntegration:
         expiration = datetime.utcnow() + timedelta(hours=1)
         
         # Send email via real AWS SES
-        success, message_id = service.send_reset_email(
+        success, message_id, error_code = service.send_reset_email(
             recipient_email=recipient_email,
             reset_token=reset_token,
             expiration=expiration

@@ -17,6 +17,10 @@ Parameters:
     Type: String
     Default: "https://the-tax-app.vercel.app"
     Description: Allowed origin for CORS headers (e.g., https://your-frontend-domain.com)
+  FromEmail:
+    Type: String
+    Default: "noreply@example.com"
+    Description: Verified SES sender email address for password reset emails. Set to a verified SES identity at deploy time via samconfig.toml parameter_overrides.
 
 Conditions:
   IsLocal: !Equals [!Ref Environment, local]
@@ -353,7 +357,7 @@ Resources:
           USER_TABLE_NAME: !Ref Users
           RESET_TOKENS_TABLE_NAME: !Ref ResetTokens
           RATE_LIMITS_TABLE: !Ref RateLimits
-          FROM_EMAIL: "noreply@example.com"
+          FROM_EMAIL: !Ref FromEmail
           BASE_URL: "http://localhost:3000"
           SES_REGION: "us-east-1"
           CONFIGURATION_SET_NAME: ""

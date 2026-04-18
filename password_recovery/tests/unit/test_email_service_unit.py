@@ -52,7 +52,7 @@ class TestEmailServiceUnit:
         )
         
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
-        success, message_id = service.send_reset_email(
+        success, message_id, error_code = service.send_reset_email(
             'user@example.com',
             'test-token-abc123',
             expiration
@@ -60,6 +60,7 @@ class TestEmailServiceUnit:
         
         assert success is True
         assert message_id == 'test-message-id-123'
+        assert error_code is None
         mock_ses.send_email.assert_called_once()
     
     def test_send_reset_email_includes_correct_recipient(self):
@@ -253,10 +254,11 @@ class TestEmailServiceUnit:
         )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
-        success, message_id = service.send_reset_email('user@example.com', 'token123', expiration)
+        success, message_id, error_code = service.send_reset_email('user@example.com', 'token123', expiration)
         
         assert success is False
         assert message_id is None
+        assert error_code == 'MessageRejected'
     
     def test_send_reset_email_handles_generic_exception(self):
         """Test handling of generic exceptions."""
@@ -271,10 +273,11 @@ class TestEmailServiceUnit:
         )
         expiration = datetime.now(timezone.utc) + timedelta(hours=1)
         
-        success, message_id = service.send_reset_email('user@example.com', 'token123', expiration)
+        success, message_id, error_code = service.send_reset_email('user@example.com', 'token123', expiration)
         
         assert success is False
         assert message_id is None
+        assert error_code == 'Exception'
     
     def test_send_reset_email_logs_success(self):
         """Test that successful email sending is logged."""

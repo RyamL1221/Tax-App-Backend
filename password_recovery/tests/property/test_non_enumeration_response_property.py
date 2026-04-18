@@ -61,7 +61,7 @@ class TestNonEnumerationResponseProperty:
             
             # Setup email service
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123', None)
             mock_email_class.return_value = mock_email
             
             # Test with registered user
@@ -112,7 +112,7 @@ class TestNonEnumerationResponseProperty:
             
             # Setup email service
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123', None)
             mock_email_class.return_value = mock_email
             
             # Test with registered user
@@ -168,7 +168,7 @@ class TestNonEnumerationResponseProperty:
             
             # Test with successful email delivery
             mock_email_success = Mock()
-            mock_email_success.send_reset_email.return_value = (True, 'test-message-id-123')
+            mock_email_success.send_reset_email.return_value = (True, 'test-message-id-123', None)
             mock_email_class.return_value = mock_email_success
             
             event_success = {
@@ -179,7 +179,7 @@ class TestNonEnumerationResponseProperty:
             
             # Test with failed email delivery
             mock_email_failure = Mock()
-            mock_email_failure.send_reset_email.return_value = (False, None)
+            mock_email_failure.send_reset_email.return_value = (False, None, 'MessageRejected')
             mock_email_class.return_value = mock_email_failure
             
             event_failure = {
@@ -224,7 +224,7 @@ class TestNonEnumerationResponseProperty:
             
             # Setup email service
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123', None)
             mock_email_class.return_value = mock_email
             
             # Test with user exists
@@ -273,7 +273,7 @@ class TestNonEnumerationResponseProperty:
             
             # Setup email service
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123', None)
             mock_email_class.return_value = mock_email
             
             # Test with registered user
