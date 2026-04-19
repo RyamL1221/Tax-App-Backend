@@ -558,7 +558,7 @@ def update_password(email: str, hashed_password: str) -> bool:
             Key={
                 'email': {'S': email}
             },
-            UpdateExpression='SET hashed_password = :password',
+            UpdateExpression='SET password_hash = :password',
             ExpressionAttributeValues={
                 ':password': {'S': hashed_password}
             }

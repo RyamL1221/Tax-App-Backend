@@ -78,8 +78,11 @@ class TestEmailFailureNonEnumerationProperty:
         # Should not raise an exception
         result = service.send_reset_email(email, token, expiration)
         
-        # Should return (False, None) to indicate failure
-        assert result == (False, None)
+        # Should return (False, None, error_code) to indicate failure with error details
+        success, message_id, err_code = result
+        assert success is False
+        assert message_id is None
+        assert err_code == error_code
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100, deadline=None)
@@ -104,8 +107,11 @@ class TestEmailFailureNonEnumerationProperty:
         # Should not raise an exception
         result = service.send_reset_email(email, token, expiration)
         
-        # Should return (False, None) to indicate failure
-        assert result == (False, None)
+        # Should return (False, None, error_type) to indicate failure
+        success, message_id, err_code = result
+        assert success is False
+        assert message_id is None
+        assert err_code is not None  # Should contain the exception type name
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -145,8 +151,10 @@ class TestEmailFailureNonEnumerationProperty:
             assert email not in log_message
             assert token not in log_message
             
-            # Should return (False, None) tuple
-            assert result == (False, None)
+            # Should return failure tuple
+            success, message_id, err_code = result
+            assert success is False
+            assert message_id is None
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -174,8 +182,10 @@ class TestEmailFailureNonEnumerationProperty:
         
         result = service.send_reset_email(email, token, expiration)
         
-        # Should return (False, None), no error details exposed
-        assert result == (False, None)
+        # Should return failure tuple - error code is for internal logging, not exposed to API callers
+        success, message_id, err_code = result
+        assert success is False
+        assert message_id is None
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -200,7 +210,10 @@ class TestEmailFailureNonEnumerationProperty:
         
         result_success = service_success.send_reset_email(email, token, expiration)
         assert isinstance(result_success, tuple)
-        assert result_success == (True, 'test-id')
+        assert len(result_success) == 3
+        assert result_success[0] is True
+        assert result_success[1] == 'test-id'
+        assert result_success[2] is None
         
         # Test failure case
         mock_ses_failure = Mock()
@@ -217,7 +230,9 @@ class TestEmailFailureNonEnumerationProperty:
         
         result_failure = service_failure.send_reset_email(email, token, expiration)
         assert isinstance(result_failure, tuple)
-        assert result_failure == (False, None)
+        assert len(result_failure) == 3
+        assert result_failure[0] is False
+        assert result_failure[1] is None
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -246,8 +261,8 @@ class TestEmailFailureNonEnumerationProperty:
         
         result = service.send_reset_email(email, token, expiration)
         
-        # Service returns (False, None) tuple to indicate failure
-        success, message_id = result
+        # Service returns (False, None, error_code) tuple to indicate failure
+        success, message_id, error_code = result
         assert success is False
         assert message_id is None
         

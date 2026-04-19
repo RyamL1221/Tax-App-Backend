@@ -321,7 +321,7 @@ class TestLambdaCodeEnvCompletenessProperty:
         ]
         
         hardcoded_values = {
-            'tax-app-documents': 'S3 bucket name',
+            'tax-app-backend-dev-documents': 'S3 bucket name',
             'TaxDocumentJobs': 'DynamoDB table name'
         }
         

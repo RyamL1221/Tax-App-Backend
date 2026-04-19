@@ -273,3 +273,29 @@ test_output_*.pdf
 # Temporary verification and test scripts in root directory
 /verify_*.py
 /test_*.py
+
+# Tech debt cleanup — added 2026-04-19
+
+# macOS Finder duplicate files
+*\ 2.*
+*\ 3.*
+
+# TLS secrets log files
+test-secret-key-*
+
+# Generated/test PDFs in samples (keep only templates)
+samples/code-tested-*.pdf
+samples/test-*.pdf
+samples/test_*.pdf
+samples/debug-*.pdf
+samples/final-*.pdf
+samples/calendar-year-*.pdf
+samples/checkbox_test_output.pdf
+samples/fatca_checkbox_*.pdf
+samples/manual_checkbox_test.pdf
+samples/fresh-generated-*.pdf
+samples/pymupdf-*.pdf
+samples/with-need-appearances-*.pdf
+
+# Duplicate vscode settings (macOS copies)
+.vscode/settings\ *.json

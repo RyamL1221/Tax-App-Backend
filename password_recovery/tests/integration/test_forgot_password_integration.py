@@ -53,7 +53,7 @@ class TestForgotPasswordIntegration:
             
             # Setup email service
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123', None)
             mock_email_class.return_value = mock_email
             
             # Create event
@@ -374,7 +374,7 @@ class TestForgotPasswordIntegration:
             
             # Setup email service to fail
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = (False, None)
+            mock_email.send_reset_email.return_value = (False, None, 'MessageRejected')
             mock_email_class.return_value = mock_email
             
             # Create event
@@ -422,7 +422,7 @@ class TestForgotPasswordIntegration:
             mock_token_gen_class.return_value = mock_token_gen
             
             mock_email = Mock()
-            mock_email.send_reset_email.return_value = (True, 'test-message-id-123')
+            mock_email.send_reset_email.return_value = (True, 'test-message-id-123', None)
             mock_email_class.return_value = mock_email
             
             event_success = {

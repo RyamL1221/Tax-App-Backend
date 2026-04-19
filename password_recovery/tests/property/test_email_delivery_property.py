@@ -58,7 +58,8 @@ class TestEmailDeliveryProperty:
         result = service.send_reset_email(email, token, expiration)
         
         # Should return True for successful send
-        assert result is True
+        success, message_id, error_code = result
+        assert success is True
         
         # Verify SES was called
         mock_ses.send_email.assert_called_once()
@@ -252,7 +253,8 @@ class TestEmailDeliveryProperty:
         
         result = service.send_reset_email(email, token, expiration)
         
-        assert result is True
+        success, message_id, error_code = result
+        assert success is True
     
     @given(valid_emails(), reset_tokens())
     @settings(max_examples=100)
@@ -276,5 +278,6 @@ class TestEmailDeliveryProperty:
         result = service.send_reset_email(email, token, expiration)
         
         # Should return False on error
-        assert result is False
+        success, message_id, error_code = result
+        assert success is False
         # Should not raise an exception

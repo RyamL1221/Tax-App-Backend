@@ -377,7 +377,7 @@ class EmailService:
         body_text: str,
         body_html: str,
         max_retries: int = 3
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, Optional[str], Optional[str]]:
         """
         Send email with exponential backoff retry logic.
 
@@ -404,9 +404,10 @@ class EmailService:
                         Total attempts = max_retries + 1 (initial attempt + retries)
 
         Returns:
-            Tuple of (success: bool, message_id: Optional[str])
-            - (True, message_id) on successful delivery with SES MessageId
-            - (False, None) on failure after all retries exhausted or permanent error
+            Tuple of (success: bool, message_id: Optional[str], error_code: Optional[str])
+            - (True, message_id, None) on successful delivery with SES MessageId
+            - (False, None, error_code) on failure after all retries exhausted or permanent error
+            - (False, None, None) as fallback if loop exits unexpectedly
 
         Retry Behavior:
             Attempt 0 (initial): Immediate send
@@ -483,7 +484,7 @@ class EmailService:
                     f"Email sent successfully to {masked_email}. "
                     f"MessageId: {message_id}"
                 )
-                return (True, message_id)
+                return (True, message_id, None)
 
             except ClientError as e:
                 # Extract error code from SES response
@@ -506,14 +507,14 @@ class EmailService:
                             f"Max retries ({max_retries}) exceeded for transient error: {error_code}. "
                             f"Failed to send email to {masked_email}"
                         )
-                        return (False, None)
+                        return (False, None, error_code)
                 else:
                     # Permanent error - don't retry
                     logger.error(
                         f"Permanent SES error: {error_code}. "
                         f"Failed to send email to {masked_email}"
                     )
-                    return (False, None)
+                    return (False, None, error_code)
 
             except Exception as e:
                 # Network errors or unexpected failures - treat as transient
@@ -533,10 +534,10 @@ class EmailService:
                         f"Max retries ({max_retries}) exceeded for unexpected error: {error_type}. "
                         f"Failed to send email to {masked_email}"
                     )
-                    return (False, None)
+                    return (False, None, error_type)
 
         # Should never reach here, but return failure as fallback
-        return (False, None)
+        return (False, None, None)
 
     def _validate_email(self, email: str) -> bool:
         """
@@ -607,7 +608,7 @@ class EmailService:
         recipient_email: str, 
         reset_token: str,
         expiration: datetime
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, Optional[str], Optional[str]]:
         """
         Send password reset email with retry logic.
         
@@ -618,7 +619,7 @@ class EmailService:
         4. Loads email templates (HTML and text)
         5. Renders templates with user-specific data
         6. Sends email via SES with automatic retry logic
-        7. Returns success status and MessageId
+        7. Returns success status, MessageId, and error code
         
         The method uses the enhanced EmailService features including:
         - Email validation with _validate_email()
@@ -632,9 +633,9 @@ class EmailService:
             expiration: Token expiration datetime (UTC)
             
         Returns:
-            Tuple of (success: bool, message_id: Optional[str])
-            - (True, message_id) on successful delivery with SES MessageId
-            - (False, None) on failure after all retries exhausted or invalid email
+            Tuple of (success: bool, message_id: Optional[str], error_code: Optional[str])
+            - (True, message_id, None) on successful delivery with SES MessageId
+            - (False, None, error_code) on failure after all retries exhausted or invalid email
             
         Email Contents:
             - Subject: "Password Reset Request"
@@ -678,7 +679,7 @@ class EmailService:
                     f"Invalid email address format: {masked_email}. "
                     f"Email delivery aborted."
                 )
-                return (False, None)
+                return (False, None, "InvalidEmailFormat")
             
             # Build reset link from base_url and token
             reset_link = f"{self.base_url}/reset-password?token={reset_token}"
@@ -714,7 +715,7 @@ class EmailService:
                 f"Unexpected error preparing reset email: {type(e).__name__}. "
                 f"Email delivery failed."
             )
-            return (False, None)
+            return (False, None, type(e).__name__)
     
     def verify_email_address(self, email: str) -> bool:
         """
