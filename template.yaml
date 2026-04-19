@@ -252,6 +252,7 @@ Resources:
           AccessControlAllowCredentials: false
           AccessControlAllowOrigins:
             Items:
+              - http://localhost:3001
               - https://the-tax-app.vercel.app
               - https://tax-app-git-dev-ryaml1221-ryan.vercel.app
           AccessControlAllowMethods:
