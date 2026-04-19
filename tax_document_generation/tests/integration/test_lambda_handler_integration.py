@@ -39,8 +39,8 @@ def test_end_to_end_generation_flow(aws_resources):
     Tests the complete workflow from API request to document storage.
     """
     # Set up environment
-    os.environ['TEMPLATES_BUCKET'] = 'tax-app-documents'
-    os.environ['OUTPUTS_BUCKET'] = 'tax-app-documents'
+    os.environ['TEMPLATES_BUCKET'] = 'tax-app-backend-dev-documents'
+    os.environ['OUTPUTS_BUCKET'] = 'tax-app-backend-dev-documents'
     os.environ['JOB_TABLE_NAME'] = 'TaxDocumentJobs'
     os.environ['JWT_SECRET'] = 'local-dev-secret-key-min-32-chars-long-for-security'
     
@@ -85,8 +85,8 @@ def test_authentication_flow():
     """
     Integration test: Authentication with valid and invalid tokens.
     """
-    os.environ['TEMPLATES_BUCKET'] = 'tax-app-documents'
-    os.environ['OUTPUTS_BUCKET'] = 'tax-app-documents'
+    os.environ['TEMPLATES_BUCKET'] = 'tax-app-backend-dev-documents'
+    os.environ['OUTPUTS_BUCKET'] = 'tax-app-backend-dev-documents'
     os.environ['JOB_TABLE_NAME'] = 'TaxDocumentJobs'
     os.environ['JWT_SECRET'] = 'local-dev-secret-key-min-32-chars-long-for-security'
     
@@ -112,8 +112,8 @@ def test_error_handling_with_missing_template():
     """
     Integration test: Error handling when template doesn't exist.
     """
-    os.environ['TEMPLATES_BUCKET'] = 'tax-app-documents'
-    os.environ['OUTPUTS_BUCKET'] = 'tax-app-documents'
+    os.environ['TEMPLATES_BUCKET'] = 'tax-app-backend-dev-documents'
+    os.environ['OUTPUTS_BUCKET'] = 'tax-app-backend-dev-documents'
     os.environ['JOB_TABLE_NAME'] = 'TaxDocumentJobs'
     os.environ['JWT_SECRET'] = 'local-dev-secret-key-min-32-chars-long-for-security'
     
@@ -160,8 +160,8 @@ def test_1099_div_generation_end_to_end(aws_resources):
     **Validates: Requirements 6.1, 6.2** (fix-pdf-form-field-error spec)
     """
     # Set up environment
-    os.environ['TEMPLATES_BUCKET'] = 'tax-app-documents'
-    os.environ['OUTPUTS_BUCKET'] = 'tax-app-documents'
+    os.environ['TEMPLATES_BUCKET'] = 'tax-app-backend-dev-documents'
+    os.environ['OUTPUTS_BUCKET'] = 'tax-app-backend-dev-documents'
     os.environ['JOB_TABLE_NAME'] = 'TaxDocumentJobs'
     os.environ['JWT_SECRET'] = 'local-dev-secret-key-min-32-chars-long-for-security'
     
@@ -260,8 +260,8 @@ def test_error_recovery_with_generation_failure(aws_resources):
     **Validates: Requirements 5.1, 5.4** (fix-pdf-form-field-error spec)
     """
     # Set up environment
-    os.environ['TEMPLATES_BUCKET'] = 'tax-app-documents'
-    os.environ['OUTPUTS_BUCKET'] = 'tax-app-documents'
+    os.environ['TEMPLATES_BUCKET'] = 'tax-app-backend-dev-documents'
+    os.environ['OUTPUTS_BUCKET'] = 'tax-app-backend-dev-documents'
     os.environ['JOB_TABLE_NAME'] = 'TaxDocumentJobs'
     os.environ['JWT_SECRET'] = 'local-dev-secret-key-min-32-chars-long-for-security'
     

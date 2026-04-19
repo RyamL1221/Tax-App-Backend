@@ -17,6 +17,15 @@ Parameters:
     Type: String
     Default: "https://the-tax-app.vercel.app"
     Description: Allowed origin for CORS headers (e.g., https://your-frontend-domain.com)
+  FromEmail:
+    Type: String
+    Default: "noreply@example.com"
+    Description: Verified SES sender email address for password reset emails. Set to a verified SES identity at deploy time via samconfig.toml parameter_overrides.
+  BaseUrl:
+    Type: String
+    Default: "http://localhost:3001"
+    Description: Frontend base URL for password reset links in emails. Set per environment (e.g., https://your-frontend.vercel.app).
+
 
 Conditions:
   IsLocal: !Equals [!Ref Environment, local]
@@ -64,7 +73,7 @@ Resources:
   Users:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Users
+      TableName: !Sub "${AWS::StackName}-Users"
       AttributeDefinitions:
         - AttributeName: email
           AttributeType: S
@@ -83,7 +92,7 @@ Resources:
   ResetTokens:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ResetTokens
+      TableName: !Sub "${AWS::StackName}-ResetTokens"
       AttributeDefinitions:
         - AttributeName: token_hash
           AttributeType: S
@@ -106,7 +115,7 @@ Resources:
   RateLimits:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: RateLimits
+      TableName: !Sub "${AWS::StackName}-RateLimits"
       AttributeDefinitions:
         - AttributeName: identifier
           AttributeType: S
@@ -131,7 +140,7 @@ Resources:
   TaxDocumentJobs:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: TaxDocumentJobs
+      TableName: !Sub "${AWS::StackName}-TaxDocumentJobs"
       AttributeDefinitions:
         - AttributeName: jobId
           AttributeType: S
@@ -164,7 +173,7 @@ Resources:
   ImportJobsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ImportJobs
+      TableName: !Sub "${AWS::StackName}-ImportJobs"
       AttributeDefinitions:
         - AttributeName: importJobId
           AttributeType: S
@@ -185,7 +194,7 @@ Resources:
   ImportJobRowsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ImportJobRows
+      TableName: !Sub "${AWS::StackName}-ImportJobRows"
       AttributeDefinitions:
         - AttributeName: importJobId
           AttributeType: S
@@ -201,7 +210,7 @@ Resources:
   TaxDocumentsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: tax-app-documents
+      BucketName: !Sub "${AWS::StackName}-documents"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -233,6 +242,32 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
+  TemplateCorsHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Condition: IsProduction
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub "${AWS::StackName}-template-cors-policy"
+        CorsConfig:
+          AccessControlAllowCredentials: false
+          AccessControlAllowOrigins:
+            Items:
+              - http://localhost:3001
+              - https://the-tax-app.vercel.app
+              - https://tax-app-git-dev-ryaml1221-ryan.vercel.app
+          AccessControlAllowMethods:
+            Items:
+              - GET
+              - HEAD
+              - OPTIONS
+          AccessControlAllowHeaders:
+            Items:
+              - Origin
+              - Accept
+              - Content-Type
+          AccessControlMaxAgeSec: 86400
+          OriginOverride: true
+
   TemplateDistribution:
     Type: AWS::CloudFront::Distribution
     Condition: IsProduction
@@ -246,10 +281,12 @@ Resources:
           AllowedMethods:
             - GET
             - HEAD
+            - OPTIONS
           CachedMethods:
             - GET
             - HEAD
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          ResponseHeadersPolicyId: !GetAtt TemplateCorsHeadersPolicy.Id
           Compress: true
         Origins:
           - Id: TemplateBucketOrigin
@@ -353,8 +390,8 @@ Resources:
           USER_TABLE_NAME: !Ref Users
           RESET_TOKENS_TABLE_NAME: !Ref ResetTokens
           RATE_LIMITS_TABLE: !Ref RateLimits
-          FROM_EMAIL: "noreply@example.com"
-          BASE_URL: "http://localhost:3000"
+          FROM_EMAIL: !Ref FromEmail
+          BASE_URL: !Ref BaseUrl
           SES_REGION: "us-east-1"
           CONFIGURATION_SET_NAME: ""
           CORS_ALLOWED_ORIGIN: !Ref CorsAllowedOrigin

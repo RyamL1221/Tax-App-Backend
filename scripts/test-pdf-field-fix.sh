@@ -19,7 +19,7 @@ JOB_ID="60873cd3-035b-4a53-b395-d68aa176eed2"
 USER_ID="test-user-123"
 
 aws --endpoint-url=http://localhost:4566 s3 cp \
-  s3://tax-app-documents/outputs/${USER_ID}/${JOB_ID}/form-1099-DIV.pdf \
+  s3://${BUCKET_NAME:-tax-app-backend-dev-documents}/outputs/${USER_ID}/${JOB_ID}/form-1099-DIV.pdf \
   test-output-1099-DIV.pdf \
   2>&1 | grep -v "Completed"
 

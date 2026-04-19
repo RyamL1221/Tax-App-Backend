@@ -148,15 +148,15 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 # Send reset email
                 email_service = EmailService()
-                email_sent, message_id = email_service.send_reset_email(email, plaintext_token, expiration)
+                email_sent, message_id, error_code = email_service.send_reset_email(email, plaintext_token, expiration)
                 
                 if email_sent:
                     # Log success with MessageId for monitoring and debugging
                     logger.info(f"Reset email sent successfully to: {email}. MessageId: {message_id}")
                 else:
-                    # Email delivery failed - log error without exposing to client
+                    # Email delivery failed - log error with SES error code and diagnostic guidance
                     # This maintains non-enumeration security (always return success response)
-                    logger.error(f"Failed to send reset email to: {email}")
+                    logger.error(f"Failed to send reset email to: {email}. SES error: {error_code}. Check that FROM_EMAIL is a verified SES identity and recipient is verified (if SES Sandbox). See docs/development/SES_SETUP_GUIDE.md")
                     # Still return success for non-enumeration
                 
             except DatabaseError as e:

@@ -132,7 +132,7 @@ class TestEmailValidationIntegration:
         expiration = datetime.utcnow() + timedelta(hours=1)
         
         # Test with invalid email
-        success, message_id = self.service.send_reset_email(
+        success, message_id, error_code = self.service.send_reset_email(
             "invalid.email",
             "test-token",
             expiration
@@ -140,6 +140,7 @@ class TestEmailValidationIntegration:
         
         assert success is False
         assert message_id is None
+        assert error_code == "InvalidEmailFormat"
     
     def test_send_reset_email_accepts_valid_email(self):
         """Test that send_reset_email accepts valid email addresses."""
@@ -152,7 +153,7 @@ class TestEmailValidationIntegration:
         expiration = datetime.utcnow() + timedelta(hours=1)
         
         # Test with valid email
-        success, message_id = self.service.send_reset_email(
+        success, message_id, error_code = self.service.send_reset_email(
             "user@example.com",
             "test-token",
             expiration
@@ -160,6 +161,7 @@ class TestEmailValidationIntegration:
         
         assert success is True
         assert message_id == 'test-message-id'
+        assert error_code is None
     
     def test_send_reset_email_logs_invalid_email(self, caplog):
         """Test that invalid email addresses are logged."""

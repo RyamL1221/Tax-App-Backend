@@ -42,11 +42,11 @@ class TestEnvConfigExamples:
         Feature: fix-s3-bucket-env-config, Example 1: TEMPLATES_BUCKET is defined
         
         The env.json file for GenerateTaxDocumentFunction should contain the key
-        "TEMPLATES_BUCKET" with value "tax-app-documents".
+        "TEMPLATES_BUCKET" with value "tax-app-backend-dev-documents".
         
         This test verifies that:
         1. The TEMPLATES_BUCKET environment variable is defined
-        2. The value is exactly "tax-app-documents"
+        2. The value is exactly "tax-app-backend-dev-documents"
         3. The Lambda can access the S3 bucket for template retrieval
         """
         # Verification 1: TEMPLATES_BUCKET key exists
@@ -56,7 +56,7 @@ class TestEnvConfigExamples:
         
         # Verification 2: TEMPLATES_BUCKET has the correct value
         actual_value = generate_tax_document_config['TEMPLATES_BUCKET']
-        expected_value = "tax-app-documents"
+        expected_value = "tax-app-backend-dev-documents"
         
         assert actual_value == expected_value, (
             f"TEMPLATES_BUCKET has incorrect value. "
@@ -69,11 +69,11 @@ class TestEnvConfigExamples:
         Feature: fix-s3-bucket-env-config, Example 2: OUTPUTS_BUCKET is defined
         
         The env.json file for GenerateTaxDocumentFunction should contain the key
-        "OUTPUTS_BUCKET" with value "tax-app-documents".
+        "OUTPUTS_BUCKET" with value "tax-app-backend-dev-documents".
         
         This test verifies that:
         1. The OUTPUTS_BUCKET environment variable is defined
-        2. The value is exactly "tax-app-documents"
+        2. The value is exactly "tax-app-backend-dev-documents"
         3. The Lambda can access the S3 bucket for output storage
         """
         # Verification 1: OUTPUTS_BUCKET key exists
@@ -83,7 +83,7 @@ class TestEnvConfigExamples:
         
         # Verification 2: OUTPUTS_BUCKET has the correct value
         actual_value = generate_tax_document_config['OUTPUTS_BUCKET']
-        expected_value = "tax-app-documents"
+        expected_value = "tax-app-backend-dev-documents"
         
         assert actual_value == expected_value, (
             f"OUTPUTS_BUCKET has incorrect value. "
