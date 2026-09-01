@@ -291,6 +291,15 @@ def _validate_field_types_and_formats(document_type: str, form_data: Dict[str, A
         
         field_value = form_data[field_name]
         
+        # Treat empty/whitespace-only OPTIONAL fields as absent.
+        # Frontends commonly send "" for fields the user left blank (e.g. an
+        # unused second state). Since the field is optional, an empty value
+        # should be skipped rather than run through format validation (which
+        # would reject "" for state codes, ZIPs, amounts, etc.). Required
+        # fields intentionally fall through so their own checks still fire.
+        if field_name in optional_fields and isinstance(field_value, str) and not field_value.strip():
+            continue
+        
         # Check data type
         if not isinstance(field_value, expected_type):
             error_msg = f"Field '{field_name}' must be of type {_format_type_name(expected_type)}"
