@@ -283,3 +283,155 @@ class TestValidateFormData:
         
         # Should not raise any exception - extra fields are allowed
         validate_form_data('1040', form_data)
+
+
+class TestOptionalEmptyStringFields:
+    """
+    Regression tests for empty-string / whitespace-only OPTIONAL fields.
+
+    Frontends commonly submit "" for optional inputs the user left blank
+    (e.g. an unused second state). These must be treated as absent rather
+    than run through format validation, which would otherwise reject "" for
+    state codes, ZIPs, amounts, etc.
+
+    Reported failure this guards against:
+        POST /documents/generate with state2="" returned HTTP 400
+        "State code must be exactly 2 uppercase letters (e.g., 'NY', 'CA')".
+
+    The empty-string skip must apply to OPTIONAL fields only; required fields
+    with empty values must still be rejected.
+    """
+
+    def _base_1099_div(self):
+        """Minimal valid 1099-DIV payload; mutate one field per test."""
+        return {
+            'payerName': 'Example Corp',
+            'payerTIN': '12-3456789',
+            'recipientName': 'John Doe',
+            'recipientTIN': '987-65-4321',
+            'totalOrdinaryDividends': 1000.00,
+        }
+
+    # ------------------------------------------------------------------
+    # Empty / whitespace-only optional fields -> treated as absent (accepted)
+    # ------------------------------------------------------------------
+
+    def test_optional_state2_empty_string_treated_as_absent(self):
+        """state2='' (the exact reported frontend failure) is accepted."""
+        form_data = self._base_1099_div()
+        form_data['state2'] = ''
+
+        # Should not raise - empty optional field is treated as absent
+        validate_form_data('1099-DIV', form_data)
+
+    def test_optional_field_whitespace_only_treated_as_absent(self):
+        """state2='   ' (whitespace only) is accepted."""
+        form_data = self._base_1099_div()
+        form_data['state2'] = '   '
+
+        validate_form_data('1099-DIV', form_data)
+
+    def test_optional_first_state_empty_string_treated_as_absent(self):
+        """state='' (first-state field) gets the same treatment as state2."""
+        form_data = self._base_1099_div()
+        form_data['state'] = ''
+
+        validate_form_data('1099-DIV', form_data)
+
+    def test_optional_payer_recipient_state_empty_string_treated_as_absent(self):
+        """payerState='' and recipientState='' are accepted."""
+        form_data = self._base_1099_div()
+        form_data['payerState'] = ''
+        form_data['recipientState'] = ''
+
+        validate_form_data('1099-DIV', form_data)
+
+    def test_optional_payer_zip_empty_string_treated_as_absent(self):
+        """payerZip='' is accepted (blank optional ZIP)."""
+        form_data = self._base_1099_div()
+        form_data['payerZip'] = ''
+
+        validate_form_data('1099-DIV', form_data)
+
+    def test_optional_state_tax_withheld2_empty_string_treated_as_absent(self):
+        """stateTaxWithheld2='' is accepted (blank optional amount)."""
+        form_data = self._base_1099_div()
+        form_data['stateTaxWithheld2'] = ''
+
+        validate_form_data('1099-DIV', form_data)
+
+    def test_complete_second_state_block_accepted(self):
+        """A fully populated second-state block is accepted unchanged."""
+        form_data = self._base_1099_div()
+        form_data['state2'] = 'CA'
+        form_data['stateIdentificationNumber2'] = 'CA-67890'
+        form_data['stateTaxWithheld2'] = 25.00
+
+        # Should not raise; validate_form_data does not mutate form_data,
+        # so the caller's values pass through unchanged.
+        validate_form_data('1099-DIV', form_data)
+        assert form_data['state2'] == 'CA'
+        assert form_data['stateIdentificationNumber2'] == 'CA-67890'
+        assert form_data['stateTaxWithheld2'] == 25.00
+
+    # ------------------------------------------------------------------
+    # Malformed NON-empty optional values -> still rejected
+    # ------------------------------------------------------------------
+
+    def test_optional_state2_lowercase_still_rejected(self):
+        """state2='ny' (lowercase, non-empty) is still rejected on format."""
+        form_data = self._base_1099_div()
+        form_data['state2'] = 'ny'
+
+        with pytest.raises(ValidationError) as exc_info:
+            validate_form_data('1099-DIV', form_data)
+
+        assert 'State code must be exactly 2 uppercase letters' in str(exc_info.value)
+
+    def test_optional_state2_single_char_still_rejected(self):
+        """state2='N' (1 char, non-empty) is still rejected on format."""
+        form_data = self._base_1099_div()
+        form_data['state2'] = 'N'
+
+        with pytest.raises(ValidationError) as exc_info:
+            validate_form_data('1099-DIV', form_data)
+
+        assert 'State code must be exactly 2 uppercase letters' in str(exc_info.value)
+
+    def test_optional_state_tax_withheld2_non_numeric_still_rejected(self):
+        """stateTaxWithheld2='abc' (non-numeric, non-empty) is still rejected."""
+        form_data = self._base_1099_div()
+        form_data['stateTaxWithheld2'] = 'abc'
+
+        with pytest.raises(ValidationError) as exc_info:
+            validate_form_data('1099-DIV', form_data)
+
+        assert "Field 'stateTaxWithheld2' must be a valid number" in str(exc_info.value)
+
+    # ------------------------------------------------------------------
+    # Required-field integrity -> empty-string skip is optional-only
+    # ------------------------------------------------------------------
+
+    def test_required_field_missing_still_rejected(self):
+        """Missing required payerName is still rejected."""
+        form_data = self._base_1099_div()
+        del form_data['payerName']
+
+        with pytest.raises(ValidationError) as exc_info:
+            validate_form_data('1099-DIV', form_data)
+
+        assert 'Missing required field' in str(exc_info.value)
+        assert 'payerName' in str(exc_info.value)
+
+    def test_required_field_empty_string_still_rejected(self):
+        """
+        Required payerName='' is still rejected (confirms the empty-string
+        skip applies to optional fields only, not universally).
+        """
+        form_data = self._base_1099_div()
+        form_data['payerName'] = ''
+
+        with pytest.raises(ValidationError) as exc_info:
+            validate_form_data('1099-DIV', form_data)
+
+        assert "Field 'payerName' must be a non-empty string" in str(exc_info.value)
