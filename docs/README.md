@@ -54,6 +54,7 @@ docs/
 ### Implementation Summaries
 - [Tax Document Generation](specs/IMPLEMENTATION_SUMMARY.md) - Feature implementation summary
 - [Field Standardization](specs/STANDARDIZATION_SUMMARY.md) - Standardization results
+- [State2 Empty-String Validation Fix](specs/STATE2_EMPTY_STRING_VALIDATION_FIX.md) - Optional-field empty-string bug fix + regression tests
 
 ### Testing
 - [Validation Results](testing/VALIDATION_RESULTS.md) - Field validation test results
